@@ -23,18 +23,18 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 sm:h-24">
           <div className="flex items-center cursor-pointer" onClick={() => handleNavClick(onShowHome)}>
-            <div className="flex-shrink-0 flex items-center gap-3 sm:gap-5">
+            <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
               <img
                 src={cpsrLogo}
                 alt="CPSR Logo"
                 className="h-8 sm:h-10 w-auto object-contain"
               />
               <div className="h-6 sm:h-8 w-px bg-gray-200"></div>
-              <div className="flex flex-col justify-center">
-                <span className="font-serif font-semibold text-slate-900 text-base sm:text-lg leading-none tracking-tight">
+              <div className="flex flex-col justify-center leading-tight">
+                <span className="font-serif font-medium text-slate-900 text-sm sm:text-base tracking-tight">
                   Centre for
                 </span>
-                <span className="text-[10px] sm:text-xs text-slate-500 font-medium uppercase tracking-widest mt-1 sm:mt-1.5">
+                <span className="font-serif font-medium text-slate-900 text-sm sm:text-base tracking-tight">
                   Professional Services Research
                 </span>
               </div>
