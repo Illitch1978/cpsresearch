@@ -73,20 +73,22 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Widget Button */}
+      {/* Chat Widget Button - Adjusted for mobile */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-8 right-8 z-50 bg-brand-red hover:bg-red-800 text-white py-4 px-6 rounded-full shadow-lg flex items-center gap-3 transition-colors duration-300 group"
+        className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 bg-brand-red hover:bg-red-800 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 transition-colors duration-300 group"
       >
-        <FontAwesomeIcon icon={faCommentDots} className="text-xl" />
-        <span className="font-medium text-sm tracking-wide">Find an expert</span>
+        <FontAwesomeIcon icon={faCommentDots} className="text-lg sm:text-xl" />
+        <span className="font-medium text-xs sm:text-sm tracking-wide hidden sm:inline">Find an expert</span>
       </button>
 
-      {/* Chat Widget Panel */}
+      {/* Chat Widget Panel - Responsive */}
       <div
-        className={`fixed bottom-28 right-8 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform font-sans ${
-          isOpen ? "flex scale-100 opacity-100" : "hidden scale-95 opacity-0"
-        }`}
+        className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform font-sans ${
+          isOpen 
+            ? "flex scale-100 opacity-100" 
+            : "hidden scale-95 opacity-0"
+        } bottom-20 right-4 sm:bottom-28 sm:right-8 w-[calc(100vw-2rem)] sm:w-96 max-w-96`}
       >
         {/* Header */}
         <div className="bg-hero-bg p-4 flex justify-between items-center text-white flex-shrink-0">
@@ -103,7 +105,7 @@ const ChatWidget = () => {
         </div>
 
         {/* Chat Body */}
-        <div className="h-[450px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
+        <div className="h-[350px] sm:h-[450px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
           {/* Bot Greeting */}
           <div className="flex gap-3 animate-fade-in">
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">

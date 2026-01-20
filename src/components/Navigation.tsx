@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
 
 interface NavigationProps {
@@ -8,28 +11,37 @@ interface NavigationProps {
 }
 
 const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToSection }: NavigationProps) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleNavClick = (action: () => void) => {
+    action();
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav className="bg-white sticky top-0 z-50 border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-24">
-          <div className="flex items-center cursor-pointer" onClick={onShowHome}>
-            <div className="flex-shrink-0 flex items-center gap-5">
+        <div className="flex justify-between h-20 sm:h-24">
+          <div className="flex items-center cursor-pointer" onClick={() => handleNavClick(onShowHome)}>
+            <div className="flex-shrink-0 flex items-center gap-3 sm:gap-5">
               <img
                 src={cpsrLogo}
                 alt="CPSR Logo"
-                className="h-10 w-auto object-contain"
+                className="h-8 sm:h-10 w-auto object-contain"
               />
-              <div className="h-8 w-px bg-gray-200"></div>
+              <div className="h-6 sm:h-8 w-px bg-gray-200"></div>
               <div className="flex flex-col justify-center">
-                <span className="font-serif font-semibold text-slate-900 text-lg leading-none tracking-tight">
+                <span className="font-serif font-semibold text-slate-900 text-base sm:text-lg leading-none tracking-tight">
                   Centre for
                 </span>
-                <span className="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1.5">
+                <span className="text-[10px] sm:text-xs text-slate-500 font-medium uppercase tracking-widest mt-1 sm:mt-1.5">
                   Professional Services Research
                 </span>
               </div>
             </div>
           </div>
+
+          {/* Desktop Navigation */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-10">
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); }}
@@ -56,6 +68,80 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
               Contact
             </button>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <div className="flex items-center sm:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
+              aria-label="Toggle menu"
+            >
+              <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} className="text-xl" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 sm:hidden ${
+          isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* Mobile Menu Panel */}
+      <div
+        className={`fixed top-0 right-0 h-full w-72 bg-white z-50 shadow-xl transform transition-transform duration-300 ease-in-out sm:hidden ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <span className="font-serif font-semibold text-slate-900 text-lg">Menu</span>
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
+            aria-label="Close menu"
+          >
+            <FontAwesomeIcon icon={faTimes} className="text-xl" />
+          </button>
+        </div>
+
+        <div className="flex flex-col py-4">
+          <button
+            onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); })}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+          >
+            About
+          </button>
+          <button
+            onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); })}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+          >
+            Initiatives
+          </button>
+          <button
+            onClick={() => handleNavClick(onShowContribute)}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+          >
+            Contribute
+          </button>
+          <button
+            onClick={() => handleNavClick(onShowContact)}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors"
+          >
+            Contact
+          </button>
+        </div>
+
+        {/* Mobile CTA */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100">
+          <button
+            onClick={() => handleNavClick(onShowContribute)}
+            className="w-full bg-brand-red text-white font-medium py-3 rounded-sm hover:bg-red-800 transition-colors text-sm uppercase tracking-wide"
+          >
+            Contribute to the Centre
+          </button>
         </div>
       </div>
     </nav>
