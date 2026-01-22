@@ -1,24 +1,92 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Expert {
   name: string;
   firm: string;
   score: number;
   pubs: number;
+  tag?: string;
+  location?: string;
+  email?: string;
+  phone?: string;
+  division?: string;
+  primaryGroup?: string;
+  bio?: string;
 }
 
 const experts: Expert[] = [
-  { name: "Dr. Elena Voreas", firm: "Clifford Chance", score: 98, pubs: 14 },
-  { name: "Prof. James Sterling", firm: "Linklaters", score: 94, pubs: 9 },
-  { name: "Sarah Jenkins", firm: "Allen & Overy", score: 91, pubs: 11 },
-  { name: "David Thorne", firm: "Freshfields", score: 89, pubs: 7 },
-  { name: "Marcus Alistair", firm: "Slaughter and May", score: 85, pubs: 12 },
+  { 
+    name: "Dr. Elena Voreas", 
+    firm: "Clifford Chance", 
+    score: 98, 
+    pubs: 14,
+    tag: "Corporate Law",
+    location: "London, United Kingdom",
+    email: "elena.voreas@cliffordchance.com",
+    phone: "+44 20 7006 1234",
+    division: "Corporate M&A",
+    primaryGroup: "Private Equity",
+    bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions. She has advised on some of the largest deals in the European market and is frequently cited in academic journals for her innovative approaches to complex regulatory challenges."
+  },
+  { 
+    name: "Prof. James Sterling", 
+    firm: "Linklaters", 
+    score: 94, 
+    pubs: 9,
+    tag: "Financial Regulation",
+    location: "London, United Kingdom",
+    email: "james.sterling@linklaters.com",
+    phone: "+44 20 7456 5678",
+    division: "Financial Markets",
+    primaryGroup: "Banking & Finance",
+    bio: "Professor James Sterling specializes in financial regulation and has been instrumental in shaping policy discussions around fintech and digital assets. He combines academic rigor with practical legal expertise gained from advising major financial institutions."
+  },
+  { 
+    name: "Sarah Jenkins", 
+    firm: "Allen & Overy", 
+    score: 91, 
+    pubs: 11,
+    tag: "Digital Transformation",
+    location: "London, United Kingdom",
+    email: "sarah.jenkins@allenovery.com",
+    phone: "+44 20 3088 4567",
+    division: "Technology & Innovation",
+    primaryGroup: "Not set",
+    bio: "Sarah Jenkins is at the forefront of legal innovation, helping organizations navigate digital transformation. Her expertise spans data privacy, AI governance, and emerging technology regulations across multiple jurisdictions."
+  },
+  { 
+    name: "David Thorne", 
+    firm: "Freshfields", 
+    score: 89, 
+    pubs: 7,
+    tag: "Dispute Resolution",
+    location: "London, United Kingdom",
+    email: "david.thorne@freshfields.com",
+    phone: "+44 20 7936 8901",
+    division: "Litigation",
+    primaryGroup: "International Arbitration",
+    bio: "David Thorne has built a reputation as one of the most effective dispute resolution specialists in the City. His strategic approach to complex commercial litigation has resulted in favorable outcomes for clients in high-stakes international disputes."
+  },
+  { 
+    name: "Marcus Alistair", 
+    firm: "Slaughter and May", 
+    score: 85, 
+    pubs: 12,
+    tag: "Tax Strategy",
+    location: "London, United Kingdom",
+    email: "marcus.alistair@slaughterandmay.com",
+    phone: "+44 20 7600 2345",
+    division: "Tax Advisory",
+    primaryGroup: "Corporate Tax",
+    bio: "Marcus Alistair is a recognized authority on international tax strategy, with particular expertise in structuring cross-border investments and M&A transactions. His publications on tax efficiency have become essential reading for corporate counsel."
+  },
 ];
 
 const organisations = [
@@ -52,12 +120,124 @@ const countries = [
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
+const ExpertProfileModal = ({ 
+  expert, 
+  isOpen, 
+  onClose 
+}: { 
+  expert: Expert | null; 
+  isOpen: boolean; 
+  onClose: () => void;
+}) => {
+  const [showFullBio, setShowFullBio] = useState(false);
+
+  if (!expert) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        {/* Header */}
+        <div className="bg-slate-50 p-5 border-b border-slate-100">
+          <div className="flex gap-4">
+            {/* Avatar */}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center flex-shrink-0 text-slate-500 text-2xl font-serif">
+              {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            </div>
+            
+            {/* Name & Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-serif font-semibold text-lg text-slate-900 leading-tight">{expert.name}</h3>
+              {expert.tag && (
+                <span className="inline-block mt-1 px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">
+                  {expert.tag}
+                </span>
+              )}
+              <div className="mt-2 text-xs text-slate-500 space-y-0.5">
+                <p className="font-medium text-slate-700">{expert.firm}</p>
+                <p>{expert.location}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Details */}
+        <div className="p-5 grid grid-cols-2 gap-4 border-b border-slate-100">
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Email</p>
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faEnvelope} className="text-slate-400 text-xs" />
+              <a 
+                href={`mailto:${expert.email}`} 
+                className="text-xs text-brand-red hover:underline truncate"
+              >
+                {expert.email}
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Phone</p>
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faPhone} className="text-slate-400 text-xs" />
+              <a 
+                href={`tel:${expert.phone}`} 
+                className="text-xs text-slate-700 hover:text-brand-red"
+              >
+                {expert.phone}
+              </a>
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Division</p>
+            <p className="text-xs text-slate-700">{expert.division}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Primary group</p>
+            <p className="text-xs text-slate-700">{expert.primaryGroup || "Not set"}</p>
+          </div>
+        </div>
+
+        {/* Bio */}
+        <div className="p-5">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase font-bold text-slate-400">Bio</p>
+            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-brand-red transition-colors">
+              <FontAwesomeIcon icon={faPencil} className="text-[8px]" />
+              Edit
+            </button>
+          </div>
+          <p className={`text-xs text-slate-600 leading-relaxed ${!showFullBio ? 'line-clamp-3' : ''}`}>
+            {expert.bio}
+          </p>
+          {expert.bio && expert.bio.length > 150 && (
+            <button 
+              onClick={() => setShowFullBio(!showFullBio)}
+              className="mt-2 flex items-center gap-1 text-xs text-brand-red hover:underline"
+            >
+              {showFullBio ? 'Show less' : 'Show more'}
+              <FontAwesomeIcon icon={showFullBio ? faChevronUp : faChevronDown} className="text-[10px]" />
+            </button>
+          )}
+        </div>
+
+        {/* Action */}
+        <div className="p-5 pt-0">
+          <button className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors">
+            Contact {expert.name.split(' ')[0]}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<ChatStep>("topic");
   const [topic, setTopic] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "bot" }>>([]);
+  const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Filter states
   const [sourceFilter, setSourceFilter] = useState("all");
@@ -398,7 +578,15 @@ const ChatWidget = () => {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900">{exp.name}</h4>
+                        <button 
+                          onClick={() => {
+                            setSelectedExpert(exp);
+                            setIsProfileOpen(true);
+                          }}
+                          className="text-sm font-bold text-slate-900 hover:text-brand-red transition-colors text-left"
+                        >
+                          {exp.name}
+                        </button>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wide">{exp.firm}</p>
                       </div>
                       <div className="text-right">
@@ -410,7 +598,13 @@ const ChatWidget = () => {
                       <span className="text-[10px] text-slate-600">
                         <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
                       </span>
-                      <button className="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors">
+                      <button 
+                        onClick={() => {
+                          setSelectedExpert(exp);
+                          setIsProfileOpen(true);
+                        }}
+                        className="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
+                      >
                         Contact
                       </button>
                     </div>
@@ -441,6 +635,13 @@ const ChatWidget = () => {
           </form>
         </div>
       </div>
+
+      {/* Expert Profile Modal */}
+      <ExpertProfileModal 
+        expert={selectedExpert} 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+      />
     </>
   );
 };
