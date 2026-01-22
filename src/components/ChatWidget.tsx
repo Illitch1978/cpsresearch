@@ -220,46 +220,46 @@ const ChatWidget = () => {
                       <RadioGroupItem value="specific-orgs" id="source-specific-orgs" />
                       <Label htmlFor="source-specific-orgs" className="text-xs text-slate-700 cursor-pointer">Specific organisations</Label>
                     </div>
+                    
+                    {sourceFilter === "specific-orgs" && (
+                      <div className="ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                        {organisations.map((org) => (
+                          <div key={org} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`org-${org}`} 
+                              checked={selectedOrgs.includes(org)}
+                              onCheckedChange={() => handleOrgToggle(org)}
+                            />
+                            <Label htmlFor={`org-${org}`} className="text-[11px] text-slate-600 cursor-pointer">{org}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="my-sector" id="source-my-sector" />
+                      <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific-sectors" id="source-specific-sectors" />
+                      <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
+                    </div>
+
+                    {sourceFilter === "specific-sectors" && (
+                      <div className="ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                        {sectors.map((sector) => (
+                          <div key={sector} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`sector-${sector}`} 
+                              checked={selectedSectors.includes(sector)}
+                              onCheckedChange={() => handleSectorToggle(sector)}
+                            />
+                            <Label htmlFor={`sector-${sector}`} className="text-[11px] text-slate-600 cursor-pointer">{sector}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </RadioGroup>
-                  
-                  {sourceFilter === "specific-orgs" && (
-                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
-                      {organisations.map((org) => (
-                        <div key={org} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`org-${org}`} 
-                            checked={selectedOrgs.includes(org)}
-                            onCheckedChange={() => handleOrgToggle(org)}
-                          />
-                          <Label htmlFor={`org-${org}`} className="text-[11px] text-slate-600 cursor-pointer">{org}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-2 mt-2">
-                    <RadioGroupItem value="my-sector" id="source-my-sector" onClick={() => setSourceFilter("my-sector")} />
-                    <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <RadioGroupItem value="specific-sectors" id="source-specific-sectors" onClick={() => setSourceFilter("specific-sectors")} />
-                    <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
-                  </div>
-
-                  {sourceFilter === "specific-sectors" && (
-                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
-                      {sectors.map((sector) => (
-                        <div key={sector} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`sector-${sector}`} 
-                            checked={selectedSectors.includes(sector)}
-                            onCheckedChange={() => handleSectorToggle(sector)}
-                          />
-                          <Label htmlFor={`sector-${sector}`} className="text-[11px] text-slate-600 cursor-pointer">{sector}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Location Filter */}
