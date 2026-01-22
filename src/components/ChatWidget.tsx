@@ -583,7 +583,7 @@ const ChatWidget = () => {
                             setSelectedExpert(exp);
                             setIsProfileOpen(true);
                           }}
-                          className="text-sm font-bold text-slate-900 hover:text-brand-red transition-colors text-left"
+                          className="text-sm font-medium text-slate-800 hover:text-brand-red transition-colors text-left"
                         >
                           {exp.name}
                         </button>
