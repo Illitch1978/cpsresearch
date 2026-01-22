@@ -2,6 +2,9 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Expert {
   name: string;
@@ -18,7 +21,7 @@ const experts: Expert[] = [
   { name: "Marcus Alistair", firm: "Slaughter and May", score: 85, pubs: 12 },
 ];
 
-const firms = [
+const organisations = [
   "Clifford Chance",
   "Linklaters",
   "Allen & Overy",
@@ -29,7 +32,25 @@ const firms = [
   "Herbert Smith Freehills",
 ];
 
-type ChatStep = "topic" | "scope" | "firms" | "searching" | "results";
+const sectors = [
+  "Financial Services",
+  "Technology",
+  "Healthcare",
+  "Energy",
+  "Real Estate",
+  "Manufacturing",
+];
+
+const countries = [
+  "United Kingdom",
+  "United States",
+  "Germany",
+  "France",
+  "Singapore",
+  "Australia",
+];
+
+type ChatStep = "topic" | "filters" | "searching" | "results";
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +58,15 @@ const ChatWidget = () => {
   const [topic, setTopic] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "bot" }>>([]);
+
+  // Filter states
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [locationFilter, setLocationFilter] = useState("any");
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [projectType, setProjectType] = useState("");
+  const [roles, setRoles] = useState<string[]>([]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -51,17 +81,33 @@ const ChatWidget = () => {
     setInputValue("");
 
     setTimeout(() => {
-      setMessages((prev) => [...prev, { text: "Where should we look for experts?", sender: "bot" }]);
-      setStep("scope");
+      setMessages((prev) => [...prev, { text: "What type of expert are you looking for today?", sender: "bot" }]);
+      setStep("filters");
     }, 600);
   };
 
-  const handleScopeClick = (type: "all" | "select" | "specific") => {
-    if (type === "select" || type === "specific") {
-      setStep("firms");
-    } else {
-      startSearch();
-    }
+  const handleOrgToggle = (org: string) => {
+    setSelectedOrgs(prev => 
+      prev.includes(org) ? prev.filter(o => o !== org) : [...prev, org]
+    );
+  };
+
+  const handleSectorToggle = (sector: string) => {
+    setSelectedSectors(prev => 
+      prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
+    );
+  };
+
+  const handleCountryToggle = (country: string) => {
+    setSelectedCountries(prev => 
+      prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
+    );
+  };
+
+  const handleRoleToggle = (role: string) => {
+    setRoles(prev => 
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
   };
 
   const startSearch = () => {
@@ -73,7 +119,7 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Widget Button - Adjusted for mobile */}
+      {/* Chat Widget Button */}
       <button
         onClick={toggleChat}
         className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 bg-brand-red hover:bg-red-800 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 transition-colors duration-300 group"
@@ -82,7 +128,7 @@ const ChatWidget = () => {
         <span className="font-medium text-xs sm:text-sm tracking-wide hidden sm:inline">Find an expert</span>
       </button>
 
-      {/* Chat Widget Panel - Responsive */}
+      {/* Chat Widget Panel */}
       <div
         className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform font-sans ${
           isOpen 
@@ -149,64 +195,171 @@ const ChatWidget = () => {
             </div>
           ))}
 
-          {/* Scope Options */}
-          {step === "scope" && (
-            <div className="pl-11 flex flex-col gap-2 animate-fade-in">
-              <label
-                className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-md cursor-pointer hover:border-brand-red transition-all group"
-                onClick={() => handleScopeClick("all")}
-              >
-                <input
-                  type="radio"
-                  name="firm_scope"
-                  className="w-3 h-3 text-brand-red focus:ring-brand-red border-gray-300"
-                />
-                <span className="text-xs text-slate-700 group-hover:text-slate-900">
-                  All firms / Marketplace
-                </span>
-              </label>
-              <label
-                className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-md cursor-pointer hover:border-brand-red transition-all group"
-                onClick={() => handleScopeClick("select")}
-              >
-                <input
-                  type="radio"
-                  name="firm_scope"
-                  className="w-3 h-3 text-brand-red focus:ring-brand-red border-gray-300"
-                />
-                <span className="text-xs text-slate-700 group-hover:text-slate-900">Selection of firms</span>
-              </label>
-              <label
-                className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-md cursor-pointer hover:border-brand-red transition-all group"
-                onClick={() => handleScopeClick("specific")}
-              >
-                <input
-                  type="radio"
-                  name="firm_scope"
-                  className="w-3 h-3 text-brand-red focus:ring-brand-red border-gray-300"
-                />
-                <span className="text-xs text-slate-700 group-hover:text-slate-900">Specific firm</span>
-              </label>
-            </div>
-          )}
+          {/* Filter Options */}
+          {step === "filters" && (
+            <div className="pl-11 flex flex-col gap-4 animate-fade-in">
+              <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
+                
+                {/* Source Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">An expert sourced from</p>
+                  <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all" id="source-all" />
+                      <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">All organisations</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="my-org" id="source-my-org" />
+                      <Label htmlFor="source-my-org" className="text-xs text-slate-700 cursor-pointer">My organisation</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="other-orgs" id="source-other-orgs" />
+                      <Label htmlFor="source-other-orgs" className="text-xs text-slate-700 cursor-pointer">All other organisations</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific-orgs" id="source-specific-orgs" />
+                      <Label htmlFor="source-specific-orgs" className="text-xs text-slate-700 cursor-pointer">Specific organisations</Label>
+                    </div>
+                  </RadioGroup>
+                  
+                  {sourceFilter === "specific-orgs" && (
+                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                      {organisations.map((org) => (
+                        <div key={org} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`org-${org}`} 
+                            checked={selectedOrgs.includes(org)}
+                            onCheckedChange={() => handleOrgToggle(org)}
+                          />
+                          <Label htmlFor={`org-${org}`} className="text-[11px] text-slate-600 cursor-pointer">{org}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-          {/* Firm Selector */}
-          {step === "firms" && (
-            <div className="pl-11 mt-2 animate-fade-in">
-              <div className="bg-white border border-gray-200 rounded-md p-3 mb-2">
-                <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Select Firms</p>
-                <div className="h-32 overflow-y-auto space-y-2">
-                  {firms.map((firm, index) => (
-                    <label key={index} className="flex items-center gap-2">
-                      <input type="checkbox" className="rounded text-brand-red" />
-                      <span className="text-xs text-slate-700">{firm}</span>
-                    </label>
-                  ))}
+                  <div className="flex items-center space-x-2 mt-2">
+                    <RadioGroupItem value="my-sector" id="source-my-sector" onClick={() => setSourceFilter("my-sector")} />
+                    <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <RadioGroupItem value="specific-sectors" id="source-specific-sectors" onClick={() => setSourceFilter("specific-sectors")} />
+                    <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
+                  </div>
+
+                  {sourceFilter === "specific-sectors" && (
+                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                      {sectors.map((sector) => (
+                        <div key={sector} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`sector-${sector}`} 
+                            checked={selectedSectors.includes(sector)}
+                            onCheckedChange={() => handleSectorToggle(sector)}
+                          />
+                          <Label htmlFor={`sector-${sector}`} className="text-[11px] text-slate-600 cursor-pointer">{sector}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Location Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Based in</p>
+                  <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="loc-any" />
+                      <Label htmlFor="loc-any" className="text-xs text-slate-700 cursor-pointer">Any location</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="my-city" id="loc-my-city" />
+                      <Label htmlFor="loc-my-city" className="text-xs text-slate-700 cursor-pointer">My city</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="my-country" id="loc-my-country" />
+                      <Label htmlFor="loc-my-country" className="text-xs text-slate-700 cursor-pointer">My country</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific-countries" id="loc-specific-countries" />
+                      <Label htmlFor="loc-specific-countries" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
+                    </div>
+                  </RadioGroup>
+                  
+                  {locationFilter === "specific-countries" && (
+                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                      {countries.map((country) => (
+                        <div key={country} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`country-${country}`} 
+                            checked={selectedCountries.includes(country)}
+                            onCheckedChange={() => handleCountryToggle(country)}
+                          />
+                          <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Project Type */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For</p>
+                  <RadioGroup value={projectType} onValueChange={setProjectType} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="client" id="proj-client" />
+                      <Label htmlFor="proj-client" className="text-xs text-slate-700 cursor-pointer">Client projects</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="internal" id="proj-internal" />
+                      <Label htmlFor="proj-internal" className="text-xs text-slate-700 cursor-pointer">Internal projects</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Role */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-author" 
+                        checked={roles.includes("author")}
+                        onCheckedChange={() => handleRoleToggle("author")}
+                      />
+                      <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-leader" 
+                        checked={roles.includes("leader")}
+                        onCheckedChange={() => handleRoleToggle("leader")}
+                      />
+                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-team" 
+                        checked={roles.includes("team")}
+                        onCheckedChange={() => handleRoleToggle("team")}
+                      />
+                      <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
+                    </div>
+                    {sourceFilter !== "my-org" && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="role-consultant" 
+                          checked={roles.includes("consultant")}
+                          onCheckedChange={() => handleRoleToggle("consultant")}
+                        />
+                        <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
               <button
                 onClick={startSearch}
-                className="w-full bg-slate-900 text-white text-xs font-medium py-2 rounded hover:bg-brand-red transition-colors text-center block"
+                className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors text-center block"
               >
                 Find Experts
               </button>
