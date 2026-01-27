@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import richardAvatar from "@/assets/richard-avatar.png";
 
 const UserAvatar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,10 +32,10 @@ const UserAvatar = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-500 hover:from-slate-300 hover:to-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
+        className="w-9 h-9 rounded-full overflow-hidden border-2 border-slate-200 hover:border-brand-red transition-all focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
         aria-label="User menu"
       >
-        <FontAwesomeIcon icon={faUser} className="text-sm" />
+        <img src={richardAvatar} alt="Richard Chaplin" className="w-full h-full object-cover" />
       </button>
 
       {/* Dropdown Menu */}
@@ -42,8 +43,8 @@ const UserAvatar = () => {
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-100 py-2 z-50">
           {/* User Info Header */}
           <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-sm font-medium text-slate-900">John Smith</p>
-            <p className="text-xs text-slate-500">john.smith@company.com</p>
+            <p className="text-sm font-medium text-slate-900">Richard Chaplin</p>
+            <p className="text-xs text-slate-500">richard@pmint.co.uk</p>
           </div>
 
           {/* Menu Items */}
