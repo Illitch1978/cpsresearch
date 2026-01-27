@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import { faFileLines } from "@fortawesome/free-regular-svg-icons";
+import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink } from "@fortawesome/free-solid-svg-icons";
+import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
+import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ interface Expert {
   division?: string;
   primaryGroup?: string;
   bio?: string;
+  officialBioUrl?: string;
+  linkedInUrl?: string;
 }
 
 interface Community {
@@ -46,7 +49,8 @@ const experts: Expert[] = [
     phone: "+44 20 7006 1234",
     division: "Corporate M&A",
     primaryGroup: "Private Equity",
-    bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions. She has advised on some of the largest deals in the European market and is frequently cited in academic journals for her innovative approaches to complex regulatory challenges."
+    bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions. She has advised on some of the largest deals in the European market and is frequently cited in academic journals for her innovative approaches to complex regulatory challenges.",
+    officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas"
   },
   { 
     name: "Prof. James Sterling", 
@@ -59,7 +63,8 @@ const experts: Expert[] = [
     phone: "+44 20 7456 5678",
     division: "Financial Markets",
     primaryGroup: "Banking & Finance",
-    bio: "Professor James Sterling specializes in financial regulation and has been instrumental in shaping policy discussions around fintech and digital assets. He combines academic rigor with practical legal expertise gained from advising major financial institutions."
+    bio: "Professor James Sterling specializes in financial regulation and has been instrumental in shaping policy discussions around fintech and digital assets. He combines academic rigor with practical legal expertise gained from advising major financial institutions.",
+    linkedInUrl: "https://www.linkedin.com/in/james-sterling"
   },
   { 
     name: "Sarah Jenkins", 
@@ -72,7 +77,8 @@ const experts: Expert[] = [
     phone: "+44 20 3088 4567",
     division: "Technology & Innovation",
     primaryGroup: "Not set",
-    bio: "Sarah Jenkins is at the forefront of legal innovation, helping organizations navigate digital transformation. Her expertise spans data privacy, AI governance, and emerging technology regulations across multiple jurisdictions."
+    bio: "Sarah Jenkins is at the forefront of legal innovation, helping organizations navigate digital transformation. Her expertise spans data privacy, AI governance, and emerging technology regulations across multiple jurisdictions.",
+    officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins"
   },
   { 
     name: "David Thorne", 
@@ -85,7 +91,8 @@ const experts: Expert[] = [
     phone: "+44 20 7936 8901",
     division: "Litigation",
     primaryGroup: "International Arbitration",
-    bio: "David Thorne has built a reputation as one of the most effective dispute resolution specialists in the City. His strategic approach to complex commercial litigation has resulted in favorable outcomes for clients in high-stakes international disputes."
+    bio: "David Thorne has built a reputation as one of the most effective dispute resolution specialists in the City. His strategic approach to complex commercial litigation has resulted in favorable outcomes for clients in high-stakes international disputes.",
+    linkedInUrl: "https://www.linkedin.com/in/david-thorne"
   },
   { 
     name: "Marcus Alistair", 
@@ -625,6 +632,27 @@ const ChatWidget = () => {
                           {exp.name}
                         </button>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wide">{exp.firm}</p>
+                        {exp.officialBioUrl ? (
+                          <a 
+                            href={exp.officialBioUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-1 text-[10px] text-brand-red hover:underline"
+                          >
+                            <FontAwesomeIcon icon={faAddressCard} className="text-[9px]" />
+                            Official bio
+                          </a>
+                        ) : exp.linkedInUrl ? (
+                          <a 
+                            href={exp.linkedInUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#0A66C2] hover:underline"
+                          >
+                            <FontAwesomeIcon icon={faLinkedin} className="text-[11px]" />
+                            LinkedIn
+                          </a>
+                        ) : null}
                       </div>
                       <div className="text-right">
                         <span className="text-xs font-bold text-brand-red">{exp.score}/100</span>
