@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
+import UserAvatar from "./UserAvatar";
 
 interface NavigationProps {
   onShowHome: () => void;
@@ -67,6 +68,7 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
             >
               Contact
             </button>
+            <UserAvatar />
           </div>
 
           {/* Mobile Hamburger Button */}
