@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines } from "@fortawesome/free-regular-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +20,19 @@ interface Expert {
   primaryGroup?: string;
   bio?: string;
 }
+
+interface Community {
+  name: string;
+  members: number;
+  description: string;
+  url: string;
+}
+
+const communities: Community[] = [
+  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#" },
+  { name: "Corporate Law Network", members: 5120, description: "Global corporate practice discussions", url: "#" },
+  { name: "ESG & Sustainability Forum", members: 1890, description: "Environmental, social & governance insights", url: "#" },
+];
 
 const experts: Expert[] = [
   { 
@@ -219,8 +232,12 @@ const ExpertProfileModal = ({
           )}
         </div>
 
-        {/* Action */}
-        <div className="p-5 pt-0">
+        {/* Bookmark & Action */}
+        <div className="p-5 pt-0 space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox id="modal-bookmark-expert" />
+            <Label htmlFor="modal-bookmark-expert" className="text-xs text-slate-600 cursor-pointer">Bookmark expert</Label>
+          </div>
           <button className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors">
             Contact {expert.name.split(' ')[0]}
           </button>
@@ -245,8 +262,10 @@ const ChatWidget = () => {
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [projectType, setProjectType] = useState("");
+  const [projectType, setProjectType] = useState("all");
   const [roles, setRoles] = useState<string[]>([]);
+  const [bookmarkedExperts, setBookmarkedExperts] = useState<string[]>([]);
+  const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -287,6 +306,18 @@ const ChatWidget = () => {
   const handleRoleToggle = (role: string) => {
     setRoles(prev => 
       prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
+  const handleExpertBookmark = (expertName: string) => {
+    setBookmarkedExperts(prev => 
+      prev.includes(expertName) ? prev.filter(n => n !== expertName) : [...prev, expertName]
+    );
+  };
+
+  const handleCommunityBookmark = (communityName: string) => {
+    setBookmarkedCommunities(prev => 
+      prev.includes(communityName) ? prev.filter(n => n !== communityName) : [...prev, communityName]
     );
   };
 
@@ -485,6 +516,10 @@ const ChatWidget = () => {
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For</p>
                   <RadioGroup value={projectType} onValueChange={setProjectType} className="space-y-2">
                     <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all" id="proj-all" />
+                      <Label htmlFor="proj-all" className="text-xs text-slate-700 cursor-pointer">All projects</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <RadioGroupItem value="client" id="proj-client" />
                       <Label htmlFor="proj-client" className="text-xs text-slate-700 cursor-pointer">Client projects</Label>
                     </div>
@@ -570,7 +605,9 @@ const ChatWidget = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 pl-11 mt-2 animate-fade-in pb-4">
+              {/* Experts Section */}
+              <div className="flex flex-col gap-3 pl-11 mt-2 animate-fade-in">
+                <p className="text-[10px] uppercase font-bold text-slate-400">Experts</p>
                 {experts.map((exp, index) => (
                   <div
                     key={index}
@@ -595,9 +632,19 @@ const ChatWidget = () => {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-                      <span className="text-[10px] text-slate-600">
-                        <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] text-slate-600">
+                          <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
+                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <Checkbox 
+                            id={`bookmark-${exp.name}`}
+                            checked={bookmarkedExperts.includes(exp.name)}
+                            onCheckedChange={() => handleExpertBookmark(exp.name)}
+                          />
+                          <Label htmlFor={`bookmark-${exp.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
+                        </div>
+                      </div>
                       <button 
                         onClick={() => {
                           setSelectedExpert(exp);
@@ -607,6 +654,46 @@ const ChatWidget = () => {
                       >
                         Contact
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Communities Section */}
+              <div className="flex flex-col gap-3 pl-11 mt-4 animate-fade-in pb-4">
+                <p className="text-[10px] uppercase font-bold text-slate-400">Online Communities</p>
+                {communities.map((community, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{community.name}</p>
+                        <p className="text-[10px] text-slate-500">{community.description}</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <FontAwesomeIcon icon={faUsers} className="text-[9px]" />
+                        {community.members.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
+                      <div className="flex items-center space-x-1.5">
+                        <Checkbox 
+                          id={`bookmark-community-${community.name}`}
+                          checked={bookmarkedCommunities.includes(community.name)}
+                          onCheckedChange={() => handleCommunityBookmark(community.name)}
+                        />
+                        <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
+                      </div>
+                      <a 
+                        href={community.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
+                      >
+                        Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                      </a>
                     </div>
                   </div>
                 ))}
