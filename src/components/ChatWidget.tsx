@@ -446,7 +446,7 @@ const ChatWidget = () => {
                   <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="all" id="source-all" />
-                      <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">All organisations</Label>
+                      <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">Any organisation</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="my-org" id="source-my-org" />
@@ -562,7 +562,7 @@ const ChatWidget = () => {
                   <RadioGroup value={projectType} onValueChange={setProjectType} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="all" id="proj-all" />
-                      <Label htmlFor="proj-all" className="text-xs text-slate-700 cursor-pointer">All projects</Label>
+                      <Label htmlFor="proj-all" className="text-xs text-slate-700 cursor-pointer">Any project</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="client" id="proj-client" />
