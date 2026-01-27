@@ -109,16 +109,15 @@ const experts: Expert[] = [
   },
 ];
 
-const organisations = [
-  "Clifford Chance",
-  "Linklaters",
-  "Allen & Overy",
-  "Freshfields",
-  "Slaughter and May",
-  "DLA Piper",
-  "Hogan Lovells",
-  "Herbert Smith Freehills",
-];
+const organisationsBySector: Record<string, string[]> = {
+  "Accounting": ["Deloitte", "PwC", "EY", "KPMG", "BDO", "Grant Thornton"],
+  "Legal": ["Clifford Chance", "Linklaters", "Allen & Overy", "Freshfields", "Slaughter and May"],
+  "Academic": ["London Business School", "Oxford Saïd", "Cambridge Judge", "Imperial Business School"],
+  "Consulting": ["McKinsey", "BCG", "Bain", "Accenture"],
+  "Financial Services": ["Goldman Sachs", "JP Morgan", "Morgan Stanley", "Barclays"],
+};
+
+const organisationSectors = Object.keys(organisationsBySector);
 
 const sectors = [
   "Financial Services",
@@ -272,6 +271,7 @@ const ChatWidget = () => {
   // Filter states
   const [sourceFilter, setSourceFilter] = useState("all");
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [selectedOrgSectors, setSelectedOrgSectors] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -302,6 +302,19 @@ const ChatWidget = () => {
     setSelectedOrgs(prev => 
       prev.includes(org) ? prev.filter(o => o !== org) : [...prev, org]
     );
+  };
+
+  const handleOrgSectorToggle = (sector: string) => {
+    setSelectedOrgSectors(prev => {
+      if (prev.includes(sector)) {
+        // Remove sector and all its orgs
+        const orgsInSector = organisationsBySector[sector] || [];
+        setSelectedOrgs(currentOrgs => currentOrgs.filter(o => !orgsInSector.includes(o)));
+        return prev.filter(s => s !== sector);
+      } else {
+        return [...prev, sector];
+      }
+    });
   };
 
   const handleSectorToggle = (sector: string) => {
@@ -446,15 +459,31 @@ const ChatWidget = () => {
                     </div>
                     
                     {sourceFilter === "specific-orgs" && (
-                      <div className="ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
-                        {organisations.map((org) => (
-                          <div key={org} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`org-${org}`} 
-                              checked={selectedOrgs.includes(org)}
-                              onCheckedChange={() => handleOrgToggle(org)}
-                            />
-                            <Label htmlFor={`org-${org}`} className="text-[11px] text-slate-600 cursor-pointer">{org}</Label>
+                      <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                        {organisationSectors.map((sector) => (
+                          <div key={sector}>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`org-sector-${sector}`} 
+                                checked={selectedOrgSectors.includes(sector)}
+                                onCheckedChange={() => handleOrgSectorToggle(sector)}
+                              />
+                              <Label htmlFor={`org-sector-${sector}`} className="text-[11px] font-medium text-slate-700 cursor-pointer">{sector}</Label>
+                            </div>
+                            {selectedOrgSectors.includes(sector) && (
+                              <div className="ml-5 mt-1.5 space-y-1.5 border-l-2 border-slate-100 pl-3">
+                                {organisationsBySector[sector].map((org) => (
+                                  <div key={org} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`org-${org}`} 
+                                      checked={selectedOrgs.includes(org)}
+                                      onCheckedChange={() => handleOrgToggle(org)}
+                                    />
+                                    <Label htmlFor={`org-${org}`} className="text-[10px] text-slate-600 cursor-pointer">{org}</Label>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -695,7 +724,7 @@ const ChatWidget = () => {
 
               {/* Communities Section */}
               <div className="flex flex-col gap-3 pl-11 mt-4 animate-fade-in pb-4">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Online Communities</p>
+                <p className="text-[10px] uppercase font-bold text-slate-400">Related communities</p>
                 {communities.map((community, index) => (
                   <div
                     key={index}
