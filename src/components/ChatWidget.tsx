@@ -239,11 +239,17 @@ const ExpertProfileModal = ({
           )}
         </div>
 
-        {/* Bookmark & Action */}
+        {/* Bookmark & View Pubs */}
         <div className="p-5 pt-0 space-y-3">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="modal-bookmark-expert" />
-            <Label htmlFor="modal-bookmark-expert" className="text-xs text-slate-600 cursor-pointer">Bookmark expert</Label>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="modal-bookmark-expert" />
+              <Label htmlFor="modal-bookmark-expert" className="text-xs text-slate-600 cursor-pointer">Bookmark expert</Label>
+            </div>
+            <button className="text-xs text-brand-red hover:underline flex items-center gap-1">
+              <FontAwesomeIcon icon={faFileLines} className="text-[10px]" />
+              View pubs ({expert.pubs})
+            </button>
           </div>
           <button className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors">
             Contact {expert.name.split(' ')[0]}
@@ -661,9 +667,9 @@ const ChatWidget = () => {
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-slate-600">
+                        <button className="text-[10px] text-slate-600 hover:text-brand-red transition-colors">
                           <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
-                        </span>
+                        </button>
                         <div className="flex items-center space-x-1.5">
                           <Checkbox 
                             id={`bookmark-${exp.name}`}
