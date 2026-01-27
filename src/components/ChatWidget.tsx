@@ -681,6 +681,47 @@ const ChatWidget = () => {
                 </div>
               </div>
 
+              {/* Recap Summary */}
+              <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                <p className="text-xs text-brand-red leading-relaxed">
+                  <span className="font-medium">
+                    {roles.length > 0 
+                      ? roles.map(r => {
+                          if (r === "author") return "Author";
+                          if (r === "leader") return "Future Leader";
+                          if (r === "team") return "Team Member";
+                          if (r === "consultant") return "External Consultant";
+                          return r;
+                        }).join(" + ")
+                      : "Any role"}
+                  </span>
+                  {" "}on "{topic}"; sourced from{" "}
+                  {sourceFilter === "all" && "any organisation"}
+                  {sourceFilter === "my-org" && "my organisation"}
+                  {sourceFilter === "other-orgs" && "all other organisations"}
+                  {sourceFilter === "specific-orgs" && (selectedOrgs.length > 0 ? selectedOrgs.slice(0, 2).join(", ") + (selectedOrgs.length > 2 ? ` +${selectedOrgs.length - 2} more` : "") : "specific organisations")}
+                  {sourceFilter === "my-sector" && "my sector"}
+                  {sourceFilter === "specific-sectors" && (selectedSectors.length > 0 ? selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "") : "specific sectors")}
+                  ;{" "}
+                  {locationFilter === "any" && "any location"}
+                  {locationFilter === "my-city" && "my city"}
+                  {locationFilter === "my-country" && "my country"}
+                  {locationFilter === "specific-countries" && (selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries")}
+                  ;{" "}
+                  {projectType === "all" && "any project"}
+                  {projectType === "client" && "client projects"}
+                  {projectType === "internal" && "internal projects"}
+                  ;{" "}
+                  {contentPeriod === "any" && "any period"}
+                  {contentPeriod === "6-months" && "last 6 months"}
+                  {contentPeriod === "12-months" && "last 12 months"}
+                  {contentPeriod === "2-years" && "last 2 years"}
+                  {contentPeriod === "5-years" && "last 5 years"}
+                  {contentPeriod === "5-plus-years" && "5+ years ago"}
+                  {contentPeriod === "date-range" && (dateRangeFrom || dateRangeTo ? `${dateRangeFrom || "?"} - ${dateRangeTo || "?"}` : "date range")}
+                </p>
+              </div>
+
               <button
                 onClick={startSearch}
                 className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors text-center block"
