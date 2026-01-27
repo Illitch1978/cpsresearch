@@ -279,6 +279,9 @@ const ChatWidget = () => {
   const [roles, setRoles] = useState<string[]>([]);
   const [bookmarkedExperts, setBookmarkedExperts] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
+  const [contentPeriod, setContentPeriod] = useState("any");
+  const [dateRangeFrom, setDateRangeFrom] = useState("");
+  const [dateRangeTo, setDateRangeTo] = useState("");
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -612,6 +615,70 @@ const ChatWidget = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Content Published Period */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For content published in</p>
+                  <RadioGroup value={contentPeriod} onValueChange={setContentPeriod} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="period-any" />
+                      <Label htmlFor="period-any" className="text-xs text-slate-700 cursor-pointer">Any period</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="6-months" id="period-6-months" />
+                      <Label htmlFor="period-6-months" className="text-xs text-slate-700 cursor-pointer">Last 6 months</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="12-months" id="period-12-months" />
+                      <Label htmlFor="period-12-months" className="text-xs text-slate-700 cursor-pointer">Last 12 months</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="2-years" id="period-2-years" />
+                      <Label htmlFor="period-2-years" className="text-xs text-slate-700 cursor-pointer">Last two years</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="5-years" id="period-5-years" />
+                      <Label htmlFor="period-5-years" className="text-xs text-slate-700 cursor-pointer">Last five years</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="5-plus-years" id="period-5-plus-years" />
+                      <Label htmlFor="period-5-plus-years" className="text-xs text-slate-700 cursor-pointer">More than five years ago</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="date-range" id="period-date-range" />
+                      <Label htmlFor="period-date-range" className="text-xs text-slate-700 cursor-pointer">Date range in years</Label>
+                    </div>
+                  </RadioGroup>
+                  
+                  {contentPeriod === "date-range" && (
+                    <div className="mt-2 ml-5 flex items-center gap-2 border-l-2 border-slate-100 pl-3">
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="date-from" className="text-[10px] text-slate-500">From</Label>
+                        <input
+                          type="text"
+                          id="date-from"
+                          placeholder="YYYY"
+                          maxLength={4}
+                          value={dateRangeFrom}
+                          onChange={(e) => setDateRangeFrom(e.target.value.replace(/\D/g, ''))}
+                          className="w-14 px-2 py-1 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-brand-red"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="date-to" className="text-[10px] text-slate-500">To</Label>
+                        <input
+                          type="text"
+                          id="date-to"
+                          placeholder="YYYY"
+                          maxLength={4}
+                          value={dateRangeTo}
+                          onChange={(e) => setDateRangeTo(e.target.value.replace(/\D/g, ''))}
+                          className="w-14 px-2 py-1 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-brand-red"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <button
@@ -667,27 +734,30 @@ const ChatWidget = () => {
                           {exp.name}
                         </button>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wide">{exp.firm}</p>
-                        {exp.officialBioUrl ? (
-                          <a 
-                            href={exp.officialBioUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-1 text-[10px] text-brand-red hover:underline"
-                          >
-                            <FontAwesomeIcon icon={faAddressCard} className="text-[9px]" />
-                            Official bio
-                          </a>
-                        ) : exp.linkedInUrl ? (
-                          <a 
-                            href={exp.linkedInUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#0A66C2] hover:underline"
-                          >
-                            <FontAwesomeIcon icon={faLinkedin} className="text-[11px]" />
-                            LinkedIn
-                          </a>
-                        ) : null}
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {exp.officialBioUrl && (
+                            <a 
+                              href={exp.officialBioUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] text-brand-red hover:underline"
+                            >
+                              <FontAwesomeIcon icon={faAddressCard} className="text-[9px]" />
+                              Official bio
+                            </a>
+                          )}
+                          {exp.linkedInUrl && (
+                            <a 
+                              href={exp.linkedInUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10px] text-[#0A66C2] hover:underline"
+                            >
+                              <FontAwesomeIcon icon={faLinkedin} className="text-[11px]" />
+                              LinkedIn
+                            </a>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right">
                         <span className="text-xs font-bold text-brand-red">{exp.score}/100</span>
