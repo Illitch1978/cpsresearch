@@ -8,6 +8,7 @@ import ContactView from "@/components/ContactView";
 import ContributeView from "@/components/ContributeView";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import CommunityFinderWidget from "@/components/CommunityFinderWidget";
 
 type View = "home" | "contact" | "contribute";
 
@@ -65,6 +66,7 @@ const Index = () => {
       />
 
       <ChatWidget />
+      <CommunityFinderWidget />
     </div>
   );
 };
