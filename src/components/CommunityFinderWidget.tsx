@@ -284,7 +284,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
       {/* Widget Panel */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 sm:bottom-28 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 sm:bottom-28 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
