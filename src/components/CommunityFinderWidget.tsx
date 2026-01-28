@@ -229,15 +229,16 @@ const CommunityFinderWidget = () => {
       {/* Toggle Button */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 transition-all duration-300 flex items-center justify-center group"
+        className="fixed bottom-4 left-4 sm:bottom-8 sm:left-8 z-50 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 transition-colors duration-300"
         aria-label="Find a community"
       >
-        <FontAwesomeIcon icon={faUsers} className="text-lg" />
+        <FontAwesomeIcon icon={faUsers} className="text-lg sm:text-xl" />
+        <span className="font-medium text-xs sm:text-sm tracking-wide hidden sm:inline">Find a community</span>
       </button>
 
       {/* Widget Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 left-6 z-50 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+        <div className="fixed bottom-20 left-4 sm:bottom-28 sm:left-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="bg-emerald-600 text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
