@@ -330,7 +330,7 @@ const Bookmarks = () => {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white">
                           <FontAwesomeIcon icon={faUsers} className="text-sm" />
                         </div>
                         <div className="flex-1">
@@ -345,7 +345,7 @@ const Bookmarks = () => {
                           </a>
                           <p className="text-sm text-slate-500">{community.description}</p>
                           <p className="text-xs text-slate-400 mt-1">
-                            <span className="text-emerald-600 font-medium">{community.members.toLocaleString()}</span> members
+                            <span className="text-slate-700 font-medium">{community.members.toLocaleString()}</span> members
                           </p>
                         </div>
                       </div>
