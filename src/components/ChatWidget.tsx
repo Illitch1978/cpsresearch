@@ -757,6 +757,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
+                        id="role-leader" 
+                        checked={roles.includes("leader")}
+                        onCheckedChange={() => handleRoleToggle("leader")}
+                      />
+                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
                         id="role-contributor" 
                         checked={roles.includes("contributor")}
                         onCheckedChange={() => handleRoleToggle("contributor")}
