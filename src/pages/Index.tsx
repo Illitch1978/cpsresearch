@@ -48,7 +48,7 @@ const Index = () => {
 
       {currentView === "home" && (
         <div className="fade-in">
-          <HeroSection onShowContribute={showContribute} />
+          <HeroSection />
           <MissionSection />
           <InitiativesSection />
           <BenefitsSection onShowContribute={showContribute} />
