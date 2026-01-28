@@ -134,14 +134,14 @@ const sectors = [
   "Manufacturing",
 ];
 
+const continents = [
+  "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
+].sort();
+
 const countries = [
-  "United Kingdom",
-  "United States",
-  "Germany",
-  "France",
-  "Singapore",
-  "Australia",
-];
+  "Australia", "Canada", "France", "Germany", "Japan", "Netherlands",
+  "Singapore", "UAE", "United Kingdom", "United States"
+].sort();
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
@@ -284,6 +284,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [selectedOrgSectors, setSelectedOrgSectors] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [locationFilter, setLocationFilter] = useState("any");
+  const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [projectType, setProjectType] = useState("all");
   const [roles, setRoles] = useState<string[]>([]);
@@ -332,6 +333,12 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     );
   };
 
+  const handleContinentToggle = (continent: string) => {
+    setSelectedContinents(prev => 
+      prev.includes(continent) ? prev.filter(c => c !== continent) : [...prev, continent]
+    );
+  };
+
   const handleCountryToggle = (country: string) => {
     setSelectedCountries(prev => 
       prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
@@ -373,6 +380,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     setSelectedOrgSectors([]);
     setSelectedSectors([]);
     setLocationFilter("any");
+    setSelectedContinents([]);
     setSelectedCountries([]);
     setProjectType("all");
     setRoles([]);
@@ -404,6 +412,8 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     if (locationFilter === "any") locationText = "any location";
     else if (locationFilter === "my-city") locationText = "my city";
     else if (locationFilter === "my-country") locationText = "my country";
+    else if (locationFilter === "my-continent") locationText = "my continent";
+    else if (locationFilter === "specific-continents") locationText = selectedContinents.length > 0 ? selectedContinents.slice(0, 2).join(", ") + (selectedContinents.length > 2 ? ` +${selectedContinents.length - 2} more` : "") : "specific continents";
     else if (locationFilter === "specific-countries") locationText = selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries";
 
     let projectText = "";
@@ -607,25 +617,46 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       <Label htmlFor="loc-my-country" className="text-xs text-slate-700 cursor-pointer">My country</Label>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="my-continent" id="loc-my-continent" />
+                      <Label htmlFor="loc-my-continent" className="text-xs text-slate-700 cursor-pointer">My continent</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific-continents" id="loc-specific-continents" />
+                      <Label htmlFor="loc-specific-continents" className="text-xs text-slate-700 cursor-pointer">Specific continents</Label>
+                    </div>
+                    {locationFilter === "specific-continents" && (
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
+                        {continents.map((continent) => (
+                          <div key={continent} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`continent-${continent}`} 
+                              checked={selectedContinents.includes(continent)}
+                              onCheckedChange={() => handleContinentToggle(continent)}
+                            />
+                            <Label htmlFor={`continent-${continent}`} className="text-[11px] text-slate-600 cursor-pointer">{continent}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2">
                       <RadioGroupItem value="specific-countries" id="loc-specific-countries" />
                       <Label htmlFor="loc-specific-countries" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
                     </div>
+                    {locationFilter === "specific-countries" && (
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
+                        {countries.map((country) => (
+                          <div key={country} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`country-${country}`} 
+                              checked={selectedCountries.includes(country)}
+                              onCheckedChange={() => handleCountryToggle(country)}
+                            />
+                            <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </RadioGroup>
-                  
-                  {locationFilter === "specific-countries" && (
-                    <div className="mt-2 ml-5 max-h-24 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
-                      {countries.map((country) => (
-                        <div key={country} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`country-${country}`} 
-                            checked={selectedCountries.includes(country)}
-                            onCheckedChange={() => handleCountryToggle(country)}
-                          />
-                          <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Project Type */}

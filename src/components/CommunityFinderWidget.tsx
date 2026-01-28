@@ -25,7 +25,7 @@ const communities: Community[] = [
 ];
 
 // All lists alphabetically sorted
-const regions = [
+const continents = [
   "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
 ].sort();
 
@@ -89,7 +89,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   // Filter states
   const [locationFilter, setLocationFilter] = useState("any");
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sectorFilter, setSectorFilter] = useState("any");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
@@ -127,9 +127,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     }, 600);
   };
 
-  const handleRegionToggle = (region: string) => {
-    setSelectedRegions(prev => 
-      prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]
+  const handleContinentToggle = (continent: string) => {
+    setSelectedContinents(prev => 
+      prev.includes(continent) ? prev.filter(c => c !== continent) : [...prev, continent]
     );
   };
 
@@ -200,7 +200,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setInputValue("");
     setMessages([]);
     setLocationFilter("any");
-    setSelectedRegions([]);
+    setSelectedContinents([]);
     setSelectedCountries([]);
     setSectorFilter("any");
     setSelectedSectors([]);
@@ -218,8 +218,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const buildRecapSummary = () => {
     const locationLabel = locationFilter === "any" 
       ? "any location" 
-      : locationFilter === "region" && selectedRegions.length > 0
-        ? selectedRegions.join(", ")
+      : locationFilter === "continent" && selectedContinents.length > 0
+        ? selectedContinents.join(", ")
         : locationFilter === "country" && selectedCountries.length > 0
           ? selectedCountries.join(", ")
           : "any location";
@@ -320,19 +320,19 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <Label htmlFor="loc-any" className="text-xs text-slate-700 cursor-pointer">Any location</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="region" id="loc-region" />
-                      <Label htmlFor="loc-region" className="text-xs text-slate-700 cursor-pointer">Specific regions</Label>
+                      <RadioGroupItem value="continent" id="loc-continent" />
+                      <Label htmlFor="loc-continent" className="text-xs text-slate-700 cursor-pointer">Specific continents</Label>
                     </div>
-                    {locationFilter === "region" && (
+                    {locationFilter === "continent" && (
                       <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
-                        {regions.map((region) => (
-                          <div key={region} className="flex items-center space-x-2">
+                        {continents.map((continent) => (
+                          <div key={continent} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`region-${region}`}
-                              checked={selectedRegions.includes(region)}
-                              onCheckedChange={() => handleRegionToggle(region)}
+                              id={`continent-${continent}`}
+                              checked={selectedContinents.includes(continent)}
+                              onCheckedChange={() => handleContinentToggle(continent)}
                             />
-                            <Label htmlFor={`region-${region}`} className="text-xs text-slate-600 cursor-pointer">{region}</Label>
+                            <Label htmlFor={`continent-${continent}`} className="text-xs text-slate-600 cursor-pointer">{continent}</Label>
                           </div>
                         ))}
                       </div>
