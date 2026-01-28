@@ -56,17 +56,17 @@ const ExpertProfileModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white border-0 shadow-2xl">
-        {/* Header with gradient */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 text-white">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white border border-slate-200 shadow-xl">
+        {/* Header */}
+        <div className="bg-slate-800 p-5 text-white">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center text-white text-lg font-serif shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center text-white font-serif shadow-md">
               {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1">
-              <h3 className="font-serif text-xl font-semibold">{expert.name}</h3>
+              <h3 className="font-serif text-lg font-semibold">{expert.name}</h3>
               <p className="text-slate-300 text-sm">{expert.firm}</p>
-              <span className="inline-block mt-2 px-2.5 py-0.5 bg-white/10 text-white/90 text-xs rounded-full backdrop-blur-sm">
+              <span className="inline-block mt-2 px-2 py-0.5 bg-white/10 text-white/90 text-xs rounded-full">
                 {expert.tag}
               </span>
             </div>
@@ -74,16 +74,16 @@ const ExpertProfileModal = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-5 space-y-4">
           {/* Score and Publications */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-serif font-bold text-brand-red">{expert.score}%</div>
-              <span className="text-xs text-slate-500">Match Score</span>
+              <div className="text-xl font-serif font-bold text-brand-red">{expert.score}%</div>
+              <span className="text-xs text-slate-500">Match</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-2xl font-serif font-bold text-slate-700">{expert.pubs}</div>
-              <span className="text-xs text-slate-500">Publications</span>
+              <div className="text-xl font-serif font-bold text-slate-700">{expert.pubs}</div>
+              <span className="text-xs text-slate-500">Pubs</span>
             </div>
           </div>
 
@@ -222,46 +222,46 @@ const Bookmarks = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-cream">
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/")}
-              className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all"
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
             <div>
-              <h1 className="font-serif text-2xl font-semibold text-white">My Bookmarks</h1>
-              <p className="text-sm text-slate-400">Your curated collection of experts, communities & research</p>
+              <h1 className="font-serif text-xl font-semibold text-slate-900">My Bookmarks</h1>
+              <p className="text-sm text-slate-500">Your saved experts, communities & publications</p>
             </div>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="experts" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-slate-800/50 border border-slate-700/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
             <TabsTrigger 
               value="experts" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-red data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 rounded-lg transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
             >
               <FontAwesomeIcon icon={faUserTie} className="text-xs" />
               Experts ({experts.length})
             </TabsTrigger>
             <TabsTrigger 
               value="communities" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-red data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 rounded-lg transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
             >
               <FontAwesomeIcon icon={faUsers} className="text-xs" />
               Communities ({communities.length})
             </TabsTrigger>
             <TabsTrigger 
               value="publications" 
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-brand-red data-[state=active]:to-red-700 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-400 rounded-lg transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
             >
               <FontAwesomeIcon icon={faFileLines} className="text-xs" />
               Publications ({publications.length})
@@ -273,41 +273,38 @@ const Bookmarks = () => {
             {experts.length === 0 ? (
               <EmptyState icon={faUserTie} message="No bookmarked experts yet" />
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {experts.map((expert) => (
                   <div 
                     key={expert.id} 
-                    className="group bg-gradient-to-r from-slate-800/80 to-slate-800/40 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 hover:border-brand-red/30 hover:shadow-lg hover:shadow-brand-red/5 transition-all duration-300"
+                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-red to-red-700 flex items-center justify-center text-white text-sm font-serif shadow-lg">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-serif">
                           {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
                         <div className="flex-1">
                           <button
                             onClick={() => openExpertModal(expert)}
-                            className="font-serif font-medium text-white hover:text-brand-red transition-colors text-left group-hover:underline decoration-brand-red/50"
+                            className="font-medium text-slate-900 hover:text-brand-red transition-colors text-left"
                           >
                             {expert.name}
                           </button>
-                          <p className="text-sm text-slate-400 mt-0.5">{expert.firm}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className="px-2 py-0.5 bg-slate-700/50 text-slate-300 text-xs rounded-full">
+                          <p className="text-sm text-slate-500">{expert.firm}</p>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
                               {expert.tag}
                             </span>
-                            <span className="text-xs text-slate-500">
-                              Score: <span className="text-brand-red font-medium">{expert.score}%</span>
-                            </span>
-                            <span className="text-xs text-slate-500">
-                              {expert.pubs} pubs
+                            <span className="text-xs text-slate-400">
+                              <span className="text-brand-red font-medium">{expert.score}%</span> match
                             </span>
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => removeExpert(expert.id)}
-                        className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                         title="Remove bookmark"
                       >
                         <FontAwesomeIcon icon={faTrash} className="text-sm" />
@@ -324,15 +321,15 @@ const Bookmarks = () => {
             {communities.length === 0 ? (
               <EmptyState icon={faUsers} message="No bookmarked communities yet" />
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {communities.map((community) => (
                   <div 
                     key={community.id} 
-                    className="group bg-gradient-to-r from-slate-800/80 to-slate-800/40 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 hover:border-brand-red/30 hover:shadow-lg hover:shadow-brand-red/5 transition-all duration-300"
+                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white">
                           <FontAwesomeIcon icon={faUsers} className="text-sm" />
                         </div>
                         <div className="flex-1">
@@ -340,22 +337,20 @@ const Bookmarks = () => {
                             href={community.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-serif font-medium text-white hover:text-brand-red transition-colors inline-flex items-center gap-2 group-hover:underline decoration-brand-red/50"
+                            className="font-medium text-slate-900 hover:text-brand-red transition-colors inline-flex items-center gap-2"
                           >
                             {community.name}
-                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs text-slate-500 group-hover:text-brand-red" />
+                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs text-slate-400" />
                           </a>
-                          <p className="text-sm text-slate-400 mt-0.5">{community.description}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className="text-xs text-slate-500">
-                              <span className="text-emerald-400 font-medium">{community.members.toLocaleString()}</span> members
-                            </span>
-                          </div>
+                          <p className="text-sm text-slate-500">{community.description}</p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            <span className="text-emerald-600 font-medium">{community.members.toLocaleString()}</span> members
+                          </p>
                         </div>
                       </div>
                       <button
                         onClick={() => removeCommunity(community.id)}
-                        className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                         title="Remove bookmark"
                       >
                         <FontAwesomeIcon icon={faTrash} className="text-sm" />
@@ -372,38 +367,38 @@ const Bookmarks = () => {
             {publications.length === 0 ? (
               <EmptyState icon={faFileLines} message="No bookmarked publications yet" />
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {publications.map((pub) => (
                   <div 
                     key={pub.id} 
-                    className="group bg-gradient-to-r from-slate-800/80 to-slate-800/40 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 hover:border-brand-red/30 hover:shadow-lg hover:shadow-brand-red/5 transition-all duration-300"
+                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg">
+                        <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
                           <FontAwesomeIcon icon={faFileLines} className="text-sm" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-serif font-medium text-white">{pub.title}</p>
-                          <p className="text-sm text-slate-400 mt-0.5">{pub.author} · {pub.date}</p>
+                          <p className="font-medium text-slate-900">{pub.title}</p>
+                          <p className="text-sm text-slate-500">{pub.author} · {pub.date}</p>
                           
                           {/* Quality Score */}
-                          <div className="mt-3 flex items-center gap-3">
-                            <div className="flex-1 max-w-32">
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="flex-1 max-w-24">
                               <Progress 
                                 value={pub.qualityScore} 
-                                className="h-1.5 bg-slate-700"
+                                className="h-1.5 bg-slate-100"
                               />
                             </div>
                             <span className="text-xs font-medium text-brand-red">
-                              {pub.qualityScore}% Quality
+                              {pub.qualityScore}%
                             </span>
                           </div>
                         </div>
                       </div>
                       <button
                         onClick={() => removePublication(pub.id)}
-                        className="p-2.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                         title="Remove bookmark"
                       >
                         <FontAwesomeIcon icon={faTrash} className="text-sm" />
@@ -428,10 +423,10 @@ const Bookmarks = () => {
 };
 
 const EmptyState = ({ icon, message }: { icon: any; message: string }) => (
-  <div className="text-center py-16 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50">
-    <FontAwesomeIcon icon={icon} className="text-5xl text-slate-600 mb-4" />
-    <p className="text-slate-400 font-medium">{message}</p>
-    <p className="text-sm text-slate-500 mt-1">Items you bookmark will appear here</p>
+  <div className="text-center py-12 bg-white rounded-lg border border-slate-200">
+    <FontAwesomeIcon icon={icon} className="text-4xl text-slate-300 mb-3" />
+    <p className="text-slate-500">{message}</p>
+    <p className="text-sm text-slate-400 mt-1">Items you bookmark will appear here</p>
   </div>
 );
 
