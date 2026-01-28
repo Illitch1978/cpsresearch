@@ -24,35 +24,62 @@ const communities: Community[] = [
   { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms", url: "#", tags: ["SME", "Business development"] },
 ];
 
+// All lists alphabetically sorted
 const contactTypes = [
-  "Entrepreneur", "Advocate", "NED", "Alumnus", "Millennial", "Gen Z", "CEO", 
-  "Ghostwriter", "Guru", "High Net Worth", "Mentor", "Technologist"
-];
+  "Advocate", "Alumnus", "CEO", "Entrepreneur", "Gen Z", "Ghostwriter", 
+  "Guru", "High Net Worth", "Mentor", "Millennial", "NED", "Technologist"
+].sort();
 
-const regions = ["Europe", "North America", "Asia Pacific", "Middle East", "Latin America", "Africa"];
+const regions = [
+  "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
+].sort();
 
 const countries = [
-  "United Kingdom", "United States", "Germany", "France", "Singapore", 
-  "Australia", "UAE", "Canada", "Japan", "Netherlands"
-];
+  "Australia", "Canada", "France", "Germany", "Japan", "Netherlands",
+  "Singapore", "UAE", "United Kingdom", "United States"
+].sort();
 
-const expertiseAreas = [
-  "Legal", "Finance", "Technology", "Consulting", "Accounting", "Healthcare", "Real Estate", "Energy"
-];
+// Renamed from expertiseAreas to sectors
+const sectors = [
+  "Accounting", "Agriculture & Farming", "Automotive", "Banking & Finance", 
+  "Biotech & Pharma", "Construction", "Consulting", "Consumer Goods", 
+  "Education", "Energy & Utilities", "Entertainment & Media", "Government & Public Sector",
+  "Healthcare", "Hospitality & Tourism", "Insurance", "Legal", 
+  "Manufacturing", "Mining & Metals", "Non-Profit", "Real Estate", 
+  "Retail", "Technology", "Telecommunications", "Transportation & Logistics"
+].sort();
 
-const orgSizes = ["SME", "Midmarket", "Large", "Very large"];
+const orgSizes = ["Large", "Midmarket", "SME", "Very large"].sort();
 
 const managementExpertise = [
-  "Business development", "Sales", "Marketing", "Sustainability", "Technology", 
-  "Innovation", "Communication", "Human resources", "Facilities", 
-  "Learning & Development", "Operations", "Finance", "Product development", 
-  "Planning", "Performance management", "Government liaison", "Procurement", "Risk"
-];
+  "Business development", "Communication", "Facilities", "Finance", 
+  "Government liaison", "Human resources", "Innovation", "Learning & Development", 
+  "Marketing", "Operations", "Performance management", "Planning", 
+  "Procurement", "Product development", "Risk", "Sales", "Sustainability", "Technology"
+].sort();
 
 const leadershipExpertise = [
-  "Firmwide Leadership", "Divisional Leadership", "Project leadership", 
-  "Chairman", "NED", "Board Member", "Governance", "Chief of Staff", "Strategy"
-];
+  "Board Member", "Chairman", "Chief of Staff", "Divisional Leadership", 
+  "Firmwide Leadership", "Governance", "NED", "Project leadership", "Strategy"
+].sort();
+
+// PEST External Factors
+const politicalFactors = [
+  "Funding & Grants", "Government Policies & Stability", 
+  "International Relations", "Regulatory Environment"
+].sort();
+
+const economicFactors = [
+  "Consumer Behaviors", "Cost Factors", "Macroeconomic Trends", "Market Conditions"
+].sort();
+
+const socialFactors = [
+  "Demographics", "Lifestyle & Trends", "Public Opinion", "Workforce Factors"
+].sort();
+
+const technologicalFactors = [
+  "Innovation & R&D", "Obsolescence", "Operational Technology", "Technology Transfer"
+].sort();
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
@@ -72,10 +99,14 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedOrgSizes, setSelectedOrgSizes] = useState<string[]>([]);
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
   const [selectedLeadership, setSelectedLeadership] = useState<string[]>([]);
+  const [selectedPolitical, setSelectedPolitical] = useState<string[]>([]);
+  const [selectedEconomic, setSelectedEconomic] = useState<string[]>([]);
+  const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
+  const [selectedTechnological, setSelectedTechnological] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
   // Collapsible sections
@@ -120,9 +151,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     );
   };
 
-  const handleExpertiseToggle = (exp: string) => {
-    setSelectedExpertise(prev => 
-      prev.includes(exp) ? prev.filter(e => e !== exp) : [...prev, exp]
+  const handleSectorToggle = (sector: string) => {
+    setSelectedSectors(prev => 
+      prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
     );
   };
 
@@ -140,6 +171,30 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   const handleLeadershipToggle = (item: string) => {
     setSelectedLeadership(prev => 
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handlePoliticalToggle = (item: string) => {
+    setSelectedPolitical(prev => 
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handleEconomicToggle = (item: string) => {
+    setSelectedEconomic(prev => 
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handleSocialToggle = (item: string) => {
+    setSelectedSocial(prev => 
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handleTechnologicalToggle = (item: string) => {
+    setSelectedTechnological(prev => 
       prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
     );
   };
@@ -166,10 +221,14 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setLocationFilter("any");
     setSelectedRegions([]);
     setSelectedCountries([]);
-    setSelectedExpertise([]);
+    setSelectedSectors([]);
     setSelectedOrgSizes([]);
     setSelectedManagement([]);
     setSelectedLeadership([]);
+    setSelectedPolitical([]);
+    setSelectedEconomic([]);
+    setSelectedSocial([]);
+    setSelectedTechnological([]);
   };
 
   // Build recap summary
@@ -186,15 +245,15 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
           ? selectedCountries.join(", ")
           : "any location";
 
-    const expertiseLabel = selectedExpertise.length > 0 
-      ? selectedExpertise.join(", ") 
-      : "any expertise";
+    const sectorLabel = selectedSectors.length > 0 
+      ? selectedSectors.join(", ") 
+      : "any sector";
 
     const orgSizeLabel = selectedOrgSizes.length > 0 
       ? selectedOrgSizes.join(", ") 
       : "any org size";
 
-    return `${contactLabel} communities on "${topic}"; ${locationLabel}; ${expertiseLabel}; ${orgSizeLabel}`;
+    return `${contactLabel} communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgSizeLabel}`;
   };
 
   const FilterSection = ({ 
@@ -340,17 +399,17 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   </RadioGroup>
                 </FilterSection>
 
-                {/* Expertise */}
-                <FilterSection title="Expertise area" sectionKey="expertise">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {expertiseAreas.map((exp) => (
-                      <div key={exp} className="flex items-center space-x-2">
+                {/* Sectors (renamed from Expertise area) */}
+                <FilterSection title="Sectors" sectionKey="sectors">
+                  <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto">
+                    {sectors.map((sector) => (
+                      <div key={sector} className="flex items-center space-x-2">
                         <Checkbox 
-                          id={`exp-${exp}`}
-                          checked={selectedExpertise.includes(exp)}
-                          onCheckedChange={() => handleExpertiseToggle(exp)}
+                          id={`sector-${sector}`}
+                          checked={selectedSectors.includes(sector)}
+                          onCheckedChange={() => handleSectorToggle(sector)}
                         />
-                        <Label htmlFor={`exp-${exp}`} className="text-xs text-slate-600 cursor-pointer">{exp}</Label>
+                        <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
                       </div>
                     ))}
                   </div>
@@ -372,35 +431,111 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   </div>
                 </FilterSection>
 
-                {/* Management Expertise */}
-                <FilterSection title="Management expertise" sectionKey="management">
-                  <div className="grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
-                    {managementExpertise.map((item) => (
-                      <div key={item} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`mgmt-${item}`}
-                          checked={selectedManagement.includes(item)}
-                          onCheckedChange={() => handleManagementToggle(item)}
-                        />
-                        <Label htmlFor={`mgmt-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                {/* Expertise (with Management and Leadership as subsets) */}
+                <FilterSection title="Expertise" sectionKey="expertise">
+                  <div className="space-y-3">
+                    {/* Management Expertise Subset */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Management</p>
+                      <div className="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto ml-2 border-l-2 border-slate-100 pl-2">
+                        {managementExpertise.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`mgmt-${item}`}
+                              checked={selectedManagement.includes(item)}
+                              onCheckedChange={() => handleManagementToggle(item)}
+                            />
+                            <Label htmlFor={`mgmt-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                    {/* Leadership Expertise Subset */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Leadership & Governance</p>
+                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
+                        {leadershipExpertise.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`lead-${item}`}
+                              checked={selectedLeadership.includes(item)}
+                              onCheckedChange={() => handleLeadershipToggle(item)}
+                            />
+                            <Label htmlFor={`lead-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </FilterSection>
 
-                {/* Leadership Expertise */}
-                <FilterSection title="Leadership & governance expertise" sectionKey="leadership">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {leadershipExpertise.map((item) => (
-                      <div key={item} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`lead-${item}`}
-                          checked={selectedLeadership.includes(item)}
-                          onCheckedChange={() => handleLeadershipToggle(item)}
-                        />
-                        <Label htmlFor={`lead-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                {/* External Factors (PEST) */}
+                <FilterSection title="External factors" sectionKey="externalFactors">
+                  <div className="space-y-3">
+                    {/* Political */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Political</p>
+                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
+                        {politicalFactors.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`political-${item}`}
+                              checked={selectedPolitical.includes(item)}
+                              onCheckedChange={() => handlePoliticalToggle(item)}
+                            />
+                            <Label htmlFor={`political-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                    {/* Economic */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Economic</p>
+                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
+                        {economicFactors.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`economic-${item}`}
+                              checked={selectedEconomic.includes(item)}
+                              onCheckedChange={() => handleEconomicToggle(item)}
+                            />
+                            <Label htmlFor={`economic-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Social */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Social</p>
+                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
+                        {socialFactors.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`social-${item}`}
+                              checked={selectedSocial.includes(item)}
+                              onCheckedChange={() => handleSocialToggle(item)}
+                            />
+                            <Label htmlFor={`social-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Technological */}
+                    <div>
+                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Technological</p>
+                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
+                        {technologicalFactors.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`tech-${item}`}
+                              checked={selectedTechnological.includes(item)}
+                              onCheckedChange={() => handleTechnologicalToggle(item)}
+                            />
+                            <Label htmlFor={`tech-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </FilterSection>
 
