@@ -22,6 +22,7 @@ interface Expert {
   bio?: string;
   officialBioUrl?: string;
   linkedInUrl?: string;
+  communityType?: string;
 }
 
 interface Community {
@@ -50,7 +51,8 @@ const experts: Expert[] = [
     division: "Corporate M&A",
     primaryGroup: "Private Equity",
     bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions. She has advised on some of the largest deals in the European market and is frequently cited in academic journals for her innovative approaches to complex regulatory challenges.",
-    officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas"
+    officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas",
+    communityType: "Entrepreneur"
   },
   { 
     name: "Prof. James Sterling", 
@@ -64,7 +66,8 @@ const experts: Expert[] = [
     division: "Financial Markets",
     primaryGroup: "Banking & Finance",
     bio: "Professor James Sterling specializes in financial regulation and has been instrumental in shaping policy discussions around fintech and digital assets. He combines academic rigor with practical legal expertise gained from advising major financial institutions.",
-    linkedInUrl: "https://www.linkedin.com/in/james-sterling"
+    linkedInUrl: "https://www.linkedin.com/in/james-sterling",
+    communityType: "Guru"
   },
   { 
     name: "Sarah Jenkins", 
@@ -78,7 +81,8 @@ const experts: Expert[] = [
     division: "Technology & Innovation",
     primaryGroup: "Not set",
     bio: "Sarah Jenkins is at the forefront of legal innovation, helping organizations navigate digital transformation. Her expertise spans data privacy, AI governance, and emerging technology regulations across multiple jurisdictions.",
-    officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins"
+    officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins",
+    communityType: "Technologist"
   },
   { 
     name: "David Thorne", 
@@ -92,7 +96,8 @@ const experts: Expert[] = [
     division: "Litigation",
     primaryGroup: "International Arbitration",
     bio: "David Thorne has built a reputation as one of the most effective dispute resolution specialists in the City. His strategic approach to complex commercial litigation has resulted in favorable outcomes for clients in high-stakes international disputes.",
-    linkedInUrl: "https://www.linkedin.com/in/david-thorne"
+    linkedInUrl: "https://www.linkedin.com/in/david-thorne",
+    communityType: "Advocate"
   },
   { 
     name: "Marcus Alistair", 
@@ -105,7 +110,8 @@ const experts: Expert[] = [
     phone: "+44 20 7600 2345",
     division: "Tax Advisory",
     primaryGroup: "Corporate Tax",
-    bio: "Marcus Alistair is a recognized authority on international tax strategy, with particular expertise in structuring cross-border investments and M&A transactions. His publications on tax efficiency have become essential reading for corporate counsel."
+    bio: "Marcus Alistair is a recognized authority on international tax strategy, with particular expertise in structuring cross-border investments and M&A transactions. His publications on tax efficiency have become essential reading for corporate counsel.",
+    communityType: "Mentor"
   },
 ];
 
@@ -357,6 +363,66 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     }, 1000);
   };
 
+  const handleNewSearch = () => {
+    setStep("topic");
+    setTopic("");
+    setInputValue("");
+    setMessages([]);
+    setSourceFilter("all");
+    setSelectedOrgs([]);
+    setSelectedOrgSectors([]);
+    setSelectedSectors([]);
+    setLocationFilter("any");
+    setSelectedCountries([]);
+    setProjectType("all");
+    setRoles([]);
+    setContentPeriod("any");
+    setDateRangeFrom("");
+    setDateRangeTo("");
+  };
+
+  const buildRecapSummary = () => {
+    const roleText = roles.length > 0 
+      ? roles.map(r => {
+          if (r === "author") return "Author";
+          if (r === "leader") return "Future Leader";
+          if (r === "team") return "Team Member";
+          if (r === "consultant") return "External Consultant";
+          return r;
+        }).join(" + ")
+      : "Any role";
+
+    let sourceText = "";
+    if (sourceFilter === "all") sourceText = "any organisation";
+    else if (sourceFilter === "my-org") sourceText = "my organisation";
+    else if (sourceFilter === "other-orgs") sourceText = "all other organisations";
+    else if (sourceFilter === "specific-orgs") sourceText = selectedOrgs.length > 0 ? selectedOrgs.slice(0, 2).join(", ") + (selectedOrgs.length > 2 ? ` +${selectedOrgs.length - 2} more` : "") : "specific organisations";
+    else if (sourceFilter === "my-sector") sourceText = "my sector";
+    else if (sourceFilter === "specific-sectors") sourceText = selectedSectors.length > 0 ? selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "") : "specific sectors";
+
+    let locationText = "";
+    if (locationFilter === "any") locationText = "any location";
+    else if (locationFilter === "my-city") locationText = "my city";
+    else if (locationFilter === "my-country") locationText = "my country";
+    else if (locationFilter === "specific-countries") locationText = selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries";
+
+    let projectText = "";
+    if (projectType === "all") projectText = "any project";
+    else if (projectType === "client") projectText = "client projects";
+    else if (projectType === "internal") projectText = "internal projects";
+
+    let periodText = "";
+    if (contentPeriod === "any") periodText = "any period";
+    else if (contentPeriod === "6-months") periodText = "last 6 months";
+    else if (contentPeriod === "12-months") periodText = "last 12 months";
+    else if (contentPeriod === "2-years") periodText = "last 2 years";
+    else if (contentPeriod === "5-years") periodText = "last 5 years";
+    else if (contentPeriod === "5-plus-years") periodText = "5+ years ago";
+    else if (contentPeriod === "date-range") periodText = dateRangeFrom || dateRangeTo ? `${dateRangeFrom || "?"} - ${dateRangeTo || "?"}` : "date range";
+
+    return `${roleText} on "${topic}"; sourced from ${sourceText}; ${locationText}; ${projectText}; ${periodText}`;
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -437,6 +503,13 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           {/* Filter Options */}
           {step === "filters" && (
             <div className="pl-11 flex flex-col gap-4 animate-fade-in">
+              {/* Recap Summary - Below Question */}
+              <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                <p className="text-xs text-brand-red leading-relaxed">
+                  {buildRecapSummary()}
+                </p>
+              </div>
+
               <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
                 
                 {/* Source Filter */}
@@ -574,48 +647,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   </RadioGroup>
                 </div>
 
-                {/* Role */}
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-author" 
-                        checked={roles.includes("author")}
-                        onCheckedChange={() => handleRoleToggle("author")}
-                      />
-                      <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-leader" 
-                        checked={roles.includes("leader")}
-                        onCheckedChange={() => handleRoleToggle("leader")}
-                      />
-                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-team" 
-                        checked={roles.includes("team")}
-                        onCheckedChange={() => handleRoleToggle("team")}
-                      />
-                      <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
-                    </div>
-                    {sourceFilter !== "my-org" && (
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="role-consultant" 
-                          checked={roles.includes("consultant")}
-                          onCheckedChange={() => handleRoleToggle("consultant")}
-                        />
-                        <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content Published Period */}
+                {/* Content Published Period - Moved above As */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For content published in</p>
                   <RadioGroup value={contentPeriod} onValueChange={setContentPeriod} className="space-y-2">
@@ -678,47 +710,47 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Recap Summary */}
-              <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
-                <p className="text-xs text-brand-red leading-relaxed">
-                  <span className="font-medium">
-                    {roles.length > 0 
-                      ? roles.map(r => {
-                          if (r === "author") return "Author";
-                          if (r === "leader") return "Future Leader";
-                          if (r === "team") return "Team Member";
-                          if (r === "consultant") return "External Consultant";
-                          return r;
-                        }).join(" + ")
-                      : "Any role"}
-                  </span>
-                  {" "}on "{topic}"; sourced from{" "}
-                  {sourceFilter === "all" && "any organisation"}
-                  {sourceFilter === "my-org" && "my organisation"}
-                  {sourceFilter === "other-orgs" && "all other organisations"}
-                  {sourceFilter === "specific-orgs" && (selectedOrgs.length > 0 ? selectedOrgs.slice(0, 2).join(", ") + (selectedOrgs.length > 2 ? ` +${selectedOrgs.length - 2} more` : "") : "specific organisations")}
-                  {sourceFilter === "my-sector" && "my sector"}
-                  {sourceFilter === "specific-sectors" && (selectedSectors.length > 0 ? selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "") : "specific sectors")}
-                  ;{" "}
-                  {locationFilter === "any" && "any location"}
-                  {locationFilter === "my-city" && "my city"}
-                  {locationFilter === "my-country" && "my country"}
-                  {locationFilter === "specific-countries" && (selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries")}
-                  ;{" "}
-                  {projectType === "all" && "any project"}
-                  {projectType === "client" && "client projects"}
-                  {projectType === "internal" && "internal projects"}
-                  ;{" "}
-                  {contentPeriod === "any" && "any period"}
-                  {contentPeriod === "6-months" && "last 6 months"}
-                  {contentPeriod === "12-months" && "last 12 months"}
-                  {contentPeriod === "2-years" && "last 2 years"}
-                  {contentPeriod === "5-years" && "last 5 years"}
-                  {contentPeriod === "5-plus-years" && "5+ years ago"}
-                  {contentPeriod === "date-range" && (dateRangeFrom || dateRangeTo ? `${dateRangeFrom || "?"} - ${dateRangeTo || "?"}` : "date range")}
-                </p>
+                {/* Role - Now after Period */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-author" 
+                        checked={roles.includes("author")}
+                        onCheckedChange={() => handleRoleToggle("author")}
+                      />
+                      <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-leader" 
+                        checked={roles.includes("leader")}
+                        onCheckedChange={() => handleRoleToggle("leader")}
+                      />
+                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-team" 
+                        checked={roles.includes("team")}
+                        onCheckedChange={() => handleRoleToggle("team")}
+                      />
+                      <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
+                    </div>
+                    {sourceFilter !== "my-org" && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="role-consultant" 
+                          checked={roles.includes("consultant")}
+                          onCheckedChange={() => handleRoleToggle("consultant")}
+                        />
+                        <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <button
@@ -754,6 +786,17 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 </div>
               </div>
 
+              {/* New Search Link */}
+              <div className="pl-11 mt-2 animate-fade-in">
+                <button
+                  onClick={handleNewSearch}
+                  className="text-xs text-brand-red hover:underline flex items-center gap-1"
+                >
+                  <FontAwesomeIcon icon={faLink} className="text-[10px]" />
+                  New search
+                </button>
+              </div>
+
               {/* Experts Section */}
               <div className="flex flex-col gap-3 pl-11 mt-2 animate-fade-in">
                 <p className="text-[10px] uppercase font-bold text-slate-400">Experts</p>
@@ -774,6 +817,11 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                           {exp.name}
                         </button>
                         <p className="text-[10px] text-slate-500 uppercase tracking-wide">{exp.firm}</p>
+                        {exp.communityType && (
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-medium rounded">
+                            {exp.communityType}
+                          </span>
+                        )}
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {exp.officialBioUrl && (
                             <a 
