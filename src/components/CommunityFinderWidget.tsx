@@ -91,16 +91,19 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [sectorFilter, setSectorFilter] = useState("any");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [expertiseFilter, setExpertiseFilter] = useState("any");
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
   const [selectedLeadership, setSelectedLeadership] = useState<string[]>([]);
+  const [externalFactorsFilter, setExternalFactorsFilter] = useState("any");
   const [selectedPolitical, setSelectedPolitical] = useState<string[]>([]);
   const [selectedEconomic, setSelectedEconomic] = useState<string[]>([]);
   const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
   const [selectedTechnological, setSelectedTechnological] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
-  // Collapsible sections
+  // Collapsible sections - only Location expanded by default
   const [expandedSections, setExpandedSections] = useState<string[]>(["location"]);
 
   const toggleSection = (section: string) => {
@@ -199,9 +202,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setLocationFilter("any");
     setSelectedRegions([]);
     setSelectedCountries([]);
+    setSectorFilter("any");
     setSelectedSectors([]);
+    setExpertiseFilter("any");
     setSelectedManagement([]);
     setSelectedLeadership([]);
+    setExternalFactorsFilter("any");
     setSelectedPolitical([]);
     setSelectedEconomic([]);
     setSelectedSocial([]);
@@ -352,128 +358,164 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   </RadioGroup>
                 </FilterSection>
 
-                {/* Sectors (renamed from Expertise area) */}
+                {/* Sectors */}
                 <FilterSection title="Sectors" sectionKey="sectors">
-                  <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto">
-                    {sectors.map((sector) => (
-                      <div key={sector} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`sector-${sector}`}
-                          checked={selectedSectors.includes(sector)}
-                          onCheckedChange={() => handleSectorToggle(sector)}
-                        />
-                        <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
+                  <RadioGroup value={sectorFilter} onValueChange={setSectorFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="sector-any" />
+                      <Label htmlFor="sector-any" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="sector-specific" />
+                      <Label htmlFor="sector-specific" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
+                    </div>
+                    {sectorFilter === "specific" && (
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-40 overflow-y-auto">
+                        {sectors.map((sector) => (
+                          <div key={sector} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`sector-${sector}`}
+                              checked={selectedSectors.includes(sector)}
+                              onCheckedChange={() => handleSectorToggle(sector)}
+                            />
+                            <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </RadioGroup>
                 </FilterSection>
 
-                {/* Expertise (with Management and Leadership as subsets) */}
+                {/* Expertise */}
                 <FilterSection title="Expertise" sectionKey="expertise">
-                  <div className="space-y-3">
-                    {/* Management Expertise Subset */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Management</p>
-                      <div className="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto ml-2 border-l-2 border-slate-100 pl-2">
-                        {managementExpertise.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`mgmt-${item}`}
-                              checked={selectedManagement.includes(item)}
-                              onCheckedChange={() => handleManagementToggle(item)}
-                            />
-                            <Label htmlFor={`mgmt-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                          </div>
-                        ))}
-                      </div>
+                  <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="expertise-any" />
+                      <Label htmlFor="expertise-any" className="text-xs text-slate-700 cursor-pointer">Any expertise</Label>
                     </div>
-                    {/* Leadership Expertise Subset */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Leadership & Governance</p>
-                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
-                        {leadershipExpertise.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`lead-${item}`}
-                              checked={selectedLeadership.includes(item)}
-                              onCheckedChange={() => handleLeadershipToggle(item)}
-                            />
-                            <Label htmlFor={`lead-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="expertise-specific" />
+                      <Label htmlFor="expertise-specific" className="text-xs text-slate-700 cursor-pointer">Specific expertise</Label>
                     </div>
-                  </div>
+                    {expertiseFilter === "specific" && (
+                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
+                        {/* Management Expertise Subset */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Management</p>
+                          <div className="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto">
+                            {managementExpertise.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`mgmt-${item}`}
+                                  checked={selectedManagement.includes(item)}
+                                  onCheckedChange={() => handleManagementToggle(item)}
+                                />
+                                <Label htmlFor={`mgmt-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Leadership Expertise Subset */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Leadership & Governance</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {leadershipExpertise.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`lead-${item}`}
+                                  checked={selectedLeadership.includes(item)}
+                                  onCheckedChange={() => handleLeadershipToggle(item)}
+                                />
+                                <Label htmlFor={`lead-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </RadioGroup>
                 </FilterSection>
 
                 {/* External Factors (PEST) */}
                 <FilterSection title="External factors" sectionKey="externalFactors">
-                  <div className="space-y-3">
-                    {/* Political */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Political</p>
-                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
-                        {politicalFactors.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`political-${item}`}
-                              checked={selectedPolitical.includes(item)}
-                              onCheckedChange={() => handlePoliticalToggle(item)}
-                            />
-                            <Label htmlFor={`political-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                          </div>
-                        ))}
-                      </div>
+                  <RadioGroup value={externalFactorsFilter} onValueChange={setExternalFactorsFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="external-any" />
+                      <Label htmlFor="external-any" className="text-xs text-slate-700 cursor-pointer">Any factor</Label>
                     </div>
-                    {/* Economic */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Economic</p>
-                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
-                        {economicFactors.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`economic-${item}`}
-                              checked={selectedEconomic.includes(item)}
-                              onCheckedChange={() => handleEconomicToggle(item)}
-                            />
-                            <Label htmlFor={`economic-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="external-specific" />
+                      <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific factors</Label>
                     </div>
-                    {/* Social */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Social</p>
-                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
-                        {socialFactors.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`social-${item}`}
-                              checked={selectedSocial.includes(item)}
-                              onCheckedChange={() => handleSocialToggle(item)}
-                            />
-                            <Label htmlFor={`social-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                    {externalFactorsFilter === "specific" && (
+                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
+                        {/* Political */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Political</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {politicalFactors.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`political-${item}`}
+                                  checked={selectedPolitical.includes(item)}
+                                  onCheckedChange={() => handlePoliticalToggle(item)}
+                                />
+                                <Label htmlFor={`political-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Technological */}
-                    <div>
-                      <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Technological</p>
-                      <div className="grid grid-cols-2 gap-1.5 ml-2 border-l-2 border-slate-100 pl-2">
-                        {technologicalFactors.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`tech-${item}`}
-                              checked={selectedTechnological.includes(item)}
-                              onCheckedChange={() => handleTechnologicalToggle(item)}
-                            />
-                            <Label htmlFor={`tech-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                        </div>
+                        {/* Economic */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Economic</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {economicFactors.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`economic-${item}`}
+                                  checked={selectedEconomic.includes(item)}
+                                  onCheckedChange={() => handleEconomicToggle(item)}
+                                />
+                                <Label htmlFor={`economic-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                        {/* Social */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Social</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {socialFactors.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`social-${item}`}
+                                  checked={selectedSocial.includes(item)}
+                                  onCheckedChange={() => handleSocialToggle(item)}
+                                />
+                                <Label htmlFor={`social-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Technological */}
+                        <div>
+                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Technological</p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {technologicalFactors.map((item) => (
+                              <div key={item} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`tech-${item}`}
+                                  checked={selectedTechnological.includes(item)}
+                                  onCheckedChange={() => handleTechnologicalToggle(item)}
+                                />
+                                <Label htmlFor={`tech-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    )}
+                  </RadioGroup>
                 </FilterSection>
 
                 {/* Recap Summary */}
