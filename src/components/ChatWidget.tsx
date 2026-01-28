@@ -394,6 +394,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
       ? roles.map(r => {
           if (r === "author") return "Author";
           if (r === "leader") return "Future Leader";
+          if (r === "contributor") return "Publication Contributor";
           if (r === "team") return "Team Member";
           if (r === "consultant") return "External Consultant";
           return r;
@@ -756,11 +757,11 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
-                        id="role-leader" 
-                        checked={roles.includes("leader")}
-                        onCheckedChange={() => handleRoleToggle("leader")}
+                        id="role-contributor" 
+                        checked={roles.includes("contributor")}
+                        onCheckedChange={() => handleRoleToggle("contributor")}
                       />
-                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                      <Label htmlFor="role-contributor" className="text-xs text-slate-700 cursor-pointer">A contributor to a publication</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
