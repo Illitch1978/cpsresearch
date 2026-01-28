@@ -264,7 +264,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 {/* Messages */}
                 <div className="space-y-2 mb-4">
                   {messages.map((msg, i) => (
-                    <div key={i} className={`text-sm p-2 rounded-lg ${msg.sender === "user" ? "bg-emerald-50 text-emerald-800 ml-8" : "bg-slate-50 text-slate-700 mr-8"}`}>
+                    <div key={i} className={`text-sm p-2 rounded-lg ${msg.sender === "user" ? "bg-slate-100 text-slate-800 ml-8" : "bg-slate-50 text-slate-700 mr-8"}`}>
                       {msg.text}
                     </div>
                   ))}
@@ -398,8 +398,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                 {/* Recap Summary */}
                 {topic && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3 mt-4">
-                    <p className="text-xs text-emerald-700 leading-relaxed">
+                  <div className="bg-slate-100 border border-slate-200 rounded-md p-3 mt-4">
+                    <p className="text-xs text-slate-700 leading-relaxed">
                       {buildRecapSummary()}
                     </p>
                   </div>
@@ -408,7 +408,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 {/* Find Button */}
                 <button
                   onClick={handleFindCommunities}
-                  className="w-full bg-emerald-600 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-emerald-700 transition-colors mt-4"
+                  className="w-full bg-slate-700 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-slate-800 transition-colors mt-4"
                 >
                   Find Communities
                 </button>
@@ -417,7 +417,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
             {step === "searching" && (
               <div className="p-8 flex flex-col items-center justify-center h-full">
-                <FontAwesomeIcon icon={faSpinner} className="text-3xl text-emerald-600 animate-spin mb-4" />
+                <FontAwesomeIcon icon={faSpinner} className="text-3xl text-slate-600 animate-spin mb-4" />
                 <p className="text-sm text-slate-600">Finding communities...</p>
               </div>
             )}
@@ -430,7 +430,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   </p>
                   <button
                     onClick={resetWidget}
-                    className="text-xs text-emerald-600 hover:underline"
+                    className="text-xs text-slate-600 hover:underline"
                   >
                     New search
                   </button>
@@ -440,10 +440,10 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   {communities.map((community, i) => (
                     <div 
                       key={i} 
-                      className="bg-slate-50 rounded-lg p-3 border border-slate-100 hover:border-emerald-200 transition-colors"
+                      className="bg-slate-50 rounded-lg p-3 border border-slate-100 hover:border-slate-300 transition-colors"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white flex-shrink-0">
                           <FontAwesomeIcon icon={faUsers} className="text-sm" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -452,7 +452,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                               href={community.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="font-medium text-slate-900 text-sm hover:text-emerald-600 transition-colors"
+                              className="font-medium text-slate-900 text-sm hover:text-slate-600 transition-colors"
                             >
                               {community.name}
                             </a>
@@ -460,7 +460,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                           </div>
                           <p className="text-xs text-slate-500 mt-0.5">{community.description}</p>
                           <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-xs text-emerald-600 font-medium">
+                            <span className="text-xs text-slate-700 font-medium">
                               {community.members.toLocaleString()} members
                             </span>
                             <div className="flex gap-1">
@@ -476,8 +476,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                               onClick={() => handleCommunityBookmark(community.name)}
                               className={`text-xs flex items-center gap-1 transition-colors ${
                                 bookmarkedCommunities.includes(community.name) 
-                                  ? "text-emerald-600" 
-                                  : "text-slate-400 hover:text-emerald-600"
+                                  ? "text-slate-700" 
+                                  : "text-slate-400 hover:text-slate-700"
                               }`}
                             >
                               <FontAwesomeIcon icon={faBookmark} />
@@ -485,7 +485,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             </button>
                             <a 
                               href={community.url}
-                              className="text-xs text-emerald-600 hover:underline"
+                              className="text-xs text-slate-700 hover:underline"
                             >
                               Join
                             </a>
