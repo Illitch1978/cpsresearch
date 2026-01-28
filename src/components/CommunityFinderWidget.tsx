@@ -227,6 +227,14 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   return (
     <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-fade-in"
+          onClick={onToggle}
+        />
+      )}
+
       {/* Widget Panel */}
       {isOpen && (
         <div className="fixed bottom-20 right-4 sm:bottom-28 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">

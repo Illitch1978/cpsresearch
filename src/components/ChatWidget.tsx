@@ -359,6 +359,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
   return (
     <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-fade-in"
+          onClick={onToggle}
+        />
+      )}
+
       {/* Chat Widget Panel */}
       <div
         className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-left transform font-sans ${
