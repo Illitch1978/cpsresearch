@@ -240,11 +240,21 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
           ? selectedCountries.join(", ")
           : "any location";
 
-    const sectorLabel = selectedSectors.length > 0 
-      ? selectedSectors.join(", ") 
-      : "any sector";
+    const sectorLabel = sectorFilter === "any" || selectedSectors.length === 0
+      ? "any sector"
+      : selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "");
 
-    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}`;
+    const expertiseLabel = expertiseFilter === "any" || (selectedManagement.length === 0 && selectedLeadership.length === 0)
+      ? "any expertise"
+      : [...selectedManagement, ...selectedLeadership].slice(0, 2).join(", ") + 
+        ([...selectedManagement, ...selectedLeadership].length > 2 ? ` +${[...selectedManagement, ...selectedLeadership].length - 2} more` : "");
+
+    const allExternalFactors = [...selectedPolitical, ...selectedEconomic, ...selectedSocial, ...selectedTechnological];
+    const externalFactorsLabel = externalFactorsFilter === "any" || allExternalFactors.length === 0
+      ? "any external factor"
+      : allExternalFactors.slice(0, 2).join(", ") + (allExternalFactors.length > 2 ? ` +${allExternalFactors.length - 2} more` : "");
+
+    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
   };
 
   const FilterSection = ({ 
@@ -460,11 +470,11 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   <RadioGroup value={externalFactorsFilter} onValueChange={setExternalFactorsFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="external-any" />
-                      <Label htmlFor="external-any" className="text-xs text-slate-700 cursor-pointer">Any factor</Label>
+                      <Label htmlFor="external-any" className="text-xs text-slate-700 cursor-pointer">Any external factor</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="specific" id="external-specific" />
-                      <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific factors</Label>
+                      <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific external factors</Label>
                     </div>
                     {externalFactorsFilter === "specific" && (
                       <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
