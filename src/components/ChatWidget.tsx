@@ -446,11 +446,11 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
       {/* Chat Widget Panel */}
       <div
-        className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-left transform font-sans ${
+        className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-center transform font-sans ${
           isOpen 
             ? "flex scale-100 opacity-100" 
             : "hidden scale-95 opacity-0"
-        } bottom-20 left-4 sm:bottom-28 sm:left-8 w-[calc(100vw-2rem)] sm:w-96 max-w-96`}
+        } bottom-20 left-1/2 -translate-x-1/2 sm:bottom-28 w-[calc(100vw-2rem)] sm:w-96 max-w-96`}
       >
         {/* Header */}
         <div className="bg-slate-800 px-4 py-3 flex justify-between items-center text-white flex-shrink-0">
