@@ -259,8 +259,12 @@ const ExpertProfileModal = ({
   );
 };
 
-const ChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface ChatWidgetProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [step, setStep] = useState<ChatStep>("topic");
   const [topic, setTopic] = useState("");
   const [inputValue, setInputValue] = useState("");
@@ -282,10 +286,6 @@ const ChatWidget = () => {
   const [contentPeriod, setContentPeriod] = useState("any");
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
-
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -359,15 +359,6 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Widget Button */}
-      <button
-        onClick={toggleChat}
-        className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 bg-brand-red hover:bg-red-800 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 transition-colors duration-300 group"
-      >
-        <FontAwesomeIcon icon={faCommentDots} className="text-lg sm:text-xl" />
-        <span className="font-medium text-xs sm:text-sm tracking-wide hidden sm:inline">Find an expert</span>
-      </button>
-
       {/* Chat Widget Panel */}
       <div
         className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform font-sans ${
@@ -385,7 +376,7 @@ const ChatWidget = () => {
               <p className="text-xs text-slate-400 mt-1">Connect with verified experts</p>
             </div>
           </div>
-          <button onClick={toggleChat} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onToggle} className="text-slate-400 hover:text-white transition-colors">
             <FontAwesomeIcon icon={faTimes} />
           </button>
         </div>
