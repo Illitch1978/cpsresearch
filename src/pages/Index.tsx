@@ -14,6 +14,8 @@ type View = "home" | "contact" | "contribute";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("home");
+  const [isExpertFinderOpen, setIsExpertFinderOpen] = useState(false);
+  const [isCommunityFinderOpen, setIsCommunityFinderOpen] = useState(false);
 
   const showHome = () => {
     setCurrentView("home");
@@ -48,7 +50,10 @@ const Index = () => {
 
       {currentView === "home" && (
         <div className="fade-in">
-          <HeroSection />
+          <HeroSection 
+            onOpenExpertFinder={() => setIsExpertFinderOpen(true)}
+            onOpenCommunityFinder={() => setIsCommunityFinderOpen(true)}
+          />
           <MissionSection />
           <InitiativesSection />
           <BenefitsSection onShowContribute={showContribute} />
@@ -65,8 +70,14 @@ const Index = () => {
         onNavigateToSection={navigateToSection}
       />
 
-      <ChatWidget />
-      <CommunityFinderWidget />
+      <ChatWidget 
+        isOpen={isExpertFinderOpen} 
+        onToggle={() => setIsExpertFinderOpen(!isExpertFinderOpen)} 
+      />
+      <CommunityFinderWidget 
+        isOpen={isCommunityFinderOpen} 
+        onToggle={() => setIsCommunityFinderOpen(!isCommunityFinderOpen)} 
+      />
     </div>
   );
 };

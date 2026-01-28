@@ -56,8 +56,12 @@ const leadershipExpertise = [
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
-const CommunityFinderWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface CommunityFinderWidgetProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps) => {
   const [step, setStep] = useState<ChatStep>("topic");
   const [topic, setTopic] = useState("");
   const [inputValue, setInputValue] = useState("");
@@ -83,9 +87,6 @@ const CommunityFinderWidget = () => {
     );
   };
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,26 +227,16 @@ const CommunityFinderWidget = () => {
 
   return (
     <>
-      {/* Toggle Button */}
-      <button
-        onClick={toggleChat}
-        className="fixed bottom-4 left-4 sm:bottom-8 sm:left-8 z-50 bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-full shadow-lg flex items-center gap-2 sm:gap-3 transition-colors duration-300"
-        aria-label="Find a community"
-      >
-        <FontAwesomeIcon icon={faUsers} className="text-lg sm:text-xl" />
-        <span className="font-medium text-xs sm:text-sm tracking-wide hidden sm:inline">Find a community</span>
-      </button>
-
       {/* Widget Panel */}
       {isOpen && (
         <div className="fixed bottom-20 left-4 sm:bottom-28 sm:left-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
           {/* Header */}
-          <div className="bg-emerald-600 text-white px-4 py-3 flex items-center justify-between">
+          <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FontAwesomeIcon icon={faUsers} />
               <span className="font-medium text-sm">Find a Community</span>
             </div>
-            <button onClick={toggleChat} className="text-white/80 hover:text-white transition-colors">
+            <button onClick={onToggle} className="text-white/80 hover:text-white transition-colors">
               <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
