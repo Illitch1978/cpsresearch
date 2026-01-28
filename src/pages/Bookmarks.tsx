@@ -39,6 +39,7 @@ interface BookmarkedPublication {
   author: string;
   date: string;
   qualityScore: number;
+  url?: string;
 }
 
 const ExpertProfileModal = ({ 
@@ -208,8 +209,8 @@ const Bookmarks = () => {
   ]);
 
   const [publications, setPublications] = useState<BookmarkedPublication[]>([
-    { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94 },
-    { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87 },
+    { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94, url: "https://papers.ssrn.com/future-ma-european-markets" },
+    { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87, url: "https://papers.ssrn.com/fintech-regulation-guide" },
   ]);
 
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
@@ -379,7 +380,15 @@ const Bookmarks = () => {
                           <FontAwesomeIcon icon={faFileLines} className="text-sm" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-slate-900">{pub.title}</p>
+                          <a
+                            href={pub.url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-slate-900 hover:text-brand-red transition-colors inline-flex items-center gap-2"
+                          >
+                            {pub.title}
+                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs text-slate-400" />
+                          </a>
                           <p className="text-sm text-slate-500">{pub.author} · {pub.date}</p>
                           
                           {/* Quality Score */}
