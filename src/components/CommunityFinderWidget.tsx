@@ -245,9 +245,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
           </div>
 
           {/* Content */}
-          <div className="h-[450px] overflow-y-auto bg-slate-50">
+          <div className="h-[400px] overflow-y-auto bg-slate-50 p-4 flex flex-col gap-4">
             {step === "topic" && (
-              <div className="p-4 flex flex-col gap-4">
+              <>
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
@@ -256,25 +256,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <p>Hello! I can help you find professional communities. What topic or interest are you looking to explore?</p>
                   </div>
                 </div>
-
-                <form onSubmit={handleSubmit} className="mt-auto pt-4 border-t border-slate-200">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="e.g., Digital transformation, ESG..."
-                      className="flex-1 px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 bg-white"
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
-                    >
-                      <FontAwesomeIcon icon={faPaperPlane} className="text-sm" />
-                    </button>
-                  </div>
-                </form>
-              </div>
+              </>
             )}
 
             {step === "filters" && (
@@ -515,6 +497,26 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
+            <form onSubmit={handleSubmit} className="relative">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={step === "results" ? "Refine search..." : "Type a topic..."}
+                className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
+                disabled={step !== "topic" && step !== "results"}
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-2"
+              >
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </button>
+            </form>
           </div>
         </div>
       )}

@@ -370,7 +370,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         {/* Header */}
         <div className="bg-slate-800 px-4 py-3 flex justify-between items-center text-white flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+            <FontAwesomeIcon icon={faCommentDots} className="text-sm" />
             <div>
               <h3 className="font-medium text-sm">Credible Voices</h3>
               <p className="text-xs text-slate-400">Connect with verified experts</p>
@@ -382,7 +382,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         </div>
 
         {/* Chat Body */}
-        <div className="h-[350px] sm:h-[450px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
+        <div className="h-[400px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
           {/* Bot Greeting */}
           <div className="flex gap-3 animate-fade-in">
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
