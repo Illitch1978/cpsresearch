@@ -34,15 +34,25 @@ const countries = [
   "Singapore", "UAE", "United Kingdom", "United States"
 ].sort();
 
-// Renamed from expertiseAreas to sectors
-const sectors = [
-  "Accounting", "Agriculture & Farming", "Automotive", "Banking & Finance", 
-  "Biotech & Pharma", "Construction", "Consulting", "Consumer Goods", 
-  "Education", "Energy & Utilities", "Entertainment & Media", "Government & Public Sector",
-  "Healthcare", "Hospitality & Tourism", "Insurance", "Legal", 
-  "Manufacturing", "Mining & Metals", "Non-Profit", "Real Estate", 
-  "Retail", "Technology", "Telecommunications", "Transportation & Logistics"
-].sort();
+// Sectors with sub-categories from Excel
+const sectorsBySector: Record<string, string[]> = {
+  "Construction": ["Residential", "Commercial", "Industrial", "Infrastructure", "Engineering", "Building services"],
+  "Consultancy": ["Management", "Technology", "Financial", "HR", "Operations"],
+  "Distribution": ["Retail", "Wholesale", "Logistics", "Agents/brokers", "Value added resellers", "Managed service providers", "Online marketplaces"],
+  "Energy": ["Fossil fuels", "Renewables", "Power & utilities", "Nuclear", "Equipment & services"],
+  "Financial services": ["Private equity & venture capital", "Corporate finance", "Insurance services", "Banking (Retail/Commercial)", "Investment management", "Accountancy", "Actuaries"],
+  "Health": ["Pharmaceuticals/Biotech", "Medical devices", "Healthcare providers", "Healthcare technology", "Managed care"],
+  "Hospitality": ["Travel & tourism", "Meetings & events", "Entertainment & recreation", "Food & Beverage", "Accommodation"],
+  "Legal services": ["Law firms", "Patent attorneys", "Legal technology"],
+  "Manufacturing": ["Food manufacturing", "Machinery", "Electronics", "Textiles", "Transportation", "Chemicals", "Other manufacturing"],
+  "Marketing": ["Marketing", "Media", "Communications", "Market research"],
+  "Other services": ["Scientific services", "Technical services", "Business services"],
+  "Property": ["Development", "Construction", "Property advisory", "Architects", "Property services"],
+  "Recruitment": ["Staffing agencies", "Executive search", "Contingency recruiters", "Niche recruiters"],
+  "Technology": ["Software & services", "Hardware & equipment", "Semi-conductors", "Internet services", "Communications equipment"],
+};
+
+const mainSectors = Object.keys(sectorsBySector).sort();
 
 const managementExpertise = [
   "Business development", "Communication", "Facilities", "Finance", 
@@ -92,6 +102,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sectorFilter, setSectorFilter] = useState("any");
+  const [selectedSectorCategories, setSelectedSectorCategories] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [expertiseFilter, setExpertiseFilter] = useState("any");
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
@@ -137,6 +148,19 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedCountries(prev => 
       prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
     );
+  };
+
+  const handleSectorCategoryToggle = (category: string) => {
+    setSelectedSectorCategories(prev => {
+      if (prev.includes(category)) {
+        // Remove category and all its sub-sectors
+        const subsInCategory = sectorsBySector[category] || [];
+        setSelectedSectors(currentSectors => currentSectors.filter(s => !subsInCategory.includes(s)));
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
   };
 
   const handleSectorToggle = (sector: string) => {
@@ -203,6 +227,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedContinents([]);
     setSelectedCountries([]);
     setSectorFilter("any");
+    setSelectedSectorCategories([]);
     setSelectedSectors([]);
     setExpertiseFilter("any");
     setSelectedManagement([]);
@@ -370,15 +395,31 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <Label htmlFor="sector-specific" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
                     </div>
                     {sectorFilter === "specific" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-40 overflow-y-auto">
-                        {sectors.map((sector) => (
-                          <div key={sector} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`sector-${sector}`}
-                              checked={selectedSectors.includes(sector)}
-                              onCheckedChange={() => handleSectorToggle(sector)}
-                            />
-                            <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
+                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                        {mainSectors.map((category) => (
+                          <div key={category}>
+                            <div className="flex items-center space-x-2 mb-1.5">
+                              <Checkbox 
+                                id={`sector-cat-${category}`}
+                                checked={selectedSectorCategories.includes(category)}
+                                onCheckedChange={() => handleSectorCategoryToggle(category)}
+                              />
+                              <Label htmlFor={`sector-cat-${category}`} className="text-xs font-medium text-slate-700 cursor-pointer">{category}</Label>
+                            </div>
+                            {selectedSectorCategories.includes(category) && (
+                              <div className="grid grid-cols-2 gap-1 ml-4 mb-2">
+                                {sectorsBySector[category].map((sub) => (
+                                  <div key={sub} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`sector-${sub}`}
+                                      checked={selectedSectors.includes(sub)}
+                                      onCheckedChange={() => handleSectorToggle(sub)}
+                                    />
+                                    <Label htmlFor={`sector-${sub}`} className="text-[11px] text-slate-600 cursor-pointer">{sub}</Label>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
