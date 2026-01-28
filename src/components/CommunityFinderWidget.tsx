@@ -229,42 +229,50 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     <>
       {/* Widget Panel */}
       {isOpen && (
-        <div className="fixed bottom-20 left-4 sm:bottom-28 sm:left-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+        <div className="fixed bottom-20 right-4 sm:bottom-28 sm:right-8 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faUsers} />
-              <span className="font-medium text-sm">Find a Community</span>
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={faUsers} className="text-sm" />
+              <div>
+                <h3 className="font-medium text-sm">Find a Community</h3>
+                <p className="text-xs text-slate-400">Discover professional networks</p>
+              </div>
             </div>
-            <button onClick={onToggle} className="text-white/80 hover:text-white transition-colors">
+            <button onClick={onToggle} className="text-slate-400 hover:text-white transition-colors">
               <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
 
           {/* Content */}
-          <div className="h-[480px] overflow-y-auto">
+          <div className="h-[450px] overflow-y-auto bg-slate-50">
             {step === "topic" && (
-              <div className="p-4">
-                <div className="mb-4">
-                  <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-700">
-                    Hello! I can help you find professional communities. What topic or interest are you looking to explore?
+              <div className="p-4 flex flex-col gap-4">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                    <FontAwesomeIcon icon={faUsers} className="text-xs" />
+                  </div>
+                  <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                    <p>Hello! I can help you find professional communities. What topic or interest are you looking to explore?</p>
                   </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="e.g., Digital transformation, ESG..."
-                    className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                  >
-                    <FontAwesomeIcon icon={faPaperPlane} className="text-sm" />
-                  </button>
+                <form onSubmit={handleSubmit} className="mt-auto pt-4 border-t border-slate-200">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="e.g., Digital transformation, ESG..."
+                      className="flex-1 px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 bg-white"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2.5 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faPaperPlane} className="text-sm" />
+                    </button>
+                  </div>
                 </form>
               </div>
             )}

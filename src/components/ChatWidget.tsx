@@ -361,19 +361,19 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     <>
       {/* Chat Widget Panel */}
       <div
-        className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-right transform font-sans ${
+        className={`fixed z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex-col overflow-hidden transition-all duration-300 origin-bottom-left transform font-sans ${
           isOpen 
             ? "flex scale-100 opacity-100" 
             : "hidden scale-95 opacity-0"
-        } bottom-20 right-4 sm:bottom-28 sm:right-8 w-[calc(100vw-2rem)] sm:w-96 max-w-96`}
+        } bottom-20 left-4 sm:bottom-28 sm:left-8 w-[calc(100vw-2rem)] sm:w-96 max-w-96`}
       >
         {/* Header */}
-        <div className="bg-hero-bg p-4 flex justify-between items-center text-white flex-shrink-0">
+        <div className="bg-slate-800 px-4 py-3 flex justify-between items-center text-white flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
             <div>
-              <h3 className="font-serif font-medium text-lg leading-none">Credible Voices</h3>
-              <p className="text-xs text-slate-400 mt-1">Connect with verified experts</p>
+              <h3 className="font-medium text-sm">Credible Voices</h3>
+              <p className="text-xs text-slate-400">Connect with verified experts</p>
             </div>
           </div>
           <button onClick={onToggle} className="text-slate-400 hover:text-white transition-colors">
