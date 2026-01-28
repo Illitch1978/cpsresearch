@@ -25,11 +25,6 @@ const communities: Community[] = [
 ];
 
 // All lists alphabetically sorted
-const contactTypes = [
-  "Advocate", "Alumnus", "CEO", "Entrepreneur", "Gen Z", "Ghostwriter", 
-  "Guru", "High Net Worth", "Mentor", "Millennial", "NED", "Technologist"
-].sort();
-
 const regions = [
   "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
 ].sort();
@@ -48,8 +43,6 @@ const sectors = [
   "Manufacturing", "Mining & Metals", "Non-Profit", "Real Estate", 
   "Retail", "Technology", "Telecommunications", "Transportation & Logistics"
 ].sort();
-
-const orgSizes = ["Large", "Midmarket", "SME", "Very large"].sort();
 
 const managementExpertise = [
   "Business development", "Communication", "Facilities", "Finance", 
@@ -95,12 +88,10 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "bot" }>>([]);
 
   // Filter states
-  const [selectedContactTypes, setSelectedContactTypes] = useState<string[]>([]);
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
-  const [selectedOrgSizes, setSelectedOrgSizes] = useState<string[]>([]);
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
   const [selectedLeadership, setSelectedLeadership] = useState<string[]>([]);
   const [selectedPolitical, setSelectedPolitical] = useState<string[]>([]);
@@ -110,7 +101,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
   // Collapsible sections
-  const [expandedSections, setExpandedSections] = useState<string[]>(["contactTypes"]);
+  const [expandedSections, setExpandedSections] = useState<string[]>(["location"]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -133,12 +124,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     }, 600);
   };
 
-  const handleContactTypeToggle = (type: string) => {
-    setSelectedContactTypes(prev => 
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
-  };
-
   const handleRegionToggle = (region: string) => {
     setSelectedRegions(prev => 
       prev.includes(region) ? prev.filter(r => r !== region) : [...prev, region]
@@ -154,12 +139,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const handleSectorToggle = (sector: string) => {
     setSelectedSectors(prev => 
       prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
-    );
-  };
-
-  const handleOrgSizeToggle = (size: string) => {
-    setSelectedOrgSizes(prev => 
-      prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
     );
   };
 
@@ -217,12 +196,10 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setTopic("");
     setInputValue("");
     setMessages([]);
-    setSelectedContactTypes([]);
     setLocationFilter("any");
     setSelectedRegions([]);
     setSelectedCountries([]);
     setSelectedSectors([]);
-    setSelectedOrgSizes([]);
     setSelectedManagement([]);
     setSelectedLeadership([]);
     setSelectedPolitical([]);
@@ -233,10 +210,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   // Build recap summary
   const buildRecapSummary = () => {
-    const contactLabel = selectedContactTypes.length > 0 
-      ? selectedContactTypes.join(" + ") 
-      : "Any contact type";
-    
     const locationLabel = locationFilter === "any" 
       ? "any location" 
       : locationFilter === "region" && selectedRegions.length > 0
@@ -249,11 +222,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? selectedSectors.join(", ") 
       : "any sector";
 
-    const orgSizeLabel = selectedOrgSizes.length > 0 
-      ? selectedOrgSizes.join(", ") 
-      : "any org size";
-
-    return `${contactLabel} communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgSizeLabel}`;
+    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}`;
   };
 
   const FilterSection = ({ 
@@ -337,22 +306,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   ))}
                 </div>
 
-                {/* Contact Types */}
-                <FilterSection title="Contact types" sectionKey="contactTypes">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {contactTypes.map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`contact-${type}`}
-                          checked={selectedContactTypes.includes(type)}
-                          onCheckedChange={() => handleContactTypeToggle(type)}
-                        />
-                        <Label htmlFor={`contact-${type}`} className="text-xs text-slate-600 cursor-pointer">{type}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </FilterSection>
-
                 {/* Location */}
                 <FilterSection title="Location" sectionKey="location">
                   <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
@@ -410,22 +363,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                           onCheckedChange={() => handleSectorToggle(sector)}
                         />
                         <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </FilterSection>
-
-                {/* Org Size */}
-                <FilterSection title="Organisation size" sectionKey="orgSize">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {orgSizes.map((size) => (
-                      <div key={size} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`size-${size}`}
-                          checked={selectedOrgSizes.includes(size)}
-                          onCheckedChange={() => handleOrgSizeToggle(size)}
-                        />
-                        <Label htmlFor={`size-${size}`} className="text-xs text-slate-600 cursor-pointer">{size}</Label>
                       </div>
                     ))}
                   </div>
