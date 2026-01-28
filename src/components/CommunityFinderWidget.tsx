@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faTimes, faPaperPlane, faSpinner, faBookmark, faArrowUpRightFromSquare, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faTimes, faPaperPlane, faSpinner, faBookmark, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -113,15 +113,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
   const [selectedTechnological, setSelectedTechnological] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
-
-  // Collapsible sections - only Location expanded by default
-  const [expandedSections, setExpandedSections] = useState<string[]>(["location"]);
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => 
-      prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]
-    );
-  };
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -258,29 +249,16 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   const FilterSection = ({ 
     title, 
-    sectionKey, 
     children 
   }: { 
     title: string; 
-    sectionKey: string; 
     children: React.ReactNode;
   }) => (
     <div className="border-b border-slate-100 pb-3">
-      <button
-        onClick={() => toggleSection(sectionKey)}
-        className="w-full flex items-center justify-between text-xs font-medium text-slate-700 py-2"
-      >
-        {title}
-        <FontAwesomeIcon 
-          icon={expandedSections.includes(sectionKey) ? faChevronUp : faChevronDown} 
-          className="text-[10px] text-slate-400" 
-        />
-      </button>
-      {expandedSections.includes(sectionKey) && (
-        <div className="pt-2">
-          {children}
-        </div>
-      )}
+      <p className="text-xs font-medium text-slate-700 py-2">{title}</p>
+      <div className="pt-1">
+        {children}
+      </div>
     </div>
   );
 
@@ -338,7 +316,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </div>
 
                 {/* Location */}
-                <FilterSection title="Location" sectionKey="location">
+                <FilterSection title="Location">
                   <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="loc-any" />
@@ -384,7 +362,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* Sectors */}
-                <FilterSection title="Sectors" sectionKey="sectors">
+                <FilterSection title="Sectors">
                   <RadioGroup value={sectorFilter} onValueChange={setSectorFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="sector-any" />
@@ -428,7 +406,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* Expertise */}
-                <FilterSection title="Expertise" sectionKey="expertise">
+                <FilterSection title="Expertise">
                   <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="expertise-any" />
@@ -478,7 +456,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* External Factors (PEST) */}
-                <FilterSection title="External factors" sectionKey="externalFactors">
+                <FilterSection title="External factors">
                   <RadioGroup value={externalFactorsFilter} onValueChange={setExternalFactorsFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="external-any" />
