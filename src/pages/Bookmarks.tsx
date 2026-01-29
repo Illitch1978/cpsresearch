@@ -49,6 +49,7 @@ interface PreviousSearch {
   topic: string;
   date: string;
   resultsCount: number;
+  hasAbstract?: boolean;
   filters: {
     source?: string;
     location?: string;
@@ -274,6 +275,7 @@ const Bookmarks = () => {
       topic: "Cross-border M&A expertise",
       date: "28 Jan 2026",
       resultsCount: 5,
+      hasAbstract: true,
       filters: {
         source: "Legal services sector",
         location: "Europe",
@@ -354,7 +356,7 @@ const Bookmarks = () => {
             </button>
             <div>
               <h1 className="font-serif text-xl font-semibold text-slate-900">My Bookmarks</h1>
-              <p className="text-sm text-slate-500">Your saved experts, communities & publications</p>
+              <p className="text-sm text-slate-500">Your saved experts, communities, publications & past searches</p>
             </div>
           </div>
         </div>
@@ -709,24 +711,34 @@ const Bookmarks = () => {
                     </div>
 
                     {/* Top Experts Preview */}
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Top experts found</p>
-                      <div className="flex flex-wrap gap-3">
-                        {search.topExperts.map((expert, idx) => (
-                          <div 
-                            key={idx}
-                            className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100"
-                          >
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white text-[10px] font-serif">
-                              {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Top experts found</p>
+                        <div className="flex flex-wrap gap-3">
+                          {search.topExperts.map((expert, idx) => (
+                            <div 
+                              key={idx}
+                              className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100"
+                            >
+                              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white text-[10px] font-serif">
+                                {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-slate-800">{expert.name}</p>
+                                <p className="text-[10px] text-slate-500">{expert.firm} · <span className="text-brand-red">{expert.score}%</span></p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-xs font-medium text-slate-800">{expert.name}</p>
-                              <p className="text-[10px] text-slate-500">{expert.firm} · <span className="text-brand-red">{expert.score}%</span></p>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
+                      
+                      {/* Abstract Button */}
+                      {search.hasAbstract && (
+                        <button className="flex items-center gap-2 px-4 py-2 bg-brand-red text-white text-xs font-medium rounded-lg hover:bg-brand-red/90 transition-colors shadow-sm">
+                          <FontAwesomeIcon icon={faFileLines} />
+                          View Abstract
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
