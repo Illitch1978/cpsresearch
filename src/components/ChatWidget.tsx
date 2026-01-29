@@ -151,6 +151,7 @@ const experts: Expert[] = [
 ];
 
 const organisationsBySector: Record<string, string[]> = {
+  "Accountancy": ["PwC", "Deloitte", "EY", "KPMG", "BDO"],
   "Construction": ["Balfour Beatty", "Skanska", "Kier Group", "Taylor Wimpey", "Persimmon"],
   "Consultancy": ["McKinsey", "BCG", "Bain", "Accenture", "Deloitte Consulting"],
   "Distribution": ["DHL", "FedEx", "UPS", "Royal Mail", "Hermes"],
@@ -170,6 +171,7 @@ const organisationsBySector: Record<string, string[]> = {
 const organisationSectors = Object.keys(organisationsBySector).sort();
 
 const sectors = [
+  "Accountancy",
   "Construction",
   "Consultancy",
   "Distribution",
@@ -1027,7 +1029,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
                 {/* Content Published Period - Moved above As */}
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For content published in</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With content published in</p>
                   <RadioGroup value={contentPeriod} onValueChange={setContentPeriod} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="period-any" />
@@ -1258,7 +1260,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-brand-red">{exp.score}/100</span>
+                        <span className="text-xs font-bold text-brand-red">{exp.score.toFixed(1)}%</span>
                         <p className="text-[9px] text-slate-400">Quality Score</p>
                       </div>
                     </div>
@@ -1271,7 +1273,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                           }}
                           className="text-[10px] text-slate-600 hover:text-brand-red transition-colors"
                         >
-                          <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
+                          <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs
                         </button>
                         <div className="flex items-center space-x-1.5">
                           <Checkbox 
