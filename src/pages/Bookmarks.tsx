@@ -461,11 +461,29 @@ const Bookmarks = () => {
               <EmptyState icon={faFileLines} message="No bookmarked publications yet" />
             ) : (
               <div className="space-y-3">
-                {publications.map((pub) => (
-                  <div 
-                    key={pub.id} 
-                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
-                  >
+                {/* Search Input */}
+                <div className="relative">
+                  <FontAwesomeIcon 
+                    icon={faSearch} 
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search publications by title or author..."
+                    value={publicationSearch}
+                    onChange={(e) => setPublicationSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                  />
+                </div>
+                
+                {filteredPublications.length === 0 ? (
+                  <p className="text-center text-sm text-slate-500 py-8">No publications match your search</p>
+                ) : (
+                  filteredPublications.map((pub) => (
+                    <div 
+                      key={pub.id} 
+                      className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
+                    >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
                         <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
