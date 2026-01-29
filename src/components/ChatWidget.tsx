@@ -1,7 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink } from "@fortawesome/free-solid-svg-icons";
-import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
+import { faFileLines, faAddressCard, faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -410,6 +410,197 @@ const PublicationsModal = ({
   );
 };
 
+// Abstract Modal for generating PDF summary
+const AbstractModal = ({ 
+  isOpen, 
+  onClose,
+  topic,
+  experts
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  topic: string;
+  experts: Expert[];
+}) => {
+  const printRef = React.useRef<HTMLDivElement>(null);
+
+  const handleDownloadPDF = () => {
+    if (!printRef.current) return;
+    
+    const printContents = printRef.current.innerHTML;
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>CPSR Expert Abstract - ${topic}</title>
+            <style>
+              @page { margin: 1.5cm; }
+              body { font-family: Georgia, 'Times New Roman', serif; line-height: 1.6; color: #1e293b; max-width: 800px; margin: 0 auto; padding: 40px; }
+              .header { text-align: center; border-bottom: 3px solid #991B1B; padding-bottom: 24px; margin-bottom: 32px; }
+              .logo-title { font-size: 14px; font-weight: bold; color: #991B1B; letter-spacing: 1px; margin-bottom: 8px; }
+              .document-title { font-size: 24px; font-weight: bold; color: #0f172a; margin: 16px 0 8px; }
+              .document-subtitle { font-size: 14px; color: #64748b; }
+              .section { margin-bottom: 24px; }
+              .section-title { font-size: 16px; font-weight: bold; color: #991B1B; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+              .paragraph { font-size: 12px; text-align: justify; margin-bottom: 12px; }
+              .expert-list { margin: 16px 0; padding-left: 0; }
+              .expert-item { margin-bottom: 8px; font-size: 12px; }
+              .expert-name { font-weight: bold; }
+              .expert-firm { color: #64748b; }
+              .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 10px; color: #94a3b8; }
+              @media print { body { padding: 0; } }
+            </style>
+          </head>
+          <body>
+            ${printContents}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const currentDate = new Date().toLocaleDateString('en-GB', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden max-h-[90vh]">
+        {/* Modal Header */}
+        <div className="bg-brand-red text-white p-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-medium text-sm">Expert Abstract Document</h3>
+            <p className="text-xs text-white/70 mt-0.5">Structured summary of top expert publications</p>
+          </div>
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2 bg-white text-brand-red text-xs font-medium px-4 py-2 rounded hover:bg-slate-100 transition-colors"
+          >
+            <FontAwesomeIcon icon={faFilePdf} />
+            Download PDF
+          </button>
+        </div>
+
+        {/* Document Preview */}
+        <div className="p-6 overflow-y-auto max-h-[70vh] bg-slate-50">
+          <div 
+            ref={printRef}
+            className="bg-white p-8 rounded-lg shadow-sm border border-slate-200 font-serif"
+          >
+            {/* Document Header */}
+            <div className="header text-center border-b-[3px] border-brand-red pb-6 mb-8">
+              <p className="logo-title text-sm font-bold text-brand-red tracking-wider">CENTRE FOR PROFESSIONAL SERVICES RESEARCH</p>
+              <p className="text-xs text-slate-500 mt-1">University of London • Established 2008</p>
+              <h1 className="document-title text-2xl font-bold text-slate-900 mt-4 mb-2">
+                Expert Publications Abstract
+              </h1>
+              <p className="document-subtitle text-sm text-slate-600">
+                Topic: <span className="font-semibold">{topic || "Professional Services Research"}</span>
+              </p>
+              <p className="text-xs text-slate-400 mt-2">{currentDate}</p>
+            </div>
+
+            {/* Executive Summary */}
+            <div className="section mb-6">
+              <h2 className="section-title text-base font-bold text-brand-red mb-3 border-b border-slate-200 pb-2">
+                Executive Summary
+              </h2>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed mb-3">
+                This abstract presents a structured summary of key publications from the top five experts identified in the Centre for Professional Services Research database for the topic "{topic || "professional services"}". The analysis covers recent scholarly contributions, industry insights, and emerging trends that shape contemporary understanding of this field.
+              </p>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed">
+                The selected experts represent leading voices from premier professional services firms, combining academic rigour with practical industry experience. Their collective work spans regulatory frameworks, technological innovation, and strategic advisory practices.
+              </p>
+            </div>
+
+            {/* Top Experts */}
+            <div className="section mb-6">
+              <h2 className="section-title text-base font-bold text-brand-red mb-3 border-b border-slate-200 pb-2">
+                Featured Experts
+              </h2>
+              <ul className="expert-list list-none p-0 m-0 space-y-2">
+                {experts.slice(0, 5).map((expert, index) => (
+                  <li key={index} className="expert-item text-sm">
+                    <span className="expert-name font-bold">{expert.name}</span>
+                    <span className="text-slate-500"> — </span>
+                    <span className="expert-firm text-slate-600">{expert.firm}</span>
+                    <span className="text-slate-400"> | {expert.pubs} publications | Match Score: {expert.score}%</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Key Themes */}
+            <div className="section mb-6">
+              <h2 className="section-title text-base font-bold text-brand-red mb-3 border-b border-slate-200 pb-2">
+                Key Themes & Insights
+              </h2>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed mb-3">
+                Analysis of the combined publication corpus reveals several dominant themes. Cross-border regulatory complexity continues to drive innovation in corporate advisory services, with particular emphasis on M&A due diligence and digital asset governance. The intersection of financial technology and traditional banking regulation emerges as a critical area of scholarly attention.
+              </p>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed mb-3">
+                Digital transformation within legal services features prominently, with contributions examining AI governance frameworks, data privacy compliance trajectories, and the operational implications of emerging technology adoption. These works bridge theoretical foundations with actionable strategic guidance for practitioners.
+              </p>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed">
+                International dispute resolution methodologies receive substantial treatment, particularly concerning arbitration mechanisms and cross-jurisdictional enforcement challenges. Tax strategy considerations, especially in the context of complex corporate structures and transfer pricing regimes, complete the analytical framework presented by these leading experts.
+              </p>
+            </div>
+
+            {/* Methodology */}
+            <div className="section mb-6">
+              <h2 className="section-title text-base font-bold text-brand-red mb-3 border-b border-slate-200 pb-2">
+                Methodology
+              </h2>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed">
+                Expert identification employed the CPSR proprietary matching algorithm, analysing citation indices, publication recency, topic relevance scores, and cross-reference frequency across 1,240,400 indexed documents. Match scores reflect weighted composite metrics incorporating academic impact factors and practitioner influence measurements.
+              </p>
+            </div>
+
+            {/* Recommendations */}
+            <div className="section mb-6">
+              <h2 className="section-title text-base font-bold text-brand-red mb-3 border-b border-slate-200 pb-2">
+                Recommendations
+              </h2>
+              <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed">
+                For organisations seeking expert consultation on {topic || "this topic"}, we recommend initiating dialogue with the identified professionals through the CPSR Expert Network platform. Direct engagement enables tailored advisory relationships aligned with specific organisational requirements and project parameters.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="footer mt-10 pt-4 border-t border-slate-200 text-center">
+              <p className="text-xs text-slate-400">
+                © {new Date().getFullYear()} Centre for Professional Services Research
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                University of London • Senate House, Malet Street, London WC1E 7HU
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                www.cpsresearch.org • research@cpsresearch.org
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-4 border-t border-slate-100 bg-white flex justify-between items-center">
+          <p className="text-xs text-slate-500">Preview of downloadable PDF document</p>
+          <button 
+            onClick={onClose}
+            className="bg-slate-900 text-white text-xs font-medium px-4 py-2 rounded hover:bg-brand-red transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface ChatWidgetProps {
   isOpen: boolean;
   onToggle: () => void;
@@ -440,6 +631,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [contentPeriod, setContentPeriod] = useState("any");
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
+  const [isAbstractOpen, setIsAbstractOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -992,13 +1184,20 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
               </div>
 
               {/* New Search Link */}
-              <div className="pl-11 mt-2 animate-fade-in">
+              <div className="pl-11 mt-2 animate-fade-in flex items-center gap-4">
                 <button
                   onClick={handleNewSearch}
                   className="text-xs text-brand-red hover:underline flex items-center gap-1"
                 >
                   <FontAwesomeIcon icon={faLink} className="text-[10px]" />
                   New search
+                </button>
+                <button
+                  onClick={() => setIsAbstractOpen(true)}
+                  className="text-xs text-slate-600 hover:text-brand-red flex items-center gap-1 transition-colors"
+                >
+                  <FontAwesomeIcon icon={faFilePdf} className="text-[10px]" />
+                  Generate abstract
                 </button>
               </div>
 
@@ -1172,6 +1371,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         expert={pubsExpert}
         isOpen={isPubsOpen}
         onClose={() => setIsPubsOpen(false)}
+      />
+
+      {/* Abstract Modal */}
+      <AbstractModal
+        isOpen={isAbstractOpen}
+        onClose={() => setIsAbstractOpen(false)}
+        topic={topic}
+        experts={experts}
       />
     </>
   );
