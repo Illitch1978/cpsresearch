@@ -4,6 +4,7 @@ import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevro
 import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router-dom";
+import cpsrLogo from "@/assets/cpsr-logo.jpg";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -354,6 +355,11 @@ const Bookmarks = () => {
             >
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
+            <img 
+              src={cpsrLogo} 
+              alt="CPSR Logo" 
+              className="h-12 w-auto object-contain"
+            />
             <div>
               <h1 className="font-serif text-xl font-semibold text-slate-900">My Bookmarks</h1>
               <p className="text-sm text-slate-500">Your saved experts, communities, publications & past searches</p>
