@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck, faSearch, faClockRotateLeft, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -42,6 +42,25 @@ interface BookmarkedPublication {
   date: string;
   qualityScore: number;
   url?: string;
+}
+
+interface PreviousSearch {
+  id: string;
+  topic: string;
+  date: string;
+  resultsCount: number;
+  filters: {
+    source?: string;
+    location?: string;
+    projectType?: string;
+    contentPeriod?: string;
+    roles?: string[];
+  };
+  topExperts: Array<{
+    name: string;
+    firm: string;
+    score: number;
+  }>;
 }
 
 const ExpertProfileModal = ({ 
@@ -249,9 +268,64 @@ const Bookmarks = () => {
     );
   }, [publications, publicationSearch]);
 
+  const [previousSearches, setPreviousSearches] = useState<PreviousSearch[]>([
+    {
+      id: "s1",
+      topic: "Cross-border M&A expertise",
+      date: "28 Jan 2026",
+      resultsCount: 5,
+      filters: {
+        source: "Legal services sector",
+        location: "Europe",
+        projectType: "Client projects",
+        contentPeriod: "Last 12 months",
+        roles: ["Author", "Contributor"]
+      },
+      topExperts: [
+        { name: "Dr. Elena Voreas", firm: "Clifford Chance", score: 98 },
+        { name: "Prof. James Sterling", firm: "Linklaters", score: 94 },
+        { name: "Sarah Jenkins", firm: "Allen & Overy", score: 91 }
+      ]
+    },
+    {
+      id: "s2",
+      topic: "Digital transformation in legal services",
+      date: "25 Jan 2026",
+      resultsCount: 8,
+      filters: {
+        source: "My organisation",
+        location: "United Kingdom",
+        projectType: "Any project",
+        contentPeriod: "Last 6 months",
+        roles: ["Author"]
+      },
+      topExperts: [
+        { name: "Sarah Jenkins", firm: "Allen & Overy", score: 95 },
+        { name: "David Thorne", firm: "Freshfields", score: 88 }
+      ]
+    },
+    {
+      id: "s3",
+      topic: "International tax strategy",
+      date: "20 Jan 2026",
+      resultsCount: 4,
+      filters: {
+        source: "Financial services sector",
+        location: "Any location",
+        projectType: "Internal projects",
+        contentPeriod: "Last two years"
+      },
+      topExperts: [
+        { name: "Marcus Alistair", firm: "Slaughter and May", score: 92 },
+        { name: "Prof. James Sterling", firm: "Linklaters", score: 87 }
+      ]
+    }
+  ]);
+
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
   const removeCommunity = (id: string) => setCommunities(communities.filter(c => c.id !== id));
   const removePublication = (id: string) => setPublications(publications.filter(p => p.id !== id));
+  const removeSearch = (id: string) => setPreviousSearches(previousSearches.filter(s => s.id !== id));
 
   const handlePostToCommunity = (pub: BookmarkedPublication, community: { id: string; name: string }) => {
     setOpenPopoverId(null);
@@ -289,27 +363,34 @@ const Bookmarks = () => {
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="experts" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-white border border-slate-200 p-1 rounded-lg shadow-sm">
             <TabsTrigger 
               value="experts" 
-              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all text-xs sm:text-sm"
             >
               <FontAwesomeIcon icon={faUserTie} className="text-xs" />
-              Experts ({experts.length})
+              <span className="hidden sm:inline">Experts</span> ({experts.length})
             </TabsTrigger>
             <TabsTrigger 
               value="communities" 
-              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all text-xs sm:text-sm"
             >
               <FontAwesomeIcon icon={faUsers} className="text-xs" />
-              Communities ({communities.length})
+              <span className="hidden sm:inline">Communities</span> ({communities.length})
             </TabsTrigger>
             <TabsTrigger 
               value="publications" 
-              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all"
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all text-xs sm:text-sm"
             >
               <FontAwesomeIcon icon={faFileLines} className="text-xs" />
-              Publications ({publications.length})
+              <span className="hidden sm:inline">Pubs</span> ({publications.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="searches" 
+              className="flex items-center gap-2 data-[state=active]:bg-slate-800 data-[state=active]:text-white text-slate-600 rounded-md transition-all text-xs sm:text-sm"
+            >
+              <FontAwesomeIcon icon={faClockRotateLeft} className="text-xs" />
+              <span className="hidden sm:inline">Searches</span> ({previousSearches.length})
             </TabsTrigger>
           </TabsList>
 
@@ -553,6 +634,102 @@ const Bookmarks = () => {
                   </div>
                 ))
                 )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Previous Searches Tab */}
+          <TabsContent value="searches">
+            {previousSearches.length === 0 ? (
+              <EmptyState icon={faClockRotateLeft} message="No previous searches yet" />
+            ) : (
+              <div className="space-y-4">
+                {previousSearches.map((search) => (
+                  <div 
+                    key={search.id} 
+                    className="group bg-white rounded-lg border border-slate-200 p-5 hover:border-slate-300 hover:shadow-md transition-all"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-medium text-slate-900">{search.topic}</h3>
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full">
+                            {search.resultsCount} results
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-500">{search.date}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="p-2 text-slate-400 hover:text-brand-red transition-colors"
+                          title="Re-run search"
+                        >
+                          <FontAwesomeIcon icon={faRotateRight} className="text-sm" />
+                        </button>
+                        <button
+                          onClick={() => removeSearch(search.id)}
+                          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                          title="Remove from history"
+                        >
+                          <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Filters Used */}
+                    <div className="mb-4">
+                      <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Filters applied</p>
+                      <div className="flex flex-wrap gap-2">
+                        {search.filters.source && (
+                          <span className="px-2 py-1 bg-brand-red/10 text-brand-red text-xs rounded">
+                            {search.filters.source}
+                          </span>
+                        )}
+                        {search.filters.location && (
+                          <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded">
+                            {search.filters.location}
+                          </span>
+                        )}
+                        {search.filters.projectType && (
+                          <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded">
+                            {search.filters.projectType}
+                          </span>
+                        )}
+                        {search.filters.contentPeriod && (
+                          <span className="px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded">
+                            {search.filters.contentPeriod}
+                          </span>
+                        )}
+                        {search.filters.roles && search.filters.roles.length > 0 && (
+                          <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded">
+                            {search.filters.roles.join(", ")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Top Experts Preview */}
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Top experts found</p>
+                      <div className="flex flex-wrap gap-3">
+                        {search.topExperts.map((expert, idx) => (
+                          <div 
+                            key={idx}
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100"
+                          >
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white text-[10px] font-serif">
+                              {expert.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-slate-800">{expert.name}</p>
+                              <p className="text-[10px] text-slate-500">{expert.firm} · <span className="text-brand-red">{expert.score}%</span></p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </TabsContent>
