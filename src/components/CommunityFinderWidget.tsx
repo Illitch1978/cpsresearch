@@ -27,7 +27,7 @@ const communities: Community[] = [
 
 // All lists alphabetically sorted
 const continents = [
-  "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
+  "Africa", "Antarctica", "Asia", "Australia", "Europe", "North America", "South America"
 ].sort();
 
 const countries = [
@@ -35,25 +35,24 @@ const countries = [
   "Singapore", "UAE", "United Kingdom", "United States"
 ].sort();
 
-// Sectors with sub-categories from Excel
-const sectorsBySector: Record<string, string[]> = {
-  "Construction": ["Building services", "Commercial", "Engineering", "Industrial", "Infrastructure", "Residential"],
-  "Consultancy": ["Financial", "HR", "Management", "Operations", "Technology"],
-  "Distribution": ["Agents/brokers", "Logistics", "Managed service providers", "Online marketplaces", "Retail", "Value added resellers", "Wholesale"],
-  "Energy": ["Equipment & services", "Fossil fuels", "Nuclear", "Power & utilities", "Renewables"],
-  "Financial services": ["Accountancy", "Actuaries", "Banking (Retail/Commercial)", "Corporate finance", "Insurance services", "Investment management", "Private equity & venture capital"],
-  "Health": ["Healthcare providers", "Healthcare technology", "Managed care", "Medical devices", "Pharmaceuticals/Biotech"],
-  "Hospitality": ["Accommodation", "Entertainment & recreation", "Food & Beverage", "Meetings & events", "Travel & tourism"],
-  "Legal services": ["Law firms", "Legal technology", "Patent attorneys"],
-  "Manufacturing": ["Chemicals", "Electronics", "Food manufacturing", "Machinery", "Other manufacturing", "Textiles", "Transportation"],
-  "Marketing": ["Communications", "Market research", "Marketing", "Media"],
-  "Other services": ["Business services", "Scientific services", "Technical services"],
-  "Property": ["Architects", "Construction", "Development", "Property advisory", "Property services"],
-  "Recruitment": ["Contingency recruiters", "Executive search", "Niche recruiters", "Staffing agencies"],
-  "Technology": ["Communications equipment", "Hardware & equipment", "Internet services", "Semi-conductors", "Software & services"],
-};
-
-const mainSectors = Object.keys(sectorsBySector).sort();
+// Sectors matching expert widget structure
+const sectors = [
+  "Accountancy",
+  "Construction",
+  "Consultancy",
+  "Distribution",
+  "Energy",
+  "Financial services",
+  "Health",
+  "Hospitality",
+  "Legal services",
+  "Manufacturing",
+  "Marketing",
+  "Other services",
+  "Property",
+  "Recruitment",
+  "Technology",
+].sort();
 
 const managementExpertise = [
   "Business development", "Communication", "Facilities", "Finance", 
@@ -118,7 +117,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sectorFilter, setSectorFilter] = useState("any");
-  const [selectedSectorCategories, setSelectedSectorCategories] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [expertiseFilter, setExpertiseFilter] = useState("any");
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
@@ -142,7 +140,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setInputValue("");
 
     setTimeout(() => {
-      setMessages((prev) => [...prev, { text: "What type of community are you looking for?", sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: "What are you looking for today?", sender: "bot" }]);
       setStep("filters");
     }, 600);
   };
@@ -157,19 +155,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedCountries(prev => 
       prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
     );
-  };
-
-  const handleSectorCategoryToggle = (category: string) => {
-    setSelectedSectorCategories(prev => {
-      if (prev.includes(category)) {
-        // Remove category and all its sub-sectors
-        const subsInCategory = sectorsBySector[category] || [];
-        setSelectedSectors(currentSectors => currentSectors.filter(s => !subsInCategory.includes(s)));
-        return prev.filter(c => c !== category);
-      } else {
-        return [...prev, category];
-      }
-    });
   };
 
   const handleSectorToggle = (sector: string) => {
@@ -242,7 +227,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedContinents([]);
     setSelectedCountries([]);
     setSectorFilter("any");
-    setSelectedSectorCategories([]);
     setSelectedSectors([]);
     setExpertiseFilter("any");
     setSelectedManagement([]);
@@ -341,7 +325,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
                   </div>
                   <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>Hello! What are you looking for today?</p>
+                    <p>Hello! What topic are you interested in?</p>
                   </div>
                 </div>
               </>
@@ -416,31 +400,15 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <Label htmlFor="sector-specific" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
                     </div>
                     {sectorFilter === "specific" && (
-                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
-                        {mainSectors.map((category) => (
-                          <div key={category}>
-                            <div className="flex items-center space-x-2 mb-1.5">
-                              <Checkbox 
-                                id={`sector-cat-${category}`}
-                                checked={selectedSectorCategories.includes(category)}
-                                onCheckedChange={() => handleSectorCategoryToggle(category)}
-                              />
-                              <Label htmlFor={`sector-cat-${category}`} className="text-xs font-medium text-slate-700 cursor-pointer">{category}</Label>
-                            </div>
-                            {selectedSectorCategories.includes(category) && (
-                              <div className="grid grid-cols-2 gap-1 ml-4 mb-2">
-                                {sectorsBySector[category].map((sub) => (
-                                  <div key={sub} className="flex items-center space-x-2">
-                                    <Checkbox 
-                                      id={`sector-${sub}`}
-                                      checked={selectedSectors.includes(sub)}
-                                      onCheckedChange={() => handleSectorToggle(sub)}
-                                    />
-                                    <Label htmlFor={`sector-${sub}`} className="text-[11px] text-slate-600 cursor-pointer">{sub}</Label>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                        {sectors.map((sector) => (
+                          <div key={sector} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`sector-${sector}`}
+                              checked={selectedSectors.includes(sector)}
+                              onCheckedChange={() => handleSectorToggle(sector)}
+                            />
+                            <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
                           </div>
                         ))}
                       </div>
