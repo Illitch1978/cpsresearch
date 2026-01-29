@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookmarkedExpert {
   id: string;
@@ -171,8 +173,18 @@ const ExpertProfileModal = ({
 
 const Bookmarks = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedExpert, setSelectedExpert] = useState<BookmarkedExpert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  
+  // Mock list of communities the user is a member of
+  const memberCommunities = [
+    { id: "c1", name: "Legal Tech Innovators" },
+    { id: "c2", name: "Corporate Law Network" },
+    { id: "c3", name: "ESG & Sustainability Forum" },
+    { id: "c4", name: "M&A Professionals Group" },
+  ];
   
   const [experts, setExperts] = useState<BookmarkedExpert[]>([
     { 
@@ -216,6 +228,14 @@ const Bookmarks = () => {
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
   const removeCommunity = (id: string) => setCommunities(communities.filter(c => c.id !== id));
   const removePublication = (id: string) => setPublications(publications.filter(p => p.id !== id));
+
+  const handlePostToCommunity = (pub: BookmarkedPublication, community: { id: string; name: string }) => {
+    setOpenPopoverId(null);
+    toast({
+      title: "Publication shared",
+      description: `"${pub.title}" has been posted to ${community.name}.`,
+    });
+  };
 
   const openExpertModal = (expert: BookmarkedExpert) => {
     setSelectedExpert(expert);
@@ -402,6 +422,33 @@ const Bookmarks = () => {
                             <span className="text-xs font-medium text-brand-red">
                               {pub.qualityScore}% Match Score
                             </span>
+                          </div>
+
+                          {/* Post to Community */}
+                          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3">
+                            <Popover open={openPopoverId === pub.id} onOpenChange={(open) => setOpenPopoverId(open ? pub.id : null)}>
+                              <PopoverTrigger asChild>
+                                <button className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-brand-red transition-colors">
+                                  <FontAwesomeIcon icon={faShare} className="text-[10px]" />
+                                  Post to community
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-56 p-2" align="start">
+                                <p className="text-xs font-medium text-slate-700 mb-2 px-2">Select a community</p>
+                                <div className="space-y-1">
+                                  {memberCommunities.map((community) => (
+                                    <button
+                                      key={community.id}
+                                      onClick={() => handlePostToCommunity(pub, community)}
+                                      className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded transition-colors flex items-center gap-2"
+                                    >
+                                      <FontAwesomeIcon icon={faUsers} className="text-[10px] text-slate-400" />
+                                      {community.name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </div>
                       </div>
