@@ -38,6 +38,35 @@ const communities: Community[] = [
   { name: "ESG & Sustainability Forum", members: 1890, description: "Environmental, social & governance insights", url: "#" },
 ];
 
+// Sample publications data for experts
+const expertPublications: Record<string, Publication[]> = {
+  "Dr. Elena Voreas": [
+    { title: "Cross-Border M&A: Navigating Regulatory Complexity", date: "2024-01-15", type: "Article", readTime: "8 min", coAuthors: ["Prof. James Sterling"] },
+    { title: "Private Equity Trends in European Markets", date: "2023-11-20", type: "Report", readTime: "15 min" },
+    { title: "Due Diligence Best Practices in Tech Acquisitions", date: "2023-09-05", type: "White Paper", readTime: "12 min" },
+    { title: "The Future of Corporate Governance", date: "2023-06-12", type: "Journal", readTime: "20 min", coAuthors: ["Sarah Jenkins", "Marcus Alistair"] },
+  ],
+  "Prof. James Sterling": [
+    { title: "Fintech Regulation: A Global Perspective", date: "2024-02-01", type: "Report", readTime: "18 min" },
+    { title: "Digital Assets and Banking Law", date: "2023-10-15", type: "Article", readTime: "10 min" },
+    { title: "Central Bank Digital Currencies: Legal Framework", date: "2023-07-22", type: "White Paper", readTime: "14 min" },
+  ],
+  "Sarah Jenkins": [
+    { title: "AI Governance in Financial Services", date: "2024-01-28", type: "Article", readTime: "7 min" },
+    { title: "Data Privacy Compliance: GDPR and Beyond", date: "2023-12-10", type: "Guide", readTime: "25 min" },
+    { title: "Legal Tech Innovation Trends 2024", date: "2023-11-05", type: "Report", readTime: "16 min" },
+  ],
+  "David Thorne": [
+    { title: "International Arbitration: Key Developments", date: "2024-01-10", type: "Article", readTime: "9 min" },
+    { title: "Cross-Border Dispute Resolution Strategies", date: "2023-08-18", type: "Case Study", readTime: "11 min" },
+  ],
+  "Marcus Alistair": [
+    { title: "International Tax Planning in 2024", date: "2024-02-05", type: "Guide", readTime: "22 min" },
+    { title: "Transfer Pricing: Compliance and Strategy", date: "2023-09-28", type: "White Paper", readTime: "17 min" },
+    { title: "M&A Tax Considerations", date: "2023-05-14", type: "Article", readTime: "8 min" },
+  ],
+};
+
 const experts: Expert[] = [
   { 
     name: "Dr. Elena Voreas", 
@@ -162,14 +191,37 @@ const countries = [
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
+// Helper to extract first name, skipping titles like Dr., Prof., etc.
+const getFirstName = (fullName: string): string => {
+  const parts = fullName.split(' ').filter(Boolean);
+  const titles = ['Dr.', 'Dr', 'Prof.', 'Prof', 'Professor', 'Doctor', 'Mr.', 'Mr', 'Mrs.', 'Mrs', 'Ms.', 'Ms', 'Miss'];
+  
+  for (const part of parts) {
+    if (!titles.includes(part)) {
+      return part;
+    }
+  }
+  return parts[parts.length - 1] || fullName;
+};
+
+interface Publication {
+  title: string;
+  date: string;
+  type: string;
+  readTime: string;
+  coAuthors?: string[];
+}
+
 const ExpertProfileModal = ({ 
   expert, 
   isOpen, 
-  onClose 
+  onClose,
+  onViewPubs
 }: { 
   expert: Expert | null; 
   isOpen: boolean; 
   onClose: () => void;
+  onViewPubs: (expert: Expert) => void;
 }) => {
   const [showFullBio, setShowFullBio] = useState(false);
 
@@ -268,13 +320,89 @@ const ExpertProfileModal = ({
               <Checkbox id="modal-bookmark-expert" />
               <Label htmlFor="modal-bookmark-expert" className="text-xs text-slate-600 cursor-pointer">Bookmark expert</Label>
             </div>
-            <button className="text-xs text-brand-red hover:underline flex items-center gap-1">
+            <button 
+              onClick={() => onViewPubs(expert)}
+              className="text-xs text-brand-red hover:underline flex items-center gap-1"
+            >
               <FontAwesomeIcon icon={faFileLines} className="text-[10px]" />
               View pubs ({expert.pubs})
             </button>
           </div>
           <button className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors">
-            Contact {expert.name.split(' ')[0]}
+            Contact {getFirstName(expert.name)}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Publications Modal
+const PublicationsModal = ({ 
+  expert, 
+  isOpen, 
+  onClose 
+}: { 
+  expert: Expert | null; 
+  isOpen: boolean; 
+  onClose: () => void;
+}) => {
+  if (!expert) return null;
+
+  const publications = expertPublications[expert.name] || [];
+  const totalReadTime = publications.reduce((acc, pub) => acc + parseInt(pub.readTime), 0);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden max-h-[80vh]">
+        {/* Header */}
+        <div className="bg-slate-800 text-white p-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-medium text-sm">Publications by {expert.name}</h3>
+            <p className="text-xs text-slate-400 mt-0.5">{publications.length} publications • {totalReadTime} min total read time</p>
+          </div>
+        </div>
+
+        {/* Publications List */}
+        <div className="p-4 overflow-y-auto max-h-[60vh] space-y-3">
+          {publications.length === 0 ? (
+            <p className="text-sm text-slate-500 text-center py-8">No publications available</p>
+          ) : (
+            publications.map((pub, index) => (
+              <div 
+                key={index}
+                className="bg-white border border-slate-200 rounded-md p-3 hover:border-brand-red transition-colors cursor-pointer"
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-slate-800 hover:text-brand-red transition-colors">
+                      {pub.title}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded">{pub.type}</span>
+                      <span className="text-[10px] text-slate-400">{new Date(pub.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <span className="text-[10px] text-slate-400">• {pub.readTime} read</span>
+                    </div>
+                    {pub.coAuthors && pub.coAuthors.length > 0 && (
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Co-authors: {pub.coAuthors.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-slate-400 text-xs flex-shrink-0" />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50">
+          <button 
+            onClick={onClose}
+            className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors"
+          >
+            Close
           </button>
         </div>
       </DialogContent>
@@ -294,6 +422,8 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "bot" }>>([]);
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isPubsOpen, setIsPubsOpen] = useState(false);
+  const [pubsExpert, setPubsExpert] = useState<Expert | null>(null);
 
   // Filter states
   const [sourceFilter, setSourceFilter] = useState("all");
@@ -852,6 +982,15 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 </div>
               </div>
 
+              {/* Active Criteria Recap */}
+              <div className="pl-11 mt-2 animate-fade-in">
+                <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                  <p className="text-xs text-brand-red leading-relaxed">
+                    {buildRecapSummary()}
+                  </p>
+                </div>
+              </div>
+
               {/* New Search Link */}
               <div className="pl-11 mt-2 animate-fade-in">
                 <button
@@ -920,7 +1059,13 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
                       <div className="flex items-center gap-3">
-                        <button className="text-[10px] text-slate-600 hover:text-brand-red transition-colors">
+                        <button 
+                          onClick={() => {
+                            setPubsExpert(exp);
+                            setIsPubsOpen(true);
+                          }}
+                          className="text-[10px] text-slate-600 hover:text-brand-red transition-colors"
+                        >
                           <FontAwesomeIcon icon={faFileLines} className="mr-1" /> {exp.pubs} Pubs (24m)
                         </button>
                         <div className="flex items-center space-x-1.5">
@@ -1014,7 +1159,19 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
       <ExpertProfileModal 
         expert={selectedExpert} 
         isOpen={isProfileOpen} 
-        onClose={() => setIsProfileOpen(false)} 
+        onClose={() => setIsProfileOpen(false)}
+        onViewPubs={(expert) => {
+          setIsProfileOpen(false);
+          setPubsExpert(expert);
+          setIsPubsOpen(true);
+        }}
+      />
+
+      {/* Publications Modal */}
+      <PublicationsModal
+        expert={pubsExpert}
+        isOpen={isPubsOpen}
+        onClose={() => setIsPubsOpen(false)}
       />
     </>
   );
