@@ -529,7 +529,7 @@ const AbstractModal = ({
                     <span className="expert-name font-bold">{expert.name}</span>
                     <span className="text-slate-500"> — </span>
                     <span className="expert-firm text-slate-600">{expert.firm}</span>
-                    <span className="text-slate-400"> | {expert.pubs} publications | Match Score: {expert.score}%</span>
+                    <span className="text-slate-400"> | {expert.pubs} publications | Quality Score: {expert.score}%</span>
                   </li>
                 ))}
               </ul>
@@ -557,7 +557,7 @@ const AbstractModal = ({
                 Methodology
               </h2>
               <p className="paragraph text-sm text-slate-700 text-justify leading-relaxed">
-                Expert identification employed the CPSR proprietary matching algorithm, analysing citation indices, publication recency, topic relevance scores, and cross-reference frequency across 1,240,400 indexed documents. Match scores reflect weighted composite metrics incorporating academic impact factors and practitioner influence measurements.
+                Expert identification employed the CPSR proprietary quality algorithm, analysing citation indices, publication recency, topic relevance scores, and cross-reference frequency across 1,240,400 indexed documents. Quality scores reflect weighted composite metrics incorporating academic impact factors and practitioner influence measurements.
               </p>
             </div>
 
@@ -1253,7 +1253,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       </div>
                       <div className="text-right">
                         <span className="text-xs font-bold text-brand-red">{exp.score}/100</span>
-                        <p className="text-[9px] text-slate-400">Match Score</p>
+                        <p className="text-[9px] text-slate-400">Quality Score</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
