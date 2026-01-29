@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -177,6 +177,8 @@ const Bookmarks = () => {
   const [selectedExpert, setSelectedExpert] = useState<BookmarkedExpert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [expertSearch, setExpertSearch] = useState("");
+  const [publicationSearch, setPublicationSearch] = useState("");
   
   // Mock list of communities the user is a member of
   const memberCommunities = [
@@ -199,6 +201,7 @@ const Bookmarks = () => {
       primaryGroup: "Private Equity",
       bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions.",
       officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas",
+      linkedInUrl: "https://www.linkedin.com/in/elena-voreas",
       score: 98,
       pubs: 14
     },
@@ -210,11 +213,32 @@ const Bookmarks = () => {
       location: "London, United Kingdom",
       email: "sarah.jenkins@allenovery.com",
       division: "Technology & Innovation",
+      officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins",
       linkedInUrl: "https://www.linkedin.com/in/sarah-jenkins",
       score: 91,
       pubs: 11
     },
   ].sort((a, b) => b.score - a.score));
+
+  // Filtered lists based on search
+  const filteredExperts = useMemo(() => {
+    if (!expertSearch.trim()) return experts;
+    const search = expertSearch.toLowerCase();
+    return experts.filter(e => 
+      e.name.toLowerCase().includes(search) || 
+      e.firm.toLowerCase().includes(search) ||
+      e.tag.toLowerCase().includes(search)
+    );
+  }, [experts, expertSearch]);
+
+  const filteredPublications = useMemo(() => {
+    if (!publicationSearch.trim()) return publications;
+    const search = publicationSearch.toLowerCase();
+    return publications.filter(p => 
+      p.title.toLowerCase().includes(search) || 
+      p.author.toLowerCase().includes(search)
+    );
+  }, [publications, publicationSearch]);
 
   const [communities, setCommunities] = useState<BookmarkedCommunity[]>([
     { id: "1", name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "https://community.legaltech.io" },
