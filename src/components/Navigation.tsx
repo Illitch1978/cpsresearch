@@ -46,25 +46,25 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-10">
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); }}
-              className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
             >
               About
             </button>
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); }}
-              className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
             >
               Initiatives
             </button>
             <button
               onClick={onShowContribute}
-              className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors duration-200 font-sans"
+              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans"
             >
               Contribute
             </button>
             <button
               onClick={onShowContact}
-              className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
             >
               Contact
             </button>
@@ -112,25 +112,25 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
         <div className="flex flex-col py-4">
           <button
             onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); })}
-            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
           >
             About
           </button>
           <button
             onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); })}
-            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
           >
             Initiatives
           </button>
           <button
             onClick={() => handleNavClick(onShowContribute)}
-            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors border-b border-gray-50"
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
           >
             Contribute
           </button>
           <button
             onClick={() => handleNavClick(onShowContact)}
-            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-slate-900 text-base font-medium transition-colors"
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors"
           >
             Contact
           </button>
