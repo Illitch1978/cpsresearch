@@ -472,7 +472,7 @@ const AbstractModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden max-h-[90vh]">
         {/* Modal Header */}
-        <div className="bg-brand-red text-white p-4 flex items-center justify-between">
+        <div className="bg-brand-red text-white p-4 pr-12 flex items-center justify-between">
           <div>
             <h3 className="font-medium text-sm">Expert Abstract Document</h3>
             <p className="text-xs text-white/70 mt-0.5">Structured summary of top expert publications</p>
