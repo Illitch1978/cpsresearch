@@ -1189,21 +1189,21 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 </div>
               </div>
 
-              {/* New Search Link */}
-              <div className="pl-11 mt-2 animate-fade-in flex items-center gap-4">
+              {/* Actions Row */}
+              <div className="pl-11 mt-3 animate-fade-in flex items-center gap-3">
                 <button
                   onClick={handleNewSearch}
-                  className="text-xs text-brand-red hover:underline flex items-center gap-1"
+                  className="text-xs text-slate-500 hover:text-brand-red flex items-center gap-1 transition-colors"
                 >
                   <FontAwesomeIcon icon={faLink} className="text-[10px]" />
                   New search
                 </button>
                 <button
                   onClick={() => setIsAbstractOpen(true)}
-                  className="text-xs text-slate-600 hover:text-brand-red flex items-center gap-1 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-brand-red text-white text-xs font-medium rounded hover:bg-brand-red/90 transition-colors shadow-sm"
                 >
                   <FontAwesomeIcon icon={faFilePdf} className="text-[10px]" />
-                  Generate abstract
+                  Generate Abstract
                 </button>
               </div>
 
