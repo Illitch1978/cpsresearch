@@ -1054,7 +1054,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       </div>
                       <div className="text-right">
                         <span className="text-xs font-bold text-brand-red">{exp.score}/100</span>
-                        <p className="text-[9px] text-slate-400">Impact Score</p>
+                        <p className="text-[9px] text-slate-400">Match Score</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
