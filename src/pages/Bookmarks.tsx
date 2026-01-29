@@ -358,7 +358,8 @@ const Bookmarks = () => {
             <img 
               src={cpsrLogo} 
               alt="CPSR Logo" 
-              className="h-12 w-auto object-contain"
+              className="h-12 w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate("/")}
             />
             <div>
               <h1 className="font-serif text-xl font-semibold text-slate-900">My Bookmarks</h1>
