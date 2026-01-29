@@ -116,26 +116,43 @@ const experts: Expert[] = [
 ];
 
 const organisationsBySector: Record<string, string[]> = {
-  "Accounting": ["Deloitte", "PwC", "EY", "KPMG", "BDO", "Grant Thornton"],
-  "Legal": ["Clifford Chance", "Linklaters", "Allen & Overy", "Freshfields", "Slaughter and May"],
-  "Academic": ["London Business School", "Oxford Saïd", "Cambridge Judge", "Imperial Business School"],
-  "Consulting": ["McKinsey", "BCG", "Bain", "Accenture"],
-  "Financial Services": ["Goldman Sachs", "JP Morgan", "Morgan Stanley", "Barclays"],
+  "Construction": ["Balfour Beatty", "Skanska", "Kier Group", "Taylor Wimpey", "Persimmon"],
+  "Consultancy": ["McKinsey", "BCG", "Bain", "Accenture", "Deloitte Consulting"],
+  "Distribution": ["DHL", "FedEx", "UPS", "Royal Mail", "Hermes"],
+  "Energy": ["BP", "Shell", "EDF", "National Grid", "SSE"],
+  "Financial services": ["Goldman Sachs", "JP Morgan", "Barclays", "HSBC", "Lloyds"],
+  "Health": ["NHS", "Bupa", "AXA Health", "Nuffield Health"],
+  "Hospitality": ["Hilton", "Marriott", "IHG", "Whitbread", "Compass Group"],
+  "Legal services": ["Clifford Chance", "Linklaters", "Allen & Overy", "Freshfields", "Slaughter and May"],
+  "Manufacturing": ["Rolls-Royce", "BAE Systems", "GKN", "JCB", "Dyson"],
+  "Marketing": ["WPP", "Publicis", "Omnicom", "Dentsu", "Havas"],
+  "Other services": ["Capita", "Serco", "G4S", "Sodexo"],
+  "Property": ["British Land", "Land Securities", "Savills", "CBRE", "JLL"],
+  "Recruitment": ["Hays", "Robert Walters", "Michael Page", "Adecco", "Manpower"],
+  "Technology": ["Google", "Microsoft", "Amazon", "Apple", "Meta"],
 };
 
-const organisationSectors = Object.keys(organisationsBySector);
+const organisationSectors = Object.keys(organisationsBySector).sort();
 
 const sectors = [
-  "Financial Services",
-  "Technology",
-  "Healthcare",
+  "Construction",
+  "Consultancy",
+  "Distribution",
   "Energy",
-  "Real Estate",
+  "Financial services",
+  "Health",
+  "Hospitality",
+  "Legal services",
   "Manufacturing",
-];
+  "Marketing",
+  "Other services",
+  "Property",
+  "Recruitment",
+  "Technology",
+].sort();
 
 const continents = [
-  "Africa", "Asia Pacific", "Europe", "Latin America", "Middle East", "North America"
+  "Africa", "Antarctica", "Asia", "Australia", "Europe", "North America", "South America"
 ].sort();
 
 const countries = [
@@ -395,11 +412,12 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           if (r === "author") return "Author";
           if (r === "leader") return "Future Leader";
           if (r === "contributor") return "Publication Contributor";
+          if (r === "researcher") return "Research Contributor";
           if (r === "team") return "Team Member";
           if (r === "consultant") return "External Consultant";
           return r;
         }).join(" + ")
-      : "Any role";
+      : "Expertise";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
@@ -789,6 +807,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
                       </div>
                     )}
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-researcher" 
+                        checked={roles.includes("researcher")}
+                        onCheckedChange={() => handleRoleToggle("researcher")}
+                      />
+                      <Label htmlFor="role-researcher" className="text-xs text-slate-700 cursor-pointer">A contributor to a research study</Label>
+                    </div>
                   </div>
                 </div>
               </div>
