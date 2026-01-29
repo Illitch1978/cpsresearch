@@ -321,6 +321,35 @@ const Bookmarks = () => {
                               <span className="text-brand-red font-medium">{expert.score}%</span> Match Score
                             </span>
                           </div>
+                          {/* External Links */}
+                          {(expert.officialBioUrl || expert.linkedInUrl) && (
+                            <div className="flex items-center gap-3 mt-2">
+                              {expert.officialBioUrl && (
+                                <a 
+                                  href={expert.officialBioUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1.5 text-xs text-brand-red hover:underline"
+                                >
+                                  <FontAwesomeIcon icon={faAddressCard} />
+                                  Official bio
+                                </a>
+                              )}
+                              {expert.linkedInUrl && (
+                                <a 
+                                  href={expert.linkedInUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1.5 text-xs text-[#0A66C2] hover:underline"
+                                >
+                                  <FontAwesomeIcon icon={faLinkedin} />
+                                  LinkedIn
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <button
