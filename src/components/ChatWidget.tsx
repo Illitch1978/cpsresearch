@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard, faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -30,12 +30,14 @@ interface Community {
   members: number;
   description: string;
   url: string;
+  theme?: string;
+  tags?: string[];
 }
 
 const communities: Community[] = [
-  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#" },
-  { name: "Corporate Law Network", members: 5120, description: "Global corporate practice discussions", url: "#" },
-  { name: "ESG & Sustainability Forum", members: 1890, description: "Environmental, social & governance insights", url: "#" },
+  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#", theme: "Digital Transformation", tags: ["Technology", "Innovation"] },
+  { name: "Corporate Law Network", members: 5120, description: "Global corporate practice discussions", url: "#", theme: "Corporate Law", tags: ["Legal", "M&A"] },
+  { name: "ESG & Sustainability Forum", members: 1890, description: "Environmental, social & governance insights", url: "#", theme: "ESG & Sustainability", tags: ["Sustainability", "DEI"] },
 ];
 
 // Sample publications data for experts
@@ -379,11 +381,11 @@ const PublicationsModal = ({
             publications.map((pub, index) => (
               <div 
                 key={index}
-                className="bg-white border border-slate-200 rounded-md p-3 hover:border-brand-red transition-colors cursor-pointer"
+                className="bg-white border border-slate-200 rounded-md p-3 hover:border-brand-red transition-colors"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1">
-                    <h4 className="text-sm font-medium text-slate-800 hover:text-brand-red transition-colors">
+                    <h4 className="text-sm font-medium text-slate-800">
                       {pub.title}
                     </h4>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -397,7 +399,13 @@ const PublicationsModal = ({
                       </p>
                     )}
                   </div>
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-slate-400 text-xs flex-shrink-0" />
+                  <button 
+                    className="flex items-center gap-1 px-2 py-1 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded hover:bg-brand-red/20 transition-colors flex-shrink-0"
+                    title="View AI Summary"
+                  >
+                    <FontAwesomeIcon icon={faWandMagicSparkles} className="text-[10px]" />
+                    AI Summary
+                  </button>
                 </div>
               </div>
             ))
@@ -1307,9 +1315,25 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors"
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-medium text-slate-800">{community.name}</p>
                         <p className="text-[10px] text-slate-500">{community.description}</p>
+                        <div className="flex flex-col gap-1.5 mt-1.5">
+                          {community.theme && (
+                            <span className="inline-block w-fit px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">
+                              {community.theme}
+                            </span>
+                          )}
+                          {community.tags && community.tags.length > 0 && (
+                            <div className="flex gap-1">
+                              {community.tags.slice(0, 2).map((tag, j) => (
+                                <span key={j} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-1 text-[10px] text-slate-400">
                         <FontAwesomeIcon icon={faUsers} className="text-[9px]" />

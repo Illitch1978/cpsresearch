@@ -312,7 +312,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
                   </div>
                   <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>Hello! I can help you find professional communities. What topic or interest are you looking to explore today?</p>
+                    <p>Hello! What are you looking for today?</p>
                   </div>
                 </div>
               </>
