@@ -551,7 +551,8 @@ const Bookmarks = () => {
                       </button>
                     </div>
                   </div>
-                ))}
+                ))
+                )}
               </div>
             )}
           </TabsContent>
