@@ -220,6 +220,15 @@ const Bookmarks = () => {
     },
   ].sort((a, b) => b.score - a.score));
 
+  const [communities, setCommunities] = useState<BookmarkedCommunity[]>([
+    { id: "1", name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "https://community.legaltech.io" },
+  ].sort((a, b) => a.name.localeCompare(b.name)));
+
+  const [publications, setPublications] = useState<BookmarkedPublication[]>([
+    { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94, url: "https://papers.ssrn.com/future-ma-european-markets" },
+    { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87, url: "https://papers.ssrn.com/fintech-regulation-guide" },
+  ].sort((a, b) => b.qualityScore - a.qualityScore));
+
   // Filtered lists based on search
   const filteredExperts = useMemo(() => {
     if (!expertSearch.trim()) return experts;
@@ -239,15 +248,6 @@ const Bookmarks = () => {
       p.author.toLowerCase().includes(search)
     );
   }, [publications, publicationSearch]);
-
-  const [communities, setCommunities] = useState<BookmarkedCommunity[]>([
-    { id: "1", name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "https://community.legaltech.io" },
-  ].sort((a, b) => a.name.localeCompare(b.name)));
-
-  const [publications, setPublications] = useState<BookmarkedPublication[]>([
-    { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94, url: "https://papers.ssrn.com/future-ma-european-markets" },
-    { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87, url: "https://papers.ssrn.com/fintech-regulation-guide" },
-  ].sort((a, b) => b.qualityScore - a.qualityScore));
 
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
   const removeCommunity = (id: string) => setCommunities(communities.filter(c => c.id !== id));
