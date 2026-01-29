@@ -85,6 +85,21 @@ const technologicalFactors = [
   "Innovation & R&D", "Obsolescence", "Operational Technology", "Technology Transfer"
 ].sort();
 
+const orgTypes = [
+  "B Corp",
+  "Business school",
+  "Charity",
+  "Consortium",
+  "Corporate organisation",
+  "Educational establishment",
+  "Joint venture",
+  "Partnership",
+  "Professional firm",
+  "Professional body",
+  "Public sector",
+  "Virtual firm",
+].sort();
+
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
 interface CommunityFinderWidgetProps {
@@ -113,6 +128,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedEconomic, setSelectedEconomic] = useState<string[]>([]);
   const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
   const [selectedTechnological, setSelectedTechnological] = useState<string[]>([]);
+  const [orgTypeFilter, setOrgTypeFilter] = useState("any");
+  const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
 
@@ -197,6 +214,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     );
   };
 
+  const handleOrgTypeToggle = (item: string) => {
+    setSelectedOrgTypes(prev => 
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
   const handleCommunityBookmark = (name: string) => {
     setBookmarkedCommunities(prev => 
       prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
@@ -229,6 +252,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedEconomic([]);
     setSelectedSocial([]);
     setSelectedTechnological([]);
+    setOrgTypeFilter("any");
+    setSelectedOrgTypes([]);
   };
 
   // Build recap summary
@@ -255,7 +280,11 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? "any external factor"
       : allExternalFactors.slice(0, 2).join(", ") + (allExternalFactors.length > 2 ? ` +${allExternalFactors.length - 2} more` : "");
 
-    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
+    const orgTypeLabel = orgTypeFilter === "any" || selectedOrgTypes.length === 0
+      ? "any org type"
+      : selectedOrgTypes.slice(0, 2).join(", ") + (selectedOrgTypes.length > 2 ? ` +${selectedOrgTypes.length - 2} more` : "");
+
+    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgTypeLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
   };
 
   const FilterSection = ({ 
@@ -412,6 +441,34 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                                 ))}
                               </div>
                             )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </RadioGroup>
+                </FilterSection>
+
+                {/* Org Type */}
+                <FilterSection title="Org type">
+                  <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="orgtype-any" />
+                      <Label htmlFor="orgtype-any" className="text-xs text-slate-700 cursor-pointer">Any org type</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="orgtype-specific" />
+                      <Label htmlFor="orgtype-specific" className="text-xs text-slate-700 cursor-pointer">Specific org types</Label>
+                    </div>
+                    {orgTypeFilter === "specific" && (
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
+                        {orgTypes.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`orgtype-${item}`}
+                              checked={selectedOrgTypes.includes(item)}
+                              onCheckedChange={() => handleOrgTypeToggle(item)}
+                            />
+                            <Label htmlFor={`orgtype-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
                           </div>
                         ))}
                       </div>
