@@ -81,6 +81,7 @@ const experts: Expert[] = [
     primaryGroup: "Private Equity",
     bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions. She has advised on some of the largest deals in the European market and is frequently cited in academic journals for her innovative approaches to complex regulatory challenges.",
     officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas",
+    linkedInUrl: "https://www.linkedin.com/in/elena-voreas",
     communityType: "Entrepreneur"
   },
   { 
@@ -95,6 +96,7 @@ const experts: Expert[] = [
     division: "Financial Markets",
     primaryGroup: "Banking & Finance",
     bio: "Professor James Sterling specializes in financial regulation and has been instrumental in shaping policy discussions around fintech and digital assets. He combines academic rigor with practical legal expertise gained from advising major financial institutions.",
+    officialBioUrl: "https://www.linklaters.com/people/james-sterling",
     linkedInUrl: "https://www.linkedin.com/in/james-sterling",
     communityType: "Guru"
   },
@@ -111,6 +113,7 @@ const experts: Expert[] = [
     primaryGroup: "Not set",
     bio: "Sarah Jenkins is at the forefront of legal innovation, helping organizations navigate digital transformation. Her expertise spans data privacy, AI governance, and emerging technology regulations across multiple jurisdictions.",
     officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins",
+    linkedInUrl: "https://www.linkedin.com/in/sarah-jenkins",
     communityType: "Technologist"
   },
   { 
@@ -125,6 +128,7 @@ const experts: Expert[] = [
     division: "Litigation",
     primaryGroup: "International Arbitration",
     bio: "David Thorne has built a reputation as one of the most effective dispute resolution specialists in the City. His strategic approach to complex commercial litigation has resulted in favorable outcomes for clients in high-stakes international disputes.",
+    officialBioUrl: "https://www.freshfields.com/people/david-thorne",
     linkedInUrl: "https://www.linkedin.com/in/david-thorne",
     communityType: "Advocate"
   },
@@ -140,6 +144,8 @@ const experts: Expert[] = [
     division: "Tax Advisory",
     primaryGroup: "Corporate Tax",
     bio: "Marcus Alistair is a recognized authority on international tax strategy, with particular expertise in structuring cross-border investments and M&A transactions. His publications on tax efficiency have become essential reading for corporate counsel.",
+    officialBioUrl: "https://www.slaughterandmay.com/people/marcus-alistair",
+    linkedInUrl: "https://www.linkedin.com/in/marcus-alistair",
     communityType: "Mentor"
   },
 ];

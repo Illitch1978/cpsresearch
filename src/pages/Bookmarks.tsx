@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faUserTie, faUsers, faTrash, faArrowLeft, faEnvelope, faPhone, faChevronDown, faChevronUp, faArrowUpRightFromSquare, faShare, faCheck, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -177,6 +177,8 @@ const Bookmarks = () => {
   const [selectedExpert, setSelectedExpert] = useState<BookmarkedExpert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [expertSearch, setExpertSearch] = useState("");
+  const [publicationSearch, setPublicationSearch] = useState("");
   
   // Mock list of communities the user is a member of
   const memberCommunities = [
@@ -199,6 +201,7 @@ const Bookmarks = () => {
       primaryGroup: "Private Equity",
       bio: "Dr. Elena Voreas is a leading expert in corporate law with over 20 years of experience in cross-border M&A transactions.",
       officialBioUrl: "https://www.cliffordchance.com/people/elena-voreas",
+      linkedInUrl: "https://www.linkedin.com/in/elena-voreas",
       score: 98,
       pubs: 14
     },
@@ -210,6 +213,7 @@ const Bookmarks = () => {
       location: "London, United Kingdom",
       email: "sarah.jenkins@allenovery.com",
       division: "Technology & Innovation",
+      officialBioUrl: "https://www.allenovery.com/people/sarah-jenkins",
       linkedInUrl: "https://www.linkedin.com/in/sarah-jenkins",
       score: 91,
       pubs: 11
@@ -224,6 +228,26 @@ const Bookmarks = () => {
     { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94, url: "https://papers.ssrn.com/future-ma-european-markets" },
     { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87, url: "https://papers.ssrn.com/fintech-regulation-guide" },
   ].sort((a, b) => b.qualityScore - a.qualityScore));
+
+  // Filtered lists based on search
+  const filteredExperts = useMemo(() => {
+    if (!expertSearch.trim()) return experts;
+    const search = expertSearch.toLowerCase();
+    return experts.filter(e => 
+      e.name.toLowerCase().includes(search) || 
+      e.firm.toLowerCase().includes(search) ||
+      e.tag.toLowerCase().includes(search)
+    );
+  }, [experts, expertSearch]);
+
+  const filteredPublications = useMemo(() => {
+    if (!publicationSearch.trim()) return publications;
+    const search = publicationSearch.toLowerCase();
+    return publications.filter(p => 
+      p.title.toLowerCase().includes(search) || 
+      p.author.toLowerCase().includes(search)
+    );
+  }, [publications, publicationSearch]);
 
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
   const removeCommunity = (id: string) => setCommunities(communities.filter(c => c.id !== id));
@@ -295,11 +319,29 @@ const Bookmarks = () => {
               <EmptyState icon={faUserTie} message="No bookmarked experts yet" />
             ) : (
               <div className="space-y-3">
-                {experts.map((expert) => (
-                  <div 
-                    key={expert.id} 
-                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
-                  >
+                {/* Search Input */}
+                <div className="relative">
+                  <FontAwesomeIcon 
+                    icon={faSearch} 
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search experts by name, firm or expertise..."
+                    value={expertSearch}
+                    onChange={(e) => setExpertSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                  />
+                </div>
+                
+                {filteredExperts.length === 0 ? (
+                  <p className="text-center text-sm text-slate-500 py-8">No experts match your search</p>
+                ) : (
+                  filteredExperts.map((expert) => (
+                    <div 
+                      key={expert.id} 
+                      className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
+                    >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
                         <div className="w-11 h-11 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-serif">
@@ -361,7 +403,8 @@ const Bookmarks = () => {
                       </button>
                     </div>
                   </div>
-                ))}
+                ))
+                )}
               </div>
             )}
           </TabsContent>
@@ -418,11 +461,29 @@ const Bookmarks = () => {
               <EmptyState icon={faFileLines} message="No bookmarked publications yet" />
             ) : (
               <div className="space-y-3">
-                {publications.map((pub) => (
-                  <div 
-                    key={pub.id} 
-                    className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
-                  >
+                {/* Search Input */}
+                <div className="relative">
+                  <FontAwesomeIcon 
+                    icon={faSearch} 
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search publications by title or author..."
+                    value={publicationSearch}
+                    onChange={(e) => setPublicationSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                  />
+                </div>
+                
+                {filteredPublications.length === 0 ? (
+                  <p className="text-center text-sm text-slate-500 py-8">No publications match your search</p>
+                ) : (
+                  filteredPublications.map((pub) => (
+                    <div 
+                      key={pub.id} 
+                      className="group bg-white rounded-lg border border-slate-200 p-4 hover:border-slate-300 hover:shadow-md transition-all"
+                    >
                     <div className="flex justify-between items-start">
                       <div className="flex items-start gap-4">
                         <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
@@ -490,7 +551,8 @@ const Bookmarks = () => {
                       </button>
                     </div>
                   </div>
-                ))}
+                ))
+                )}
               </div>
             )}
           </TabsContent>
