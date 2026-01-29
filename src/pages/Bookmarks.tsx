@@ -82,7 +82,7 @@ const ExpertProfileModal = ({
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="text-xl font-serif font-bold text-brand-red">{expert.score}%</div>
-              <span className="text-xs text-slate-500">Match Score</span>
+              <span className="text-xs text-slate-500">Quality Score</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="text-xl font-serif font-bold text-slate-700">{expert.pubs}</div>
@@ -318,7 +318,7 @@ const Bookmarks = () => {
                               {expert.tag}
                             </span>
                             <span className="text-xs text-slate-400">
-                              <span className="text-brand-red font-medium">{expert.score}%</span> Match Score
+                              <span className="text-brand-red font-medium">{expert.score}%</span> Quality Score
                             </span>
                           </div>
                           {/* External Links */}
@@ -440,7 +440,7 @@ const Bookmarks = () => {
                           </a>
                           <p className="text-sm text-slate-500">{pub.author} · {pub.date}</p>
                           
-                          {/* Match Score */}
+                          {/* Quality Score */}
                           <div className="mt-2 flex items-center gap-2">
                             <div className="flex-1 max-w-24">
                               <Progress 
@@ -449,7 +449,7 @@ const Bookmarks = () => {
                               />
                             </div>
                             <span className="text-xs font-medium text-brand-red">
-                              {pub.qualityScore}% Match Score
+                              {pub.qualityScore}% Quality Score
                             </span>
                           </div>
 
