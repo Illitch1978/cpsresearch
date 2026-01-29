@@ -80,7 +80,7 @@ const ExpertProfileModal = ({
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="text-xl font-serif font-bold text-brand-red">{expert.score}%</div>
-              <span className="text-xs text-slate-500">Match</span>
+              <span className="text-xs text-slate-500">Match Score</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="text-xl font-serif font-bold text-slate-700">{expert.pubs}</div>
@@ -202,16 +202,16 @@ const Bookmarks = () => {
       score: 91,
       pubs: 11
     },
-  ]);
+  ].sort((a, b) => b.score - a.score));
 
   const [communities, setCommunities] = useState<BookmarkedCommunity[]>([
     { id: "1", name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "https://community.legaltech.io" },
-  ]);
+  ].sort((a, b) => a.name.localeCompare(b.name)));
 
   const [publications, setPublications] = useState<BookmarkedPublication[]>([
     { id: "1", title: "The Future of M&A in European Markets", author: "Dr. Elena Voreas", date: "Jan 2024", qualityScore: 94, url: "https://papers.ssrn.com/future-ma-european-markets" },
     { id: "2", title: "Fintech Regulation: A Comprehensive Guide", author: "Prof. James Sterling", date: "Dec 2023", qualityScore: 87, url: "https://papers.ssrn.com/fintech-regulation-guide" },
-  ]);
+  ].sort((a, b) => b.qualityScore - a.qualityScore));
 
   const removeExpert = (id: string) => setExperts(experts.filter(e => e.id !== id));
   const removeCommunity = (id: string) => setCommunities(communities.filter(c => c.id !== id));
@@ -298,7 +298,7 @@ const Bookmarks = () => {
                               {expert.tag}
                             </span>
                             <span className="text-xs text-slate-400">
-                              <span className="text-brand-red font-medium">{expert.score}%</span> match
+                              <span className="text-brand-red font-medium">{expert.score}%</span> Match Score
                             </span>
                           </div>
                         </div>
@@ -391,7 +391,7 @@ const Bookmarks = () => {
                           </a>
                           <p className="text-sm text-slate-500">{pub.author} · {pub.date}</p>
                           
-                          {/* Quality Score */}
+                          {/* Match Score */}
                           <div className="mt-2 flex items-center gap-2">
                             <div className="flex-1 max-w-24">
                               <Progress 
@@ -400,7 +400,7 @@ const Bookmarks = () => {
                               />
                             </div>
                             <span className="text-xs font-medium text-brand-red">
-                              {pub.qualityScore}%
+                              {pub.qualityScore}% Match Score
                             </span>
                           </div>
                         </div>

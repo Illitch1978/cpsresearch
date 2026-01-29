@@ -11,17 +11,18 @@ interface Community {
   description: string;
   url: string;
   tags: string[];
+  theme?: string;
 }
 
 const communities: Community[] = [
-  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#", tags: ["Technology", "Innovation"] },
-  { name: "CEO Roundtable UK", members: 890, description: "Strategic discussions for chief executives", url: "#", tags: ["CEO", "Leadership"] },
-  { name: "Future Leaders Network", members: 4120, description: "Emerging talent in professional services", url: "#", tags: ["Millennial", "Mentor"] },
-  { name: "Sustainability Champions", members: 1560, description: "ESG and CSR best practices forum", url: "#", tags: ["Sustainability", "DEI"] },
-  { name: "High Net Worth Advisors", members: 720, description: "Wealth management and advisory network", url: "#", tags: ["High Net Worth", "Finance"] },
-  { name: "NED Connect", members: 1890, description: "Non-executive director community", url: "#", tags: ["NED", "Governance"] },
-  { name: "Entrepreneurship Hub", members: 3450, description: "Founders and startup enthusiasts", url: "#", tags: ["Entrepreneur", "Innovation"] },
-  { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms", url: "#", tags: ["SME", "Business development"] },
+  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#", tags: ["Technology", "Innovation"], theme: "Digital Transformation" },
+  { name: "CEO Roundtable UK", members: 890, description: "Strategic discussions for chief executives", url: "#", tags: ["CEO", "Leadership"], theme: "Executive Leadership" },
+  { name: "Future Leaders Network", members: 4120, description: "Emerging talent in professional services", url: "#", tags: ["Millennial", "Mentor"], theme: "Career Development" },
+  { name: "Sustainability Champions", members: 1560, description: "ESG and CSR best practices forum", url: "#", tags: ["Sustainability", "DEI"], theme: "ESG & Sustainability" },
+  { name: "High Net Worth Advisors", members: 720, description: "Wealth management and advisory network", url: "#", tags: ["High Net Worth", "Finance"], theme: "Wealth Management" },
+  { name: "NED Connect", members: 1890, description: "Non-executive director community", url: "#", tags: ["NED", "Governance"], theme: "Corporate Governance" },
+  { name: "Entrepreneurship Hub", members: 3450, description: "Founders and startup enthusiasts", url: "#", tags: ["Entrepreneur", "Innovation"], theme: "Entrepreneurship" },
+  { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms", url: "#", tags: ["SME", "Business development"], theme: "Business Growth" },
 ];
 
 // All lists alphabetically sorted
@@ -36,20 +37,20 @@ const countries = [
 
 // Sectors with sub-categories from Excel
 const sectorsBySector: Record<string, string[]> = {
-  "Construction": ["Residential", "Commercial", "Industrial", "Infrastructure", "Engineering", "Building services"],
-  "Consultancy": ["Management", "Technology", "Financial", "HR", "Operations"],
-  "Distribution": ["Retail", "Wholesale", "Logistics", "Agents/brokers", "Value added resellers", "Managed service providers", "Online marketplaces"],
-  "Energy": ["Fossil fuels", "Renewables", "Power & utilities", "Nuclear", "Equipment & services"],
-  "Financial services": ["Private equity & venture capital", "Corporate finance", "Insurance services", "Banking (Retail/Commercial)", "Investment management", "Accountancy", "Actuaries"],
-  "Health": ["Pharmaceuticals/Biotech", "Medical devices", "Healthcare providers", "Healthcare technology", "Managed care"],
-  "Hospitality": ["Travel & tourism", "Meetings & events", "Entertainment & recreation", "Food & Beverage", "Accommodation"],
-  "Legal services": ["Law firms", "Patent attorneys", "Legal technology"],
-  "Manufacturing": ["Food manufacturing", "Machinery", "Electronics", "Textiles", "Transportation", "Chemicals", "Other manufacturing"],
-  "Marketing": ["Marketing", "Media", "Communications", "Market research"],
-  "Other services": ["Scientific services", "Technical services", "Business services"],
-  "Property": ["Development", "Construction", "Property advisory", "Architects", "Property services"],
-  "Recruitment": ["Staffing agencies", "Executive search", "Contingency recruiters", "Niche recruiters"],
-  "Technology": ["Software & services", "Hardware & equipment", "Semi-conductors", "Internet services", "Communications equipment"],
+  "Construction": ["Building services", "Commercial", "Engineering", "Industrial", "Infrastructure", "Residential"],
+  "Consultancy": ["Financial", "HR", "Management", "Operations", "Technology"],
+  "Distribution": ["Agents/brokers", "Logistics", "Managed service providers", "Online marketplaces", "Retail", "Value added resellers", "Wholesale"],
+  "Energy": ["Equipment & services", "Fossil fuels", "Nuclear", "Power & utilities", "Renewables"],
+  "Financial services": ["Accountancy", "Actuaries", "Banking (Retail/Commercial)", "Corporate finance", "Insurance services", "Investment management", "Private equity & venture capital"],
+  "Health": ["Healthcare providers", "Healthcare technology", "Managed care", "Medical devices", "Pharmaceuticals/Biotech"],
+  "Hospitality": ["Accommodation", "Entertainment & recreation", "Food & Beverage", "Meetings & events", "Travel & tourism"],
+  "Legal services": ["Law firms", "Legal technology", "Patent attorneys"],
+  "Manufacturing": ["Chemicals", "Electronics", "Food manufacturing", "Machinery", "Other manufacturing", "Textiles", "Transportation"],
+  "Marketing": ["Communications", "Market research", "Marketing", "Media"],
+  "Other services": ["Business services", "Scientific services", "Technical services"],
+  "Property": ["Architects", "Construction", "Development", "Property advisory", "Property services"],
+  "Recruitment": ["Contingency recruiters", "Executive search", "Niche recruiters", "Staffing agencies"],
+  "Technology": ["Communications equipment", "Hardware & equipment", "Internet services", "Semi-conductors", "Software & services"],
 };
 
 const mainSectors = Object.keys(sectorsBySector).sort();
@@ -311,7 +312,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
                   </div>
                   <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>Hello! I can help you find professional communities. What topic or interest are you looking to explore?</p>
+                    <p>Hello! I can help you find professional communities. What topic or interest are you looking to explore today?</p>
                   </div>
                 </div>
               </>
@@ -613,16 +614,23 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] text-slate-400" />
                           </div>
                           <p className="text-xs text-slate-500 mt-0.5">{community.description}</p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-xs text-slate-700 font-medium">
-                              {community.members.toLocaleString()} members
-                            </span>
-                            <div className="flex gap-1">
-                              {community.tags.slice(0, 2).map((tag, j) => (
-                                <span key={j} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] rounded">
-                                  {tag}
-                                </span>
-                              ))}
+                          <div className="flex flex-col gap-1.5 mt-1.5">
+                            {community.theme && (
+                              <span className="inline-block w-fit px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">
+                                {community.theme}
+                              </span>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-slate-700 font-medium">
+                                {community.members.toLocaleString()} members
+                              </span>
+                              <div className="flex gap-1">
+                                {community.tags.slice(0, 2).map((tag, j) => (
+                                  <span key={j} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] rounded">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 mt-2">
