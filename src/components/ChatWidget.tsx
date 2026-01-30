@@ -518,7 +518,7 @@ const AbstractModal = ({
             {/* Document Header */}
             <div className="header text-center border-b-[3px] border-brand-red pb-6 mb-8">
               <p className="logo-title text-sm font-bold text-brand-red tracking-wider">CENTRE FOR PROFESSIONAL SERVICES RESEARCH</p>
-              <p className="text-xs text-slate-500 mt-1">University of London • Established 2008</p>
+              <p className="text-xs text-slate-500 mt-1">Established 2008</p>
               <h1 className="document-title text-2xl font-bold text-slate-900 mt-4 mb-2">
                 Expert Publications Abstract
               </h1>
@@ -600,7 +600,7 @@ const AbstractModal = ({
                 © {new Date().getFullYear()} Centre for Professional Services Research
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                University of London • Senate House, Malet Street, London WC1E 7HU
+                www.cpsresearch.org • research@cpsresearch.org
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 www.cpsresearch.org • research@cpsresearch.org
