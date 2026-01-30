@@ -25,34 +25,41 @@ const communities: Community[] = [
   { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms", url: "#", tags: ["SME", "Business development"], theme: "Business Growth" },
 ];
 
-// All lists alphabetically sorted
+// All lists alphabetically sorted - excluding Antarctica
 const continents = [
-  "Africa", "Antarctica", "Asia", "Australia", "Europe", "North America", "South America"
+  "Africa", "Asia", "Australia", "Europe", "North America", "South America"
 ].sort();
 
-const countries = [
-  "Australia", "Canada", "France", "Germany", "Japan", "Netherlands",
-  "Singapore", "UAE", "United Kingdom", "United States"
-].sort();
+// Countries grouped by continent for hierarchical display
+const countriesByContinent: Record<string, string[]> = {
+  "Africa": ["Egypt", "Kenya", "Nigeria", "South Africa"].sort(),
+  "Asia": ["China", "India", "Japan", "Singapore", "UAE"].sort(),
+  "Australia": ["Australia", "New Zealand"].sort(),
+  "Europe": ["France", "Germany", "Netherlands", "United Kingdom"].sort(),
+  "North America": ["Canada", "United States"].sort(),
+  "South America": ["Argentina", "Brazil", "Chile"].sort(),
+};
 
-// Sectors matching expert widget structure
-const sectors = [
-  "Accountancy",
-  "Construction",
-  "Consultancy",
-  "Distribution",
-  "Energy",
-  "Financial services",
-  "Health",
-  "Hospitality",
-  "Legal services",
-  "Manufacturing",
-  "Marketing",
-  "Other services",
-  "Property",
-  "Recruitment",
-  "Technology",
-].sort();
+// Sectors with sub-sectors matching expert widget structure
+const sectorsByCategory: Record<string, string[]> = {
+  "Accountancy": ["Audit", "Tax", "Advisory", "Forensic", "Insolvency"].sort(),
+  "Construction": ["Commercial", "Residential", "Infrastructure", "Civil Engineering"].sort(),
+  "Consultancy": ["Strategy", "Operations", "HR", "IT", "Management"].sort(),
+  "Distribution": ["Logistics", "Warehousing", "Supply Chain", "Retail Distribution"].sort(),
+  "Energy": ["Oil & Gas", "Renewables", "Utilities", "Nuclear"].sort(),
+  "Financial services": ["Banking", "Insurance", "Asset Management", "Private Equity"].sort(),
+  "Health": ["Hospitals", "Pharma", "Biotech", "Medical Devices", "Care Services"].sort(),
+  "Hospitality": ["Hotels", "Restaurants", "Events", "Travel"].sort(),
+  "Legal services": ["Corporate", "Litigation", "IP", "Employment", "Real Estate"].sort(),
+  "Manufacturing": ["Automotive", "Aerospace", "Consumer Goods", "Industrial"].sort(),
+  "Marketing": ["Digital", "Brand", "PR", "Advertising", "Research"].sort(),
+  "Other services": ["Facilities", "Security", "Cleaning", "Outsourcing"].sort(),
+  "Property": ["Commercial", "Residential", "Development", "Investment"].sort(),
+  "Recruitment": ["Executive Search", "Temp", "RPO", "Specialist"].sort(),
+  "Technology": ["Software", "Hardware", "SaaS", "AI/ML", "Cybersecurity"].sort(),
+};
+
+const sectors = Object.keys(sectorsByCategory).sort();
 
 const managementExpertise = [
   "Business development", "Communication", "Facilities", "Finance", 
@@ -117,6 +124,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sectorFilter, setSectorFilter] = useState("any");
+  const [expandedSectors, setExpandedSectors] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [expertiseFilter, setExpertiseFilter] = useState("any");
   const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
@@ -140,7 +148,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setInputValue("");
 
     setTimeout(() => {
-      setMessages((prev) => [...prev, { text: "What are you looking for today?", sender: "bot" }]);
+      setMessages((prev) => [...prev, { text: "What type of communities are you looking for today?", sender: "bot" }]);
       setStep("filters");
     }, 600);
   };
@@ -159,6 +167,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   const handleSectorToggle = (sector: string) => {
     setSelectedSectors(prev => 
+      prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
+    );
+  };
+
+  const handleSectorExpand = (sector: string) => {
+    setExpandedSectors(prev => 
       prev.includes(sector) ? prev.filter(s => s !== sector) : [...prev, sector]
     );
   };
@@ -268,7 +282,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? "any org type"
       : selectedOrgTypes.slice(0, 2).join(", ") + (selectedOrgTypes.length > 2 ? ` +${selectedOrgTypes.length - 2} more` : "");
 
-    return `Communities on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgTypeLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
+    return `Communities based on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgTypeLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
   };
 
   const FilterSection = ({ 
@@ -307,7 +321,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
             <div className="flex items-center gap-3">
               <FontAwesomeIcon icon={faUsers} className="text-sm" />
               <div>
-                <h3 className="font-medium text-sm">Find a Community</h3>
+                <h3 className="font-medium text-sm">Credible voices</h3>
                 <p className="text-xs text-slate-400">Discover professional networks</p>
               </div>
             </div>
@@ -343,7 +357,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </div>
 
                 {/* Location */}
-                <FilterSection title="Location">
+                <FilterSection title="Communities based on location">
                   <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="loc-any" />
@@ -372,15 +386,22 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <Label htmlFor="loc-country" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
                     </div>
                     {locationFilter === "country" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
-                        {countries.map((country) => (
-                          <div key={country} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`country-${country}`}
-                              checked={selectedCountries.includes(country)}
-                              onCheckedChange={() => handleCountryToggle(country)}
-                            />
-                            <Label htmlFor={`country-${country}`} className="text-xs text-slate-600 cursor-pointer">{country}</Label>
+                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                        {continents.map((continent) => (
+                          <div key={continent}>
+                            <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">{continent}</p>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {countriesByContinent[continent]?.map((country) => (
+                                <div key={country} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`country-${country}`}
+                                    checked={selectedCountries.includes(country)}
+                                    onCheckedChange={() => handleCountryToggle(country)}
+                                  />
+                                  <Label htmlFor={`country-${country}`} className="text-xs text-slate-600 cursor-pointer">{country}</Label>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -389,7 +410,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* Sectors */}
-                <FilterSection title="Sectors">
+                <FilterSection title="Communities based on sectors">
                   <RadioGroup value={sectorFilter} onValueChange={setSectorFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="sector-any" />
@@ -400,15 +421,36 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <Label htmlFor="sector-specific" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
                     </div>
                     {sectorFilter === "specific" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                      <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-64 overflow-y-auto">
                         {sectors.map((sector) => (
-                          <div key={sector} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`sector-${sector}`}
-                              checked={selectedSectors.includes(sector)}
-                              onCheckedChange={() => handleSectorToggle(sector)}
-                            />
-                            <Label htmlFor={`sector-${sector}`} className="text-xs text-slate-600 cursor-pointer">{sector}</Label>
+                          <div key={sector}>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`sector-${sector}`}
+                                checked={selectedSectors.includes(sector)}
+                                onCheckedChange={() => handleSectorToggle(sector)}
+                              />
+                              <Label 
+                                htmlFor={`sector-${sector}`} 
+                                className="text-xs text-slate-600 cursor-pointer flex-1"
+                              >
+                                {sector}
+                              </Label>
+                              <button
+                                type="button"
+                                onClick={() => handleSectorExpand(sector)}
+                                className="text-[10px] text-slate-400 hover:text-slate-600"
+                              >
+                                {expandedSectors.includes(sector) ? "−" : "+"}
+                              </button>
+                            </div>
+                            {expandedSectors.includes(sector) && sectorsByCategory[sector] && (
+                              <div className="ml-5 mt-1.5 grid grid-cols-2 gap-1 pl-2 border-l border-slate-100">
+                                {sectorsByCategory[sector].map((subSector) => (
+                                  <span key={subSector} className="text-[10px] text-slate-500">{subSector}</span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -417,7 +459,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* Org Type */}
-                <FilterSection title="Org type">
+                <FilterSection title="Communities based on org type">
                   <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="orgtype-any" />
@@ -445,7 +487,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* Expertise */}
-                <FilterSection title="Expertise">
+                <FilterSection title="Communities based on expertise">
                   <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="expertise-any" />
@@ -495,7 +537,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 </FilterSection>
 
                 {/* External Factors (PEST) */}
-                <FilterSection title="External factors">
+                <FilterSection title="Communities based on external factors">
                   <RadioGroup value={externalFactorsFilter} onValueChange={setExternalFactorsFilter} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="external-any" />
