@@ -191,13 +191,20 @@ const sectors = [
 ].sort();
 
 const continents = [
-  "Africa", "Antarctica", "Asia", "Australia", "Europe", "North America", "South America"
+  "Africa", "Asia", "Australia", "Europe", "North America", "South America"
 ].sort();
 
-const countries = [
-  "Australia", "Canada", "France", "Germany", "Japan", "Netherlands",
-  "Singapore", "UAE", "United Kingdom", "United States"
-].sort();
+// Countries grouped by continent for hierarchical display
+const countriesByContinent: Record<string, string[]> = {
+  "Africa": ["Egypt", "Kenya", "Nigeria", "South Africa"].sort(),
+  "Asia": ["China", "India", "Japan", "Singapore", "UAE"].sort(),
+  "Australia": ["Australia", "New Zealand"].sort(),
+  "Europe": ["France", "Germany", "Netherlands", "United Kingdom"].sort(),
+  "North America": ["Canada", "United States"].sort(),
+  "South America": ["Argentina", "Brazil", "Chile"].sort(),
+};
+
+const allCountries = Object.values(countriesByContinent).flat().sort();
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
@@ -647,6 +654,8 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [contentPeriod, setContentPeriod] = useState("any");
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
+  const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
+  const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -725,7 +734,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     }, 1000);
   };
 
-  const handleNewSearch = () => {
+  const confirmNewSearch = () => {
     setStep("topic");
     setTopic("");
     setInputValue("");
@@ -742,6 +751,28 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     setContentPeriod("any");
     setDateRangeFrom("");
     setDateRangeTo("");
+    setShowSaveSearchDialog(false);
+    setPendingNewSearch(false);
+  };
+
+  const handleNewSearch = () => {
+    // If we have results, ask if they want to save first
+    if (step === "results" && topic) {
+      setShowSaveSearchDialog(true);
+      setPendingNewSearch(true);
+    } else {
+      confirmNewSearch();
+    }
+  };
+
+  const handleSaveAndNewSearch = () => {
+    // Here you would save the search to bookmarks/history
+    // For now, just proceed with new search
+    confirmNewSearch();
+  };
+
+  const handleDontSaveNewSearch = () => {
+    confirmNewSearch();
   };
 
   const buildRecapSummary = () => {
@@ -829,8 +860,8 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
               <FontAwesomeIcon icon={faUserTie} className="text-xs" />
             </div>
-            <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-              <p>Hello. I can help you identify accurate voices and experts for your next report or panel.</p>
+          <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+              <p>Hello. I can help you identify authoritative experts based on applying an academically validated framework to millions of articles from thousands of organisations.</p>
             </div>
           </div>
 
@@ -928,6 +959,24 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                             )}
                           </div>
                         ))}
+                        {/* Other option */}
+                        <div className="flex items-center space-x-2 mt-2 pt-2 border-t border-slate-100">
+                          <Checkbox 
+                            id="org-other" 
+                            checked={selectedOrgs.includes("Other")}
+                            onCheckedChange={() => handleOrgToggle("Other")}
+                          />
+                          <Label htmlFor="org-other" className="text-[11px] font-medium text-slate-700 cursor-pointer">Other</Label>
+                        </div>
+                        {selectedOrgs.includes("Other") && (
+                          <div className="ml-5 mt-1.5 border-l-2 border-slate-100 pl-3">
+                            <input
+                              type="url"
+                              placeholder="Enter organisation URL..."
+                              className="w-full px-2 py-1.5 text-[11px] border border-slate-200 rounded focus:outline-none focus:border-brand-red"
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -1000,15 +1049,22 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       <Label htmlFor="loc-specific-countries" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
                     </div>
                     {locationFilter === "specific-countries" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
-                        {countries.map((country) => (
-                          <div key={country} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`country-${country}`} 
-                              checked={selectedCountries.includes(country)}
-                              onCheckedChange={() => handleCountryToggle(country)}
-                            />
-                            <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
+                      <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                        {continents.map((continent) => (
+                          <div key={continent}>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">{continent}</p>
+                            <div className="grid grid-cols-2 gap-1.5 mb-2">
+                              {countriesByContinent[continent]?.map((country) => (
+                                <div key={country} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`country-${country}`} 
+                                    checked={selectedCountries.includes(country)}
+                                    onCheckedChange={() => handleCountryToggle(country)}
+                                  />
+                                  <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1099,7 +1155,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   )}
                 </div>
 
-                {/* Role - Now after Period */}
+                {/* Role - Now after Period - Alphabetically sorted */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
                   <div className="space-y-2">
@@ -1110,30 +1166,6 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         onCheckedChange={() => handleRoleToggle("author")}
                       />
                       <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-leader" 
-                        checked={roles.includes("leader")}
-                        onCheckedChange={() => handleRoleToggle("leader")}
-                      />
-                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-contributor" 
-                        checked={roles.includes("contributor")}
-                        onCheckedChange={() => handleRoleToggle("contributor")}
-                      />
-                      <Label htmlFor="role-contributor" className="text-xs text-slate-700 cursor-pointer">A contributor to a publication</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-team" 
-                        checked={roles.includes("team")}
-                        onCheckedChange={() => handleRoleToggle("team")}
-                      />
-                      <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
                     </div>
                     {sourceFilter !== "my-org" && (
                       <div className="flex items-center space-x-2">
@@ -1147,11 +1179,35 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     )}
                     <div className="flex items-center space-x-2">
                       <Checkbox 
+                        id="role-contributor" 
+                        checked={roles.includes("contributor")}
+                        onCheckedChange={() => handleRoleToggle("contributor")}
+                      />
+                      <Label htmlFor="role-contributor" className="text-xs text-slate-700 cursor-pointer">A contributor to a publication</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
                         id="role-researcher" 
                         checked={roles.includes("researcher")}
                         onCheckedChange={() => handleRoleToggle("researcher")}
                       />
                       <Label htmlFor="role-researcher" className="text-xs text-slate-700 cursor-pointer">A contributor to a research study</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-leader" 
+                        checked={roles.includes("leader")}
+                        onCheckedChange={() => handleRoleToggle("leader")}
+                      />
+                      <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-team" 
+                        checked={roles.includes("team")}
+                        onCheckedChange={() => handleRoleToggle("team")}
+                      />
+                      <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
                     </div>
                   </div>
                 </div>
@@ -1412,6 +1468,41 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         topic={topic}
         experts={experts}
       />
+
+      {/* Save Search Dialog */}
+      <Dialog open={showSaveSearchDialog} onOpenChange={setShowSaveSearchDialog}>
+        <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden">
+          <div className="bg-slate-800 text-white p-4">
+            <h3 className="font-medium text-sm">Save this search?</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Would you like to save your current search before starting a new one?</p>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded">
+              <span className="font-medium">Current search:</span> {topic}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveAndNewSearch}
+                className="flex-1 bg-brand-red text-white text-xs font-medium py-2 rounded hover:bg-brand-red/90 transition-colors"
+              >
+                Save & New Search
+              </button>
+              <button
+                onClick={handleDontSaveNewSearch}
+                className="flex-1 bg-slate-200 text-slate-700 text-xs font-medium py-2 rounded hover:bg-slate-300 transition-colors"
+              >
+                Don't Save
+              </button>
+            </div>
+            <button
+              onClick={() => setShowSaveSearchDialog(false)}
+              className="w-full text-xs text-slate-500 hover:text-slate-700 transition-colors py-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
