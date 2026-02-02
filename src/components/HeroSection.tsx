@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots, faUsers } from "@fortawesome/free-solid-svg-icons";
 import heroImage from "@/assets/london-hero.png";
+import cpsrLogoWhite from "@/assets/cpsr-logo-white.png";
 
 interface HeroSectionProps {
   onOpenExpertFinder: () => void;
@@ -10,7 +11,7 @@ interface HeroSectionProps {
 const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionProps) => {
   return (
     <header
-      className="hero-section py-20 sm:py-40 flex items-center justify-center min-h-[85vh] sm:min-h-screen relative"
+      className="hero-section py-20 sm:py-32 flex items-center justify-center min-h-screen relative -mt-20 sm:-mt-24"
       style={{
         backgroundImage: `url(${heroImage})`,
         backgroundSize: 'cover',
@@ -18,7 +19,14 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
       }}
     >
       <div className="hero-glow"></div>
-      <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 text-center relative z-10">
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 text-center relative z-10 pt-20 sm:pt-24">
+        {/* White CPSR Logo */}
+        <img 
+          src={cpsrLogoWhite} 
+          alt="Centre for Professional Services Research" 
+          className="h-12 sm:h-16 md:h-20 w-auto mx-auto mb-8 sm:mb-12"
+        />
+        
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-medium tracking-tight mb-6 sm:mb-8 leading-tight font-serif text-white">
           Empowering <span className="italic text-slate-300">insight</span> <br className="hidden sm:block" />
           <span className="sm:hidden"> </span>and collaboration

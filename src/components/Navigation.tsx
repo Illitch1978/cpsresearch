@@ -9,9 +9,10 @@ interface NavigationProps {
   onShowContribute: () => void;
   onShowContact: () => void;
   onNavigateToSection: (section: string) => void;
+  isTransparent?: boolean;
 }
 
-const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToSection }: NavigationProps) => {
+const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToSection, isTransparent = false }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleNavClick = (action: () => void) => {
@@ -20,10 +21,17 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
   };
 
   return (
-    <nav className="bg-white sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+      isTransparent 
+        ? 'bg-transparent border-b border-transparent' 
+        : 'bg-white border-b border-gray-100 shadow-sm'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 sm:h-24">
-          <div className="flex items-center cursor-pointer" onClick={() => handleNavClick(onShowHome)}>
+          <div 
+            className={`flex items-center cursor-pointer transition-opacity duration-300 ${isTransparent ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} 
+            onClick={() => handleNavClick(onShowHome)}
+          >
             <div className="flex-shrink-0 flex items-center gap-3 sm:gap-4">
               <img
                 src={cpsrLogo}
@@ -46,25 +54,33 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-10">
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); }}
-              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
+                isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
+              }`}
             >
               About
             </button>
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); }}
-              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
+                isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
+              }`}
             >
               Initiatives
             </button>
             <button
               onClick={onShowContribute}
-              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans"
+              className={`text-sm font-medium transition-colors duration-200 font-sans ${
+                isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
+              }`}
             >
               Contribute
             </button>
             <button
               onClick={onShowContact}
-              className="text-slate-600 hover:text-brand-red text-sm font-medium transition-colors duration-200 font-sans cursor-pointer"
+              className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
+                isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
+              }`}
             >
               Contact
             </button>
@@ -75,7 +91,9 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
           <div className="flex items-center sm:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 transition-colors"
+              className={`p-2 transition-colors ${
+                isTransparent ? 'text-white hover:text-white/80' : 'text-slate-600 hover:text-slate-900'
+              }`}
               aria-label="Toggle menu"
             >
               <FontAwesomeIcon icon={isMobileMenuOpen ? faTimes : faBars} className="text-xl" />
