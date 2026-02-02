@@ -51,7 +51,7 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-10">
+          <div className="hidden sm:ml-auto sm:flex sm:items-center space-x-6">
             <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('about'), 100); }}
               className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
