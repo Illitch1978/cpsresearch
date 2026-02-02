@@ -339,7 +339,15 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
                   </div>
                   <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>Hello! What topic are you interested in?</p>
+                    <p>Hello. I can help you identify free-to-join online communities where you can collaborate with peers on topics of mutual interest.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                    <FontAwesomeIcon icon={faUsers} className="text-xs" />
+                  </div>
+                  <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                    <p>What topic are you researching?</p>
                   </div>
                 </div>
               </>
@@ -723,6 +731,20 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Create Community Button */}
+                <div className="mt-4 pt-3 border-t border-slate-200">
+                  <button
+                    disabled={true}
+                    className="w-full py-2.5 px-4 bg-slate-200 text-slate-400 text-xs font-medium rounded cursor-not-allowed"
+                    title="Available after 30 days of membership"
+                  >
+                    Create community
+                  </button>
+                  <p className="text-[10px] text-slate-400 text-center mt-1.5">
+                    Available after 30 days of membership
+                  </p>
                 </div>
               </div>
             )}
