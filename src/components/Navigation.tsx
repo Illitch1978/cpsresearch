@@ -26,7 +26,7 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
         ? 'bg-transparent border-b border-transparent' 
         : 'bg-white border-b border-gray-100 shadow-sm'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isTransparent ? 'max-w-full' : 'max-w-7xl'}`}>
         <div className="flex justify-between h-20 sm:h-24">
           <div 
             className={`flex items-center cursor-pointer transition-opacity duration-300 ${isTransparent ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} 
