@@ -654,6 +654,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [contentPeriod, setContentPeriod] = useState("any");
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
+  const [expertRoles, setExpertRoles] = useState<string[]>([]);
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -715,6 +716,16 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     );
   };
 
+  const handleExpertRoleToggle = (role: string) => {
+    if (role === "any") {
+      setExpertRoles([]);
+    } else {
+      setExpertRoles(prev => 
+        prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+      );
+    }
+  };
+
   const handleExpertBookmark = (expertName: string) => {
     setBookmarkedExperts(prev => 
       prev.includes(expertName) ? prev.filter(n => n !== expertName) : [...prev, expertName]
@@ -751,6 +762,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     setContentPeriod("any");
     setDateRangeFrom("");
     setDateRangeTo("");
+    setExpertRoles([]);
     setShowSaveSearchDialog(false);
     setPendingNewSearch(false);
   };
@@ -786,7 +798,11 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           if (r === "consultant") return "External Consultant";
           return r;
         }).join(" + ")
-      : "Expertise";
+      : "Experts";
+    
+    const expertRoleText = expertRoles.length > 0 
+      ? expertRoles.slice(0, 2).join(", ") + (expertRoles.length > 2 ? ` +${expertRoles.length - 2} more` : "")
+      : "any expert role";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
@@ -818,7 +834,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     else if (contentPeriod === "5-plus-years") periodText = "5+ years ago";
     else if (contentPeriod === "date-range") periodText = dateRangeFrom || dateRangeTo ? `${dateRangeFrom || "?"} - ${dateRangeTo || "?"}` : "date range";
 
-    return `${roleText} on "${topic}"; sourced from ${sourceText}; ${locationText}; ${projectText}; ${periodText}`;
+    return `${roleText} in "${topic}"; ${expertRoleText}; sourced from ${sourceText}; ${locationText}; ${projectText}; ${periodText}`;
   };
 
   return (
@@ -1006,7 +1022,46 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   </RadioGroup>
                 </div>
 
-                {/* Location Filter */}
+                {/* Expert Role Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Expert role</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="expert-role-any" 
+                        checked={expertRoles.length === 0}
+                        onCheckedChange={() => handleExpertRoleToggle("any")}
+                      />
+                      <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Any expert role</Label>
+                    </div>
+                    {[
+                      "Academia",
+                      "Charities",
+                      "Diplomacy",
+                      "Entrepreneurship",
+                      "Financial services",
+                      "Health",
+                      "Leadership & Governance",
+                      "Management",
+                      "Mentorship",
+                      "Philanthropy",
+                      "Professional services",
+                      "Public policy",
+                      "Teams",
+                      "Technology"
+                    ].map((role) => (
+                      <div key={role} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} 
+                          checked={expertRoles.includes(role)}
+                          onCheckedChange={() => handleExpertRoleToggle(role)}
+                        />
+                        <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Based in</p>
                   <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
