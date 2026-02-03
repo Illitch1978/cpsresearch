@@ -326,17 +326,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
             {/* Filter Options */}
             {step === "filters" && (
               <div className="pl-11 flex flex-col gap-4 animate-fade-in">
-                {/* Recap Summary - Only show after selections have been made */}
-                {(sourceFilter !== "all" || selectedSectors.length > 0 || locationFilter !== "any" || 
-                  selectedContinents.length > 0 || selectedCountries.length > 0 || orgTypeFilter !== "any" ||
-                  selectedOrgTypes.length > 0 || selectedExpertise.length > 0 || selectedExternalFactors.length > 0) && (
-                  <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
-                    <p className="text-xs text-brand-red leading-relaxed">
-                      {buildRecapSummary()}
-                    </p>
-                  </div>
-                )}
-
                 <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
                   
                   {/* 1. Location Filter */}
@@ -346,18 +335,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="loc-any" />
                         <Label htmlFor="loc-any" className="text-xs text-slate-700 cursor-pointer">Any location</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="my-city" id="loc-my-city" />
-                        <Label htmlFor="loc-my-city" className="text-xs text-slate-700 cursor-pointer">My city</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="my-country" id="loc-my-country" />
-                        <Label htmlFor="loc-my-country" className="text-xs text-slate-700 cursor-pointer">My country</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="my-continent" id="loc-my-continent" />
-                        <Label htmlFor="loc-my-continent" className="text-xs text-slate-700 cursor-pointer">My continent</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="specific-continents" id="loc-specific-continents" />
@@ -412,10 +389,6 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="all" id="source-all" />
                         <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="my-sector" id="source-my-sector" />
-                        <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="specific-sectors" id="source-specific-sectors" />
@@ -473,9 +446,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                         <Label htmlFor="orgtype-specific" className="text-xs text-slate-700 cursor-pointer">Specific org types</Label>
                       </div>
                       {orgTypeFilter === "specific" && (
-                        <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
+                        <div className="ml-5 flex flex-col flex-wrap gap-1.5 border-l-2 border-slate-100 pl-3 max-h-44">
                           {orgTypes.map((item) => (
-                            <div key={item} className="flex items-center space-x-2">
+                            <div key={item} className="flex items-center space-x-2 w-[45%]">
                               <Checkbox 
                                 id={`orgtype-${item}`}
                                 checked={selectedOrgTypes.includes(item)}
