@@ -76,22 +76,29 @@ const orgTypes = [
   "Virtual firm",
 ].sort();
 
-// Expertise areas for communities
-const expertiseList = [
-  "Academia",
-  "Charities",
-  "Diplomacy",
-  "Entrepreneurship",
-  "Financial services",
-  "Health",
-  "Leadership & Governance",
-  "Management",
-  "Mentorship",
-  "Philanthropy",
-  "Professional services",
-  "Public policy",
-  "Team membership",
-  "Technology"
+// Expertise areas for communities - split into two categories
+const managementExpertiseList = [
+  "Change management",
+  "Crisis management",
+  "Financial management",
+  "Knowledge management",
+  "Operations management",
+  "People management",
+  "Performance management",
+  "Project management",
+  "Risk management",
+  "Strategic management"
+];
+
+const leadershipExpertiseList = [
+  "Board development",
+  "Corporate governance",
+  "Executive leadership",
+  "Leadership development",
+  "Non-executive directorship",
+  "Regulatory compliance",
+  "Stakeholder engagement",
+  "Succession planning"
 ];
 
 // Contribution areas for communities (singular for display, plural for recap)
@@ -283,11 +290,11 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? selectedExternalFactors.slice(0, 2).join(", ") + (selectedExternalFactors.length > 2 ? ` +${selectedExternalFactors.length - 2} more` : "")
       : "any external factor";
 
-    // Build the summary with contributions first if selected
+    // Build the summary with contributions first if selected - start with "Communities based on TOPIC"
     if (contributionsText) {
-      return `Communities in "${topic}" ${contributionsText}; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
+      return `Communities based on "${topic}" ${contributionsText}; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
     }
-    return `Communities in "${topic}"; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
+    return `Communities based on "${topic}"; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
   };
 
   return (
@@ -504,9 +511,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     </RadioGroup>
                   </div>
 
-                  {/* 4. Expertise Filter */}
+                  {/* 4. Management Expertise Filter */}
                   <div>
-                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on expertise</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on management expertise</p>
                     <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="expertise-any" />
@@ -517,20 +524,37 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                         <Label htmlFor="expertise-specific" className="text-xs text-slate-700 cursor-pointer">Specific expertise</Label>
                       </div>
                       {expertiseFilter === "specific" && (
-                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
-                          {expertiseList.map((expertise) => (
+                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
+                          {managementExpertiseList.map((expertise) => (
                             <div key={expertise} className="flex items-center space-x-2">
                               <Checkbox 
-                                id={`expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
+                                id={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
                                 checked={selectedExpertise.includes(expertise)}
                                 onCheckedChange={() => handleExpertiseToggle(expertise)}
                               />
-                              <Label htmlFor={`expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                              <Label htmlFor={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
                             </div>
                           ))}
                         </div>
                       )}
                     </RadioGroup>
+                  </div>
+
+                  {/* 5. Leadership & Governance Expertise Filter */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on leadership & governance expertise</p>
+                    <div className="space-y-2">
+                      {leadershipExpertiseList.map((expertise) => (
+                        <div key={expertise} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
+                            checked={selectedExpertise.includes(expertise)}
+                            onCheckedChange={() => handleExpertiseToggle(expertise)}
+                          />
+                          <Label htmlFor={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* 5. External Factors Filter */}
