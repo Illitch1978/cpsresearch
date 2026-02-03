@@ -1019,7 +1019,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
                 {/* Expert Role Filter */}
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Expert role</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience in</p>
                   <RadioGroup value={expertRole} onValueChange={setExpertRole} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="expert-role-any" />
@@ -1038,7 +1038,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       "Philanthropy",
                       "Professional services",
                       "Public policy",
-                      "Teams",
+                      "Team membership",
                       "Technology"
                     ].map((role) => (
                       <div key={role} className="flex items-center space-x-2">
