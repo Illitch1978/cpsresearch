@@ -94,15 +94,15 @@ const expertiseList = [
   "Technology"
 ];
 
-// Contribution areas for communities
+// Contribution areas for communities (singular for display, plural for recap)
 const contributionsList = [
-  "Case study",
-  "Education",
-  "Event",
-  "Mentorship",
-  "Publication",
-  "Research",
-  "Thought leadership"
+  { singular: "Case study", plural: "case studies" },
+  { singular: "Education", plural: "education" },
+  { singular: "Event", plural: "events" },
+  { singular: "Mentorship", plural: "mentorship" },
+  { singular: "Publication", plural: "publications" },
+  { singular: "Research", plural: "research" },
+  { singular: "Thought leadership", plural: "thought leadership" }
 ];
 const externalFactorsList = {
   "Political": [
@@ -257,9 +257,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   // Build recap summary - aligned with ChatWidget style
   const buildRecapSummary = () => {
-    // Contributions come first - what they will do in the community
+    // Contributions come first - what they will do in the community (use plural forms)
     const contributionsText = selectedContributions.length > 0 
-      ? `to contribute ${selectedContributions.join(", ").toLowerCase()}`
+      ? `to contribute ${selectedContributions.map(c => contributionsList.find(item => item.singular === c)?.plural || c.toLowerCase()).join(", ")}`
       : "";
 
     const expertiseText = selectedExpertise.length > 0 
@@ -574,13 +574,13 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <p className="text-xs font-medium text-slate-700 mb-2">To contribute in the following areas</p>
                     <div className="space-y-2">
                       {contributionsList.map((contribution) => (
-                        <div key={contribution} className="flex items-center space-x-2">
+                        <div key={contribution.singular} className="flex items-center space-x-2">
                           <Checkbox 
-                            id={`contribution-${contribution.toLowerCase().replace(/\s+/g, '-')}`}
-                            checked={selectedContributions.includes(contribution)}
-                            onCheckedChange={() => handleContributionToggle(contribution)}
+                            id={`contribution-${contribution.singular.toLowerCase().replace(/\s+/g, '-')}`}
+                            checked={selectedContributions.includes(contribution.singular)}
+                            onCheckedChange={() => handleContributionToggle(contribution.singular)}
                           />
-                          <Label htmlFor={`contribution-${contribution.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{contribution}</Label>
+                          <Label htmlFor={`contribution-${contribution.singular.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{contribution.singular}</Label>
                         </div>
                       ))}
                     </div>
