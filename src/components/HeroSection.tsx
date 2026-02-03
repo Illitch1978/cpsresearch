@@ -24,7 +24,7 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
         <img 
           src={cpsrLogoWhite} 
           alt="Centre for Professional Services Research" 
-          className="h-12 sm:h-16 md:h-20 w-auto mx-auto mb-36 sm:mb-40"
+          className="h-12 sm:h-16 md:h-20 w-auto mx-auto mb-48 sm:mb-52"
         />
         
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-medium tracking-tight mb-6 sm:mb-8 leading-tight font-serif text-white">
