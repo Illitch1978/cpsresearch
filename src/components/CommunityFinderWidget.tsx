@@ -257,20 +257,21 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
   // Build recap summary - aligned with ChatWidget style
   const buildRecapSummary = () => {
+    // Contributions come first - what they will do in the community
+    const contributionsText = selectedContributions.length > 0 
+      ? `to contribute ${selectedContributions.join(", ").toLowerCase()}`
+      : "";
+
     const expertiseText = selectedExpertise.length > 0 
       ? selectedExpertise.slice(0, 2).join(", ") + (selectedExpertise.length > 2 ? ` +${selectedExpertise.length - 2} more` : "")
       : "any expertise";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any sector";
-    else if (sourceFilter === "my-sector") sourceText = "my sector";
     else if (sourceFilter === "specific-sectors") sourceText = selectedSectors.length > 0 ? selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "") : "specific sectors";
 
     let locationText = "";
     if (locationFilter === "any") locationText = "any location";
-    else if (locationFilter === "my-city") locationText = "my city";
-    else if (locationFilter === "my-country") locationText = "my country";
-    else if (locationFilter === "my-continent") locationText = "my continent";
     else if (locationFilter === "specific-continents") locationText = selectedContinents.length > 0 ? selectedContinents.slice(0, 2).join(", ") + (selectedContinents.length > 2 ? ` +${selectedContinents.length - 2} more` : "") : "specific continents";
     else if (locationFilter === "specific-countries") locationText = selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries";
 
@@ -282,6 +283,10 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? selectedExternalFactors.slice(0, 2).join(", ") + (selectedExternalFactors.length > 2 ? ` +${selectedExternalFactors.length - 2} more` : "")
       : "any external factor";
 
+    // Build the summary with contributions first if selected
+    if (contributionsText) {
+      return `Communities in "${topic}" ${contributionsText}; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
+    }
     return `Communities in "${topic}"; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
   };
 
