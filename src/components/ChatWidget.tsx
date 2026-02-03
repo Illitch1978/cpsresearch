@@ -908,16 +908,6 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           {/* Filter Options */}
           {step === "filters" && (
             <div className="pl-11 flex flex-col gap-4 animate-fade-in">
-              {/* Recap Summary - Only show after selections have been made */}
-              {(sourceFilter !== "all" || selectedOrgs.length > 0 || locationFilter !== "any" || 
-                selectedContinents.length > 0 || selectedCountries.length > 0 || projectType !== "all" || 
-                contentPeriod !== "any" || expertRole !== "any" || roles.length > 0) && (
-                <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
-                  <p className="text-xs text-brand-red leading-relaxed">
-                    {buildRecapSummary()}
-                  </p>
-                </div>
-              )}
 
               <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
                 
@@ -1204,14 +1194,6 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
                   <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-any" 
-                        checked={roles.length === 0}
-                        onCheckedChange={() => setRoles([])}
-                      />
-                      <Label htmlFor="role-any" className="text-xs text-slate-700 cursor-pointer">Any content type</Label>
-                    </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="role-author" 
