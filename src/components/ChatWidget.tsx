@@ -1469,6 +1469,17 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                   </div>
                 ))}
+                
+                {/* Create Community CTA */}
+                <div className="mt-2 flex flex-col items-center gap-1">
+                  <button 
+                    className="w-full bg-slate-100 text-slate-500 text-xs font-medium py-2.5 rounded hover:bg-slate-200 transition-colors cursor-not-allowed"
+                    disabled
+                  >
+                    Create community
+                  </button>
+                  <p className="text-[10px] text-slate-400">Available after 30 days of membership</p>
+                </div>
               </div>
             </>
           )}
