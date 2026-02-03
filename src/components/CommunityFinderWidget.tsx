@@ -455,7 +455,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                   {/* 3. Org Types Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Org types</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on org type</p>
                     <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="orgtype-any" />
@@ -484,7 +484,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                   {/* 4. Expertise Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Expertise</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on expertise</p>
                     <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="expertise-any" />
@@ -513,7 +513,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                   {/* 5. External Factors Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">External factors</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on external factors</p>
                     <RadioGroup value={externalFactorFilter} onValueChange={setExternalFactorFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="external-any" />
