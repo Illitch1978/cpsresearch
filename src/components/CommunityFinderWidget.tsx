@@ -94,12 +94,12 @@ const expertiseList = [
   "Technology"
 ];
 
-// External factors for communities
+// External factors for communities (PEST analysis)
 const externalFactorsList = [
-  "DEI & Inclusion",
-  "ESG & Sustainability",
-  "Innovation & Disruption",
-  "Work arrangements"
+  "Political",
+  "Economic",
+  "Social",
+  "Technological"
 ];
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
