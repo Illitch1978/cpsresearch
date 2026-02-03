@@ -78,27 +78,34 @@ const orgTypes = [
 
 // Expertise areas for communities - split into two categories
 const managementExpertiseList = [
-  "Change management",
-  "Crisis management",
-  "Financial management",
-  "Knowledge management",
-  "Operations management",
-  "People management",
+  "Business development",
+  "Communication",
+  "Facilities",
+  "Finance",
+  "Government liaison",
+  "Human resources",
+  "Innovation",
+  "Learning & Development",
+  "Marketing",
+  "Operations",
   "Performance management",
-  "Project management",
-  "Risk management",
-  "Strategic management"
+  "Planning",
+  "Procurement",
+  "Product development",
+  "Risk",
+  "Sales",
+  "Sustainability (DEI, CSR)",
+  "Technology"
 ];
 
 const leadershipExpertiseList = [
-  "Board development",
-  "Corporate governance",
-  "Executive leadership",
-  "Leadership development",
-  "Non-executive directorship",
-  "Regulatory compliance",
-  "Stakeholder engagement",
-  "Succession planning"
+  "Board/ExCo (Chairman, NED, Member)",
+  "Chief of Staff",
+  "Divisional Leadership",
+  "Firmwide Leadership",
+  "Governance",
+  "Project leadership",
+  "Strategy"
 ];
 
 // Contribution areas for communities (singular for display, plural for recap)
