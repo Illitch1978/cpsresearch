@@ -94,7 +94,16 @@ const expertiseList = [
   "Technology"
 ];
 
-// External factors for communities (PEST analysis)
+// Contribution areas for communities
+const contributionsList = [
+  "Case study",
+  "Education",
+  "Event",
+  "Mentorship",
+  "Publication",
+  "Research",
+  "Thought leadership"
+];
 const externalFactorsList = {
   "Political": [
     "Government Policies & Stability",
@@ -148,6 +157,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
   const [externalFactorFilter, setExternalFactorFilter] = useState("any");
   const [selectedExternalFactors, setSelectedExternalFactors] = useState<string[]>([]);
+  const [selectedContributions, setSelectedContributions] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
 
@@ -207,6 +217,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     );
   };
 
+  const handleContributionToggle = (contribution: string) => {
+    setSelectedContributions(prev => 
+      prev.includes(contribution) ? prev.filter(c => c !== contribution) : [...prev, contribution]
+    );
+  };
+
   const handleCommunityBookmark = (name: string) => {
     setBookmarkedCommunities(prev => 
       prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
@@ -236,6 +252,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSelectedOrgTypes([]);
     setExternalFactorFilter("any");
     setSelectedExternalFactors([]);
+    setSelectedContributions([]);
   };
 
   // Build recap summary - aligned with ChatWidget style
@@ -350,7 +367,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   
                   {/* 1. Location Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Locations</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on location</p>
                     <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="loc-any" />
@@ -404,7 +421,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                   {/* 2. Sectors Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Sectors</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on sectors</p>
                     <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="all" id="source-all" />
@@ -545,6 +562,23 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                         </div>
                       )}
                     </RadioGroup>
+                  </div>
+
+                  {/* 6. Contributions Filter */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-700 mb-2">To contribute in the following areas</p>
+                    <div className="space-y-2">
+                      {contributionsList.map((contribution) => (
+                        <div key={contribution} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`contribution-${contribution.toLowerCase().replace(/\s+/g, '-')}`}
+                            checked={selectedContributions.includes(contribution)}
+                            onCheckedChange={() => handleContributionToggle(contribution)}
+                          />
+                          <Label htmlFor={`contribution-${contribution.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{contribution}</Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
