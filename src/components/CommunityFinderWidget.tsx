@@ -95,12 +95,32 @@ const expertiseList = [
 ];
 
 // External factors for communities (PEST analysis)
-const externalFactorsList = [
-  "Political",
-  "Economic",
-  "Social",
-  "Technological"
-];
+const externalFactorsList = {
+  "Political": [
+    "Government Policies & Stability",
+    "Regulatory Environment",
+    "International Relations",
+    "Funding & Grants"
+  ],
+  "Economic": [
+    "Macroeconomic Trends",
+    "Market Conditions",
+    "Consumer Behaviors",
+    "Cost Factors"
+  ],
+  "Social": [
+    "Demographics",
+    "Lifestyle & Trends",
+    "Workforce Factors",
+    "Public Opinion"
+  ],
+  "Technological": [
+    "Innovation & R&D",
+    "Operational Technology",
+    "Technology Transfer",
+    "Obsolescence"
+  ]
+};
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
@@ -504,15 +524,22 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                         <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific factors</Label>
                       </div>
                       {externalFactorFilter === "specific" && (
-                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3">
-                          {externalFactorsList.map((factor) => (
-                            <div key={factor} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`}
-                                checked={selectedExternalFactors.includes(factor)}
-                                onCheckedChange={() => handleExternalFactorToggle(factor)}
-                              />
-                              <Label htmlFor={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{factor}</Label>
+                        <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
+                          {Object.entries(externalFactorsList).map(([category, factors]) => (
+                            <div key={category}>
+                              <p className="text-[11px] font-semibold text-slate-700 mb-1.5">{category}</p>
+                              <div className="space-y-1 ml-2">
+                                {factors.map((factor) => (
+                                  <div key={factor} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`}
+                                      checked={selectedExternalFactors.includes(factor)}
+                                      onCheckedChange={() => handleExternalFactorToggle(factor)}
+                                    />
+                                    <Label htmlFor={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{factor}</Label>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
