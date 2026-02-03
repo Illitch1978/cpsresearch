@@ -75,7 +75,7 @@ export default {
       },
       fontFamily: {
         serif: ["'Playfair Display'", "serif"],
-        sans: ["'Roboto'", "sans-serif"],
+        sans: ["'Geologica'", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
