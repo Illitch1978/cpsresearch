@@ -19,7 +19,7 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
       }}
     >
       <div className="hero-glow"></div>
-      <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 text-center relative z-10 pt-20 sm:pt-24">
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 text-center relative z-10 pt-8 sm:pt-12">
         {/* White CPSR Logo */}
         <img 
           src={cpsrLogoWhite} 
