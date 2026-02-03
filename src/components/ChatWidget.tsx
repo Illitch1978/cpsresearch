@@ -1023,7 +1023,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   <RadioGroup value={expertRole} onValueChange={setExpertRole} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="expert-role-any" />
-                      <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Any expert role</Label>
+                      <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Unspecified</Label>
                     </div>
                     {[
                       "Academia",
