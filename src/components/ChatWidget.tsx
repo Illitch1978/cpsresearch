@@ -654,7 +654,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [contentPeriod, setContentPeriod] = useState("any");
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
-  const [expertRoles, setExpertRoles] = useState<string[]>([]);
+  const [expertRole, setExpertRole] = useState("any");
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -716,15 +716,8 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     );
   };
 
-  const handleExpertRoleToggle = (role: string) => {
-    if (role === "any") {
-      setExpertRoles([]);
-    } else {
-      setExpertRoles(prev => 
-        prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
-      );
-    }
-  };
+  // Expert role is now single select (radio)
+  // Roles (As) toggle is multi-select (checkboxes)
 
   const handleExpertBookmark = (expertName: string) => {
     setBookmarkedExperts(prev => 
@@ -762,7 +755,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     setContentPeriod("any");
     setDateRangeFrom("");
     setDateRangeTo("");
-    setExpertRoles([]);
+    setExpertRole("any");
     setShowSaveSearchDialog(false);
     setPendingNewSearch(false);
   };
@@ -800,9 +793,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         }).join(" + ")
       : "Experts";
     
-    const expertRoleText = expertRoles.length > 0 
-      ? expertRoles.slice(0, 2).join(", ") + (expertRoles.length > 2 ? ` +${expertRoles.length - 2} more` : "")
-      : "any expert role";
+    const expertRoleText = expertRole !== "any" ? expertRole : "any expert role";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
@@ -1025,13 +1016,9 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 {/* Expert Role Filter */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Expert role</p>
-                  <div className="space-y-2">
+                  <RadioGroup value={expertRole} onValueChange={setExpertRole} className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="expert-role-any" 
-                        checked={expertRoles.length === 0}
-                        onCheckedChange={() => handleExpertRoleToggle("any")}
-                      />
+                      <RadioGroupItem value="any" id="expert-role-any" />
                       <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Any expert role</Label>
                     </div>
                     {[
@@ -1051,15 +1038,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       "Technology"
                     ].map((role) => (
                       <div key={role} className="flex items-center space-x-2">
-                        <Checkbox 
+                        <RadioGroupItem 
+                          value={role} 
                           id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} 
-                          checked={expertRoles.includes(role)}
-                          onCheckedChange={() => handleExpertRoleToggle(role)}
                         />
                         <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
                       </div>
                     ))}
-                  </div>
+                  </RadioGroup>
                 </div>
 
                 <div>
@@ -1213,38 +1199,66 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 {/* Role - Now after Period - Alphabetically sorted */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
-                  <RadioGroup value={roles[0] || "any"} onValueChange={(val) => setRoles(val === "any" ? [] : [val])} className="space-y-2">
+                  <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="role-any" />
+                      <Checkbox 
+                        id="role-any" 
+                        checked={roles.length === 0}
+                        onCheckedChange={() => setRoles([])}
+                      />
                       <Label htmlFor="role-any" className="text-xs text-slate-700 cursor-pointer">Any content type</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="author" id="role-author" />
+                      <Checkbox 
+                        id="role-author" 
+                        checked={roles.includes("author")}
+                        onCheckedChange={() => handleRoleToggle("author")}
+                      />
                       <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
                     </div>
                     {sourceFilter !== "my-org" && (
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="consultant" id="role-consultant" />
+                        <Checkbox 
+                          id="role-consultant" 
+                          checked={roles.includes("consultant")}
+                          onCheckedChange={() => handleRoleToggle("consultant")}
+                        />
                         <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="contributor" id="role-contributor" />
+                      <Checkbox 
+                        id="role-contributor" 
+                        checked={roles.includes("contributor")}
+                        onCheckedChange={() => handleRoleToggle("contributor")}
+                      />
                       <Label htmlFor="role-contributor" className="text-xs text-slate-700 cursor-pointer">A contributor to a publication</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="researcher" id="role-researcher" />
+                      <Checkbox 
+                        id="role-researcher" 
+                        checked={roles.includes("researcher")}
+                        onCheckedChange={() => handleRoleToggle("researcher")}
+                      />
                       <Label htmlFor="role-researcher" className="text-xs text-slate-700 cursor-pointer">A contributor to a research study</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="leader" id="role-leader" />
+                      <Checkbox 
+                        id="role-leader" 
+                        checked={roles.includes("leader")}
+                        onCheckedChange={() => handleRoleToggle("leader")}
+                      />
                       <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="team" id="role-team" />
+                      <Checkbox 
+                        id="role-team" 
+                        checked={roles.includes("team")}
+                        onCheckedChange={() => handleRoleToggle("team")}
+                      />
                       <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
                     </div>
-                  </RadioGroup>
+                  </div>
                 </div>
               </div>
 
