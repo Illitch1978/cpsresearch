@@ -76,8 +76,8 @@ const orgTypes = [
   "Virtual firm",
 ].sort();
 
-// Expert roles aligned with ChatWidget
-const expertRolesList = [
+// Expertise areas for communities
+const expertiseList = [
   "Academia",
   "Charities",
   "Diplomacy",
@@ -90,8 +90,16 @@ const expertRolesList = [
   "Philanthropy",
   "Professional services",
   "Public policy",
-  "Teams",
+  "Team membership",
   "Technology"
+];
+
+// External factors for communities
+const externalFactorsList = [
+  "DEI & Inclusion",
+  "ESG & Sustainability",
+  "Innovation & Disruption",
+  "Work arrangements"
 ];
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
@@ -114,10 +122,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [expertRoles, setExpertRoles] = useState<string[]>([]);
+  const [expertiseFilter, setExpertiseFilter] = useState("any");
+  const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const [orgTypeFilter, setOrgTypeFilter] = useState("any");
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
-  const [contentType, setContentType] = useState("any");
+  const [externalFactorFilter, setExternalFactorFilter] = useState("any");
+  const [selectedExternalFactors, setSelectedExternalFactors] = useState<string[]>([]);
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
 
@@ -159,14 +169,16 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     );
   };
 
-  const handleExpertRoleToggle = (role: string) => {
-    if (role === "any") {
-      setExpertRoles([]);
-    } else {
-      setExpertRoles(prev => 
-        prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
-      );
-    }
+  const handleExpertiseToggle = (expertise: string) => {
+    setSelectedExpertise(prev => 
+      prev.includes(expertise) ? prev.filter(e => e !== expertise) : [...prev, expertise]
+    );
+  };
+
+  const handleExternalFactorToggle = (factor: string) => {
+    setSelectedExternalFactors(prev => 
+      prev.includes(factor) ? prev.filter(f => f !== factor) : [...prev, factor]
+    );
   };
 
   const handleOrgTypeToggle = (item: string) => {
@@ -198,17 +210,19 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setLocationFilter("any");
     setSelectedContinents([]);
     setSelectedCountries([]);
-    setExpertRoles([]);
+    setExpertiseFilter("any");
+    setSelectedExpertise([]);
     setOrgTypeFilter("any");
     setSelectedOrgTypes([]);
-    setContentType("any");
+    setExternalFactorFilter("any");
+    setSelectedExternalFactors([]);
   };
 
   // Build recap summary - aligned with ChatWidget style
   const buildRecapSummary = () => {
-    const expertRoleText = expertRoles.length > 0 
-      ? expertRoles.slice(0, 2).join(", ") + (expertRoles.length > 2 ? ` +${expertRoles.length - 2} more` : "")
-      : "any expert role";
+    const expertiseText = selectedExpertise.length > 0 
+      ? selectedExpertise.slice(0, 2).join(", ") + (selectedExpertise.length > 2 ? ` +${selectedExpertise.length - 2} more` : "")
+      : "any expertise";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any sector";
@@ -227,9 +241,11 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? "any org type"
       : selectedOrgTypes.slice(0, 2).join(", ") + (selectedOrgTypes.length > 2 ? ` +${selectedOrgTypes.length - 2} more` : "");
 
-    const contentTypeLabel = contentType === "any" ? "any content type" : contentType;
+    const externalFactorsLabel = selectedExternalFactors.length > 0
+      ? selectedExternalFactors.slice(0, 2).join(", ") + (selectedExternalFactors.length > 2 ? ` +${selectedExternalFactors.length - 2} more` : "")
+      : "any external factor";
 
-    return `Communities in "${topic}"; ${expertRoleText}; ${sourceText}; ${locationText}; ${orgTypeLabel}; ${contentTypeLabel}`;
+    return `Communities in "${topic}"; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
   };
 
   return (
@@ -312,8 +328,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
               <div className="pl-11 flex flex-col gap-4 animate-fade-in">
                 {/* Recap Summary - Only show after selections have been made */}
                 {(sourceFilter !== "all" || selectedSectors.length > 0 || locationFilter !== "any" || 
-                  selectedContinents.length > 0 || selectedCountries.length > 0 || orgTypeFilter !== "all" ||
-                  selectedOrgTypes.length > 0 || expertRoles.length > 0 || contentType !== "any") && (
+                  selectedContinents.length > 0 || selectedCountries.length > 0 || orgTypeFilter !== "any" ||
+                  selectedOrgTypes.length > 0 || selectedExpertise.length > 0 || selectedExternalFactors.length > 0) && (
                   <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
                     <p className="text-xs text-brand-red leading-relaxed">
                       {buildRecapSummary()}
@@ -323,89 +339,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                 <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
                   
-                  {/* Source Filter - Sectors */}
+                  {/* 1. Location Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Communities in sector</p>
-                    <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="all" id="source-all" />
-                        <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="my-sector" id="source-my-sector" />
-                        <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="specific-sectors" id="source-specific-sectors" />
-                        <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
-                      </div>
-
-                      {sourceFilter === "specific-sectors" && (
-                        <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
-                          {sectors.map((sector) => (
-                            <div key={sector}>
-                              <div className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`sector-${sector}`}
-                                  checked={selectedSectors.includes(sector)}
-                                  onCheckedChange={() => handleSectorToggle(sector)}
-                                />
-                                <Label 
-                                  htmlFor={`sector-${sector}`} 
-                                  className="text-[11px] text-slate-600 cursor-pointer flex-1"
-                                >
-                                  {sector}
-                                </Label>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSectorExpand(sector)}
-                                  className="text-[10px] text-slate-400 hover:text-slate-600"
-                                >
-                                  {expandedSectors.includes(sector) ? "−" : "+"}
-                                </button>
-                              </div>
-                              {expandedSectors.includes(sector) && sectorsByCategory[sector] && (
-                                <div className="ml-5 mt-1.5 grid grid-cols-2 gap-1 pl-2 border-l border-slate-100">
-                                  {sectorsByCategory[sector].map((subSector) => (
-                                    <span key={subSector} className="text-[10px] text-slate-500">{subSector}</span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </RadioGroup>
-                  </div>
-
-                  {/* Expert Role Filter */}
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Community focus</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="expert-role-any" 
-                          checked={expertRoles.length === 0}
-                          onCheckedChange={() => handleExpertRoleToggle("any")}
-                        />
-                        <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Any focus area</Label>
-                      </div>
-                      {expertRolesList.map((role) => (
-                        <div key={role} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} 
-                            checked={expertRoles.includes(role)}
-                            onCheckedChange={() => handleExpertRoleToggle(role)}
-                          />
-                          <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Location Filter */}
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Based in</p>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Locations</p>
                     <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="loc-any" />
@@ -469,9 +405,64 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     </RadioGroup>
                   </div>
 
-                  {/* Org Type */}
+                  {/* 2. Sectors Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Organisation type</p>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Sectors</p>
+                    <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="all" id="source-all" />
+                        <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="my-sector" id="source-my-sector" />
+                        <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific-sectors" id="source-specific-sectors" />
+                        <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
+                      </div>
+
+                      {sourceFilter === "specific-sectors" && (
+                        <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                          {sectors.map((sector) => (
+                            <div key={sector}>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`sector-${sector}`}
+                                  checked={selectedSectors.includes(sector)}
+                                  onCheckedChange={() => handleSectorToggle(sector)}
+                                />
+                                <Label 
+                                  htmlFor={`sector-${sector}`} 
+                                  className="text-[11px] text-slate-600 cursor-pointer flex-1"
+                                >
+                                  {sector}
+                                </Label>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSectorExpand(sector)}
+                                  className="text-[10px] text-slate-400 hover:text-slate-600"
+                                >
+                                  {expandedSectors.includes(sector) ? "−" : "+"}
+                                </button>
+                              </div>
+                              {expandedSectors.includes(sector) && sectorsByCategory[sector] && (
+                                <div className="ml-5 mt-1.5 grid grid-cols-2 gap-1 pl-2 border-l border-slate-100">
+                                  {sectorsByCategory[sector].map((subSector) => (
+                                    <span key={subSector} className="text-[10px] text-slate-500">{subSector}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* 3. Org Types Filter */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Org types</p>
                     <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="orgtype-any" />
@@ -498,34 +489,61 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     </RadioGroup>
                   </div>
 
-                  {/* Content Type - Now radios */}
+                  {/* 4. Expertise Filter */}
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Content type</p>
-                    <RadioGroup value={contentType} onValueChange={setContentType} className="space-y-2">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Expertise</p>
+                    <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="any" id="content-any" />
-                        <Label htmlFor="content-any" className="text-xs text-slate-700 cursor-pointer">Any content type</Label>
+                        <RadioGroupItem value="any" id="expertise-any" />
+                        <Label htmlFor="expertise-any" className="text-xs text-slate-700 cursor-pointer">Any expertise</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="discussions" id="content-discussions" />
-                        <Label htmlFor="content-discussions" className="text-xs text-slate-700 cursor-pointer">Discussions</Label>
+                        <RadioGroupItem value="specific" id="expertise-specific" />
+                        <Label htmlFor="expertise-specific" className="text-xs text-slate-700 cursor-pointer">Specific expertise</Label>
+                      </div>
+                      {expertiseFilter === "specific" && (
+                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                          {expertiseList.map((expertise) => (
+                            <div key={expertise} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
+                                checked={selectedExpertise.includes(expertise)}
+                                onCheckedChange={() => handleExpertiseToggle(expertise)}
+                              />
+                              <Label htmlFor={`expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* 5. External Factors Filter */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">External factors</p>
+                    <RadioGroup value={externalFactorFilter} onValueChange={setExternalFactorFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="external-any" />
+                        <Label htmlFor="external-any" className="text-xs text-slate-700 cursor-pointer">Any external factor</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="resources" id="content-resources" />
-                        <Label htmlFor="content-resources" className="text-xs text-slate-700 cursor-pointer">Resources & guides</Label>
+                        <RadioGroupItem value="specific" id="external-specific" />
+                        <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific factors</Label>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="events" id="content-events" />
-                        <Label htmlFor="content-events" className="text-xs text-slate-700 cursor-pointer">Events & webinars</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="networking" id="content-networking" />
-                        <Label htmlFor="content-networking" className="text-xs text-slate-700 cursor-pointer">Networking</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="mentorship" id="content-mentorship" />
-                        <Label htmlFor="content-mentorship" className="text-xs text-slate-700 cursor-pointer">Mentorship</Label>
-                      </div>
+                      {externalFactorFilter === "specific" && (
+                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3">
+                          {externalFactorsList.map((factor) => (
+                            <div key={factor} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`}
+                                checked={selectedExternalFactors.includes(factor)}
+                                onCheckedChange={() => handleExternalFactorToggle(factor)}
+                              />
+                              <Label htmlFor={`external-${factor.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{factor}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </RadioGroup>
                   </div>
                 </div>
