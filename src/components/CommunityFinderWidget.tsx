@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faTimes, faPaperPlane, faSpinner, faBookmark, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -61,36 +61,6 @@ const sectorsByCategory: Record<string, string[]> = {
 
 const sectors = Object.keys(sectorsByCategory).sort();
 
-const managementExpertise = [
-  "Business development", "Communication", "Facilities", "Finance", 
-  "Government liaison", "Human resources", "Innovation", "Learning & Development", 
-  "Marketing", "Operations", "Performance management", "Planning", 
-  "Procurement", "Product development", "Risk", "Sales", "Sustainability", "Technology"
-].sort();
-
-const leadershipExpertise = [
-  "Board Member", "Chairman", "Chief of Staff", "Divisional Leadership", 
-  "Firmwide Leadership", "Governance", "NED", "Project leadership", "Strategy"
-].sort();
-
-// PEST External Factors
-const politicalFactors = [
-  "Funding & Grants", "Government Policies & Stability", 
-  "International Relations", "Regulatory Environment"
-].sort();
-
-const economicFactors = [
-  "Consumer Behaviors", "Cost Factors", "Macroeconomic Trends", "Market Conditions"
-].sort();
-
-const socialFactors = [
-  "Demographics", "Lifestyle & Trends", "Public Opinion", "Workforce Factors"
-].sort();
-
-const technologicalFactors = [
-  "Innovation & R&D", "Obsolescence", "Operational Technology", "Technology Transfer"
-].sort();
-
 const orgTypes = [
   "B Corp",
   "Business school",
@@ -106,6 +76,24 @@ const orgTypes = [
   "Virtual firm",
 ].sort();
 
+// Expert roles aligned with ChatWidget
+const expertRolesList = [
+  "Academia",
+  "Charities",
+  "Diplomacy",
+  "Entrepreneurship",
+  "Financial services",
+  "Health",
+  "Leadership & Governance",
+  "Management",
+  "Mentorship",
+  "Philanthropy",
+  "Professional services",
+  "Public policy",
+  "Teams",
+  "Technology"
+];
+
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
 interface CommunityFinderWidgetProps {
@@ -119,23 +107,17 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "bot" }>>([]);
 
-  // Filter states
+  // Filter states - aligned with ChatWidget
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [expandedSectors, setExpandedSectors] = useState<string[]>([]);
   const [locationFilter, setLocationFilter] = useState("any");
   const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [sectorFilter, setSectorFilter] = useState("any");
-  const [expandedSectors, setExpandedSectors] = useState<string[]>([]);
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
-  const [expertiseFilter, setExpertiseFilter] = useState("any");
-  const [selectedManagement, setSelectedManagement] = useState<string[]>([]);
-  const [selectedLeadership, setSelectedLeadership] = useState<string[]>([]);
-  const [externalFactorsFilter, setExternalFactorsFilter] = useState("any");
-  const [selectedPolitical, setSelectedPolitical] = useState<string[]>([]);
-  const [selectedEconomic, setSelectedEconomic] = useState<string[]>([]);
-  const [selectedSocial, setSelectedSocial] = useState<string[]>([]);
-  const [selectedTechnological, setSelectedTechnological] = useState<string[]>([]);
+  const [expertRoles, setExpertRoles] = useState<string[]>([]);
   const [orgTypeFilter, setOrgTypeFilter] = useState("any");
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
+  const [contentType, setContentType] = useState("any");
   const [bookmarkedCommunities, setBookmarkedCommunities] = useState<string[]>([]);
 
 
@@ -177,40 +159,14 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     );
   };
 
-  const handleManagementToggle = (item: string) => {
-    setSelectedManagement(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-  };
-
-  const handleLeadershipToggle = (item: string) => {
-    setSelectedLeadership(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-  };
-
-  const handlePoliticalToggle = (item: string) => {
-    setSelectedPolitical(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-  };
-
-  const handleEconomicToggle = (item: string) => {
-    setSelectedEconomic(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-  };
-
-  const handleSocialToggle = (item: string) => {
-    setSelectedSocial(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-  };
-
-  const handleTechnologicalToggle = (item: string) => {
-    setSelectedTechnological(prev => 
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
+  const handleExpertRoleToggle = (role: string) => {
+    if (role === "any") {
+      setExpertRoles([]);
+    } else {
+      setExpertRoles(prev => 
+        prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+      );
+    }
   };
 
   const handleOrgTypeToggle = (item: string) => {
@@ -237,68 +193,44 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setTopic("");
     setInputValue("");
     setMessages([]);
+    setSourceFilter("all");
+    setSelectedSectors([]);
     setLocationFilter("any");
     setSelectedContinents([]);
     setSelectedCountries([]);
-    setSectorFilter("any");
-    setSelectedSectors([]);
-    setExpertiseFilter("any");
-    setSelectedManagement([]);
-    setSelectedLeadership([]);
-    setExternalFactorsFilter("any");
-    setSelectedPolitical([]);
-    setSelectedEconomic([]);
-    setSelectedSocial([]);
-    setSelectedTechnological([]);
+    setExpertRoles([]);
     setOrgTypeFilter("any");
     setSelectedOrgTypes([]);
+    setContentType("any");
   };
 
-  // Build recap summary
+  // Build recap summary - aligned with ChatWidget style
   const buildRecapSummary = () => {
-    const locationLabel = locationFilter === "any" 
-      ? "any location" 
-      : locationFilter === "continent" && selectedContinents.length > 0
-        ? selectedContinents.join(", ")
-        : locationFilter === "country" && selectedCountries.length > 0
-          ? selectedCountries.join(", ")
-          : "any location";
+    const expertRoleText = expertRoles.length > 0 
+      ? expertRoles.slice(0, 2).join(", ") + (expertRoles.length > 2 ? ` +${expertRoles.length - 2} more` : "")
+      : "any expert role";
 
-    const sectorLabel = sectorFilter === "any" || selectedSectors.length === 0
-      ? "any sector"
-      : selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "");
+    let sourceText = "";
+    if (sourceFilter === "all") sourceText = "any sector";
+    else if (sourceFilter === "my-sector") sourceText = "my sector";
+    else if (sourceFilter === "specific-sectors") sourceText = selectedSectors.length > 0 ? selectedSectors.slice(0, 2).join(", ") + (selectedSectors.length > 2 ? ` +${selectedSectors.length - 2} more` : "") : "specific sectors";
 
-    const expertiseLabel = expertiseFilter === "any" || (selectedManagement.length === 0 && selectedLeadership.length === 0)
-      ? "any expertise"
-      : [...selectedManagement, ...selectedLeadership].slice(0, 2).join(", ") + 
-        ([...selectedManagement, ...selectedLeadership].length > 2 ? ` +${[...selectedManagement, ...selectedLeadership].length - 2} more` : "");
-
-    const allExternalFactors = [...selectedPolitical, ...selectedEconomic, ...selectedSocial, ...selectedTechnological];
-    const externalFactorsLabel = externalFactorsFilter === "any" || allExternalFactors.length === 0
-      ? "any external factor"
-      : allExternalFactors.slice(0, 2).join(", ") + (allExternalFactors.length > 2 ? ` +${allExternalFactors.length - 2} more` : "");
+    let locationText = "";
+    if (locationFilter === "any") locationText = "any location";
+    else if (locationFilter === "my-city") locationText = "my city";
+    else if (locationFilter === "my-country") locationText = "my country";
+    else if (locationFilter === "my-continent") locationText = "my continent";
+    else if (locationFilter === "specific-continents") locationText = selectedContinents.length > 0 ? selectedContinents.slice(0, 2).join(", ") + (selectedContinents.length > 2 ? ` +${selectedContinents.length - 2} more` : "") : "specific continents";
+    else if (locationFilter === "specific-countries") locationText = selectedCountries.length > 0 ? selectedCountries.slice(0, 2).join(", ") + (selectedCountries.length > 2 ? ` +${selectedCountries.length - 2} more` : "") : "specific countries";
 
     const orgTypeLabel = orgTypeFilter === "any" || selectedOrgTypes.length === 0
       ? "any org type"
       : selectedOrgTypes.slice(0, 2).join(", ") + (selectedOrgTypes.length > 2 ? ` +${selectedOrgTypes.length - 2} more` : "");
 
-    return `Communities based on "${topic}"; ${locationLabel}; ${sectorLabel}; ${orgTypeLabel}; ${expertiseLabel}; ${externalFactorsLabel}`;
-  };
+    const contentTypeLabel = contentType === "any" ? "any content type" : contentType;
 
-  const FilterSection = ({ 
-    title, 
-    children 
-  }: { 
-    title: string; 
-    children: React.ReactNode;
-  }) => (
-    <div className="border-b border-slate-100 pb-3">
-      <p className="text-xs font-medium text-slate-700 py-2">{title}</p>
-      <div className="pt-1">
-        {children}
-      </div>
-    </div>
-  );
+    return `Communities in "${topic}"; ${expertRoleText}; ${sourceText}; ${locationText}; ${orgTypeLabel}; ${contentTypeLabel}`;
+  };
 
   return (
     <>
@@ -332,313 +264,271 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
           {/* Content */}
           <div className="h-[400px] overflow-y-auto bg-slate-50 p-4 flex flex-col gap-4">
-            {step === "topic" && (
-              <>
-                <div className="flex gap-3">
+            {/* Bot Greeting */}
+            <div className="flex gap-3 animate-fade-in">
+              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                <FontAwesomeIcon icon={faUsers} className="text-xs" />
+              </div>
+              <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                <p>Hello. I can help you identify free-to-join online communities where you can collaborate with peers on topics of mutual interest.</p>
+              </div>
+            </div>
+
+            {/* Bot Question */}
+            <div className="flex gap-3 animate-fade-in" style={{ animationDelay: "0.5s" }}>
+              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                <FontAwesomeIcon icon={faUsers} className="text-xs" />
+              </div>
+              <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                <p>What topic are you researching?</p>
+              </div>
+            </div>
+
+            {/* Dynamic Messages */}
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${msg.sender === "user" ? "justify-end" : "gap-3"} animate-fade-in`}
+              >
+                {msg.sender === "bot" && (
                   <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
                     <FontAwesomeIcon icon={faUsers} className="text-xs" />
-                  </div>
-                  <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>Hello. I can help you identify free-to-join online communities where you can collaborate with peers on topics of mutual interest.</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 animate-fade-in" style={{ animationDelay: "0.5s" }}>
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
-                    <FontAwesomeIcon icon={faUsers} className="text-xs" />
-                  </div>
-                  <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                    <p>What topic are you researching?</p>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {step === "filters" && (
-              <div className="p-4 space-y-3">
-                {/* Messages */}
-                <div className="space-y-2 mb-4">
-                  {messages.map((msg, i) => (
-                    <div key={i} className={`text-sm p-2 rounded-lg ${msg.sender === "user" ? "bg-slate-100 text-slate-800 ml-8" : "bg-slate-50 text-slate-700 mr-8"}`}>
-                      {msg.text}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Location */}
-                <FilterSection title="Communities based on location">
-                  <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="loc-any" />
-                      <Label htmlFor="loc-any" className="text-xs text-slate-700 cursor-pointer">Any location</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="continent" id="loc-continent" />
-                      <Label htmlFor="loc-continent" className="text-xs text-slate-700 cursor-pointer">Specific continents</Label>
-                    </div>
-                    {locationFilter === "continent" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
-                        {continents.map((continent) => (
-                          <div key={continent} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`continent-${continent}`}
-                              checked={selectedContinents.includes(continent)}
-                              onCheckedChange={() => handleContinentToggle(continent)}
-                            />
-                            <Label htmlFor={`continent-${continent}`} className="text-xs text-slate-600 cursor-pointer">{continent}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="country" id="loc-country" />
-                      <Label htmlFor="loc-country" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
-                    </div>
-                    {locationFilter === "country" && (
-                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
-                        {continents.map((continent) => (
-                          <div key={continent}>
-                            <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">{continent}</p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {countriesByContinent[continent]?.map((country) => (
-                                <div key={country} className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id={`country-${country}`}
-                                    checked={selectedCountries.includes(country)}
-                                    onCheckedChange={() => handleCountryToggle(country)}
-                                  />
-                                  <Label htmlFor={`country-${country}`} className="text-xs text-slate-600 cursor-pointer">{country}</Label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </RadioGroup>
-                </FilterSection>
-
-                {/* Sectors */}
-                <FilterSection title="Communities based on sectors">
-                  <RadioGroup value={sectorFilter} onValueChange={setSectorFilter} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="sector-any" />
-                      <Label htmlFor="sector-any" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="specific" id="sector-specific" />
-                      <Label htmlFor="sector-specific" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
-                    </div>
-                    {sectorFilter === "specific" && (
-                      <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-64 overflow-y-auto">
-                        {sectors.map((sector) => (
-                          <div key={sector}>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`sector-${sector}`}
-                                checked={selectedSectors.includes(sector)}
-                                onCheckedChange={() => handleSectorToggle(sector)}
-                              />
-                              <Label 
-                                htmlFor={`sector-${sector}`} 
-                                className="text-xs text-slate-600 cursor-pointer flex-1"
-                              >
-                                {sector}
-                              </Label>
-                              <button
-                                type="button"
-                                onClick={() => handleSectorExpand(sector)}
-                                className="text-[10px] text-slate-400 hover:text-slate-600"
-                              >
-                                {expandedSectors.includes(sector) ? "−" : "+"}
-                              </button>
-                            </div>
-                            {expandedSectors.includes(sector) && sectorsByCategory[sector] && (
-                              <div className="ml-5 mt-1.5 grid grid-cols-2 gap-1 pl-2 border-l border-slate-100">
-                                {sectorsByCategory[sector].map((subSector) => (
-                                  <span key={subSector} className="text-[10px] text-slate-500">{subSector}</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </RadioGroup>
-                </FilterSection>
-
-                {/* Org Type */}
-                <FilterSection title="Communities based on org type">
-                  <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="orgtype-any" />
-                      <Label htmlFor="orgtype-any" className="text-xs text-slate-700 cursor-pointer">Any org type</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="specific" id="orgtype-specific" />
-                      <Label htmlFor="orgtype-specific" className="text-xs text-slate-700 cursor-pointer">Specific org types</Label>
-                    </div>
-                    {orgTypeFilter === "specific" && (
-                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
-                        {orgTypes.map((item) => (
-                          <div key={item} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`orgtype-${item}`}
-                              checked={selectedOrgTypes.includes(item)}
-                              onCheckedChange={() => handleOrgTypeToggle(item)}
-                            />
-                            <Label htmlFor={`orgtype-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </RadioGroup>
-                </FilterSection>
-
-                {/* Expertise */}
-                <FilterSection title="Communities based on expertise">
-                  <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="expertise-any" />
-                      <Label htmlFor="expertise-any" className="text-xs text-slate-700 cursor-pointer">Any expertise</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="specific" id="expertise-specific" />
-                      <Label htmlFor="expertise-specific" className="text-xs text-slate-700 cursor-pointer">Specific expertise</Label>
-                    </div>
-                    {expertiseFilter === "specific" && (
-                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
-                        {/* Management Expertise Subset */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Management</p>
-                          <div className="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto">
-                            {managementExpertise.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`mgmt-${item}`}
-                                  checked={selectedManagement.includes(item)}
-                                  onCheckedChange={() => handleManagementToggle(item)}
-                                />
-                                <Label htmlFor={`mgmt-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Leadership Expertise Subset */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Leadership & Governance</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {leadershipExpertise.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`lead-${item}`}
-                                  checked={selectedLeadership.includes(item)}
-                                  onCheckedChange={() => handleLeadershipToggle(item)}
-                                />
-                                <Label htmlFor={`lead-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </RadioGroup>
-                </FilterSection>
-
-                {/* External Factors (PEST) */}
-                <FilterSection title="Communities based on external factors">
-                  <RadioGroup value={externalFactorsFilter} onValueChange={setExternalFactorsFilter} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="any" id="external-any" />
-                      <Label htmlFor="external-any" className="text-xs text-slate-700 cursor-pointer">Any external factor</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="specific" id="external-specific" />
-                      <Label htmlFor="external-specific" className="text-xs text-slate-700 cursor-pointer">Specific external factors</Label>
-                    </div>
-                    {externalFactorsFilter === "specific" && (
-                      <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3">
-                        {/* Political */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Political</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {politicalFactors.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`political-${item}`}
-                                  checked={selectedPolitical.includes(item)}
-                                  onCheckedChange={() => handlePoliticalToggle(item)}
-                                />
-                                <Label htmlFor={`political-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Economic */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Economic</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {economicFactors.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`economic-${item}`}
-                                  checked={selectedEconomic.includes(item)}
-                                  onCheckedChange={() => handleEconomicToggle(item)}
-                                />
-                                <Label htmlFor={`economic-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Social */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Social</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {socialFactors.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`social-${item}`}
-                                  checked={selectedSocial.includes(item)}
-                                  onCheckedChange={() => handleSocialToggle(item)}
-                                />
-                                <Label htmlFor={`social-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Technological */}
-                        <div>
-                          <p className="text-[10px] uppercase font-medium text-slate-500 mb-1.5">Technological</p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {technologicalFactors.map((item) => (
-                              <div key={item} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`tech-${item}`}
-                                  checked={selectedTechnological.includes(item)}
-                                  onCheckedChange={() => handleTechnologicalToggle(item)}
-                                />
-                                <Label htmlFor={`tech-${item}`} className="text-xs text-slate-600 cursor-pointer">{item}</Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </RadioGroup>
-                </FilterSection>
-
-                {/* Recap Summary */}
-                {topic && (
-                  <div className="bg-slate-100 border border-slate-200 rounded-md p-3 mt-4">
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      {buildRecapSummary()}
-                    </p>
                   </div>
                 )}
+                <div
+                  className={`p-3 rounded-lg text-sm shadow-sm max-w-[80%] ${
+                    msg.sender === "user"
+                      ? "bg-brand-red text-white rounded-tr-none"
+                      : "bg-white border border-gray-100 rounded-tl-none text-slate-700"
+                  }`}
+                >
+                  <p>{msg.text}</p>
+                </div>
+              </div>
+            ))}
 
-                {/* Find Button */}
+            {/* Filter Options */}
+            {step === "filters" && (
+              <div className="pl-11 flex flex-col gap-4 animate-fade-in">
+                {/* Recap Summary - Below Question */}
+                <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                  <p className="text-xs text-brand-red leading-relaxed">
+                    {buildRecapSummary()}
+                  </p>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
+                  
+                  {/* Source Filter - Sectors */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Communities in sector</p>
+                    <RadioGroup value={sourceFilter} onValueChange={setSourceFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="all" id="source-all" />
+                        <Label htmlFor="source-all" className="text-xs text-slate-700 cursor-pointer">Any sector</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="my-sector" id="source-my-sector" />
+                        <Label htmlFor="source-my-sector" className="text-xs text-slate-700 cursor-pointer">My sector</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific-sectors" id="source-specific-sectors" />
+                        <Label htmlFor="source-specific-sectors" className="text-xs text-slate-700 cursor-pointer">Specific sectors</Label>
+                      </div>
+
+                      {sourceFilter === "specific-sectors" && (
+                        <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                          {sectors.map((sector) => (
+                            <div key={sector}>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`sector-${sector}`}
+                                  checked={selectedSectors.includes(sector)}
+                                  onCheckedChange={() => handleSectorToggle(sector)}
+                                />
+                                <Label 
+                                  htmlFor={`sector-${sector}`} 
+                                  className="text-[11px] text-slate-600 cursor-pointer flex-1"
+                                >
+                                  {sector}
+                                </Label>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSectorExpand(sector)}
+                                  className="text-[10px] text-slate-400 hover:text-slate-600"
+                                >
+                                  {expandedSectors.includes(sector) ? "−" : "+"}
+                                </button>
+                              </div>
+                              {expandedSectors.includes(sector) && sectorsByCategory[sector] && (
+                                <div className="ml-5 mt-1.5 grid grid-cols-2 gap-1 pl-2 border-l border-slate-100">
+                                  {sectorsByCategory[sector].map((subSector) => (
+                                    <span key={subSector} className="text-[10px] text-slate-500">{subSector}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Expert Role Filter */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Community focus</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="expert-role-any" 
+                          checked={expertRoles.length === 0}
+                          onCheckedChange={() => handleExpertRoleToggle("any")}
+                        />
+                        <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Any focus area</Label>
+                      </div>
+                      {expertRolesList.map((role) => (
+                        <div key={role} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} 
+                            checked={expertRoles.includes(role)}
+                            onCheckedChange={() => handleExpertRoleToggle(role)}
+                          />
+                          <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location Filter */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Based in</p>
+                    <RadioGroup value={locationFilter} onValueChange={setLocationFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="loc-any" />
+                        <Label htmlFor="loc-any" className="text-xs text-slate-700 cursor-pointer">Any location</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="my-city" id="loc-my-city" />
+                        <Label htmlFor="loc-my-city" className="text-xs text-slate-700 cursor-pointer">My city</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="my-country" id="loc-my-country" />
+                        <Label htmlFor="loc-my-country" className="text-xs text-slate-700 cursor-pointer">My country</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="my-continent" id="loc-my-continent" />
+                        <Label htmlFor="loc-my-continent" className="text-xs text-slate-700 cursor-pointer">My continent</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific-continents" id="loc-specific-continents" />
+                        <Label htmlFor="loc-specific-continents" className="text-xs text-slate-700 cursor-pointer">Specific continents</Label>
+                      </div>
+                      {locationFilter === "specific-continents" && (
+                        <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
+                          {continents.map((continent) => (
+                            <div key={continent} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`continent-${continent}`}
+                                checked={selectedContinents.includes(continent)}
+                                onCheckedChange={() => handleContinentToggle(continent)}
+                              />
+                              <Label htmlFor={`continent-${continent}`} className="text-[11px] text-slate-600 cursor-pointer">{continent}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific-countries" id="loc-specific-countries" />
+                        <Label htmlFor="loc-specific-countries" className="text-xs text-slate-700 cursor-pointer">Specific countries</Label>
+                      </div>
+                      {locationFilter === "specific-countries" && (
+                        <div className="ml-5 max-h-48 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                          {continents.map((continent) => (
+                            <div key={continent}>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">{continent}</p>
+                              <div className="grid grid-cols-2 gap-1.5 mb-2">
+                                {countriesByContinent[continent]?.map((country) => (
+                                  <div key={country} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`country-${country}`}
+                                      checked={selectedCountries.includes(country)}
+                                      onCheckedChange={() => handleCountryToggle(country)}
+                                    />
+                                    <Label htmlFor={`country-${country}`} className="text-[11px] text-slate-600 cursor-pointer">{country}</Label>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Org Type */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Organisation type</p>
+                    <RadioGroup value={orgTypeFilter} onValueChange={setOrgTypeFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="orgtype-any" />
+                        <Label htmlFor="orgtype-any" className="text-xs text-slate-700 cursor-pointer">Any org type</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific" id="orgtype-specific" />
+                        <Label htmlFor="orgtype-specific" className="text-xs text-slate-700 cursor-pointer">Specific org types</Label>
+                      </div>
+                      {orgTypeFilter === "specific" && (
+                        <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
+                          {orgTypes.map((item) => (
+                            <div key={item} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`orgtype-${item}`}
+                                checked={selectedOrgTypes.includes(item)}
+                                onCheckedChange={() => handleOrgTypeToggle(item)}
+                              />
+                              <Label htmlFor={`orgtype-${item}`} className="text-[11px] text-slate-600 cursor-pointer">{item}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Content Type - Now radios */}
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Content type</p>
+                    <RadioGroup value={contentType} onValueChange={setContentType} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="content-any" />
+                        <Label htmlFor="content-any" className="text-xs text-slate-700 cursor-pointer">Any content type</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="discussions" id="content-discussions" />
+                        <Label htmlFor="content-discussions" className="text-xs text-slate-700 cursor-pointer">Discussions</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="resources" id="content-resources" />
+                        <Label htmlFor="content-resources" className="text-xs text-slate-700 cursor-pointer">Resources & guides</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="events" id="content-events" />
+                        <Label htmlFor="content-events" className="text-xs text-slate-700 cursor-pointer">Events & webinars</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="networking" id="content-networking" />
+                        <Label htmlFor="content-networking" className="text-xs text-slate-700 cursor-pointer">Networking</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="mentorship" id="content-mentorship" />
+                        <Label htmlFor="content-mentorship" className="text-xs text-slate-700 cursor-pointer">Mentorship</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+
                 <button
                   onClick={handleFindCommunities}
-                  className="w-full bg-slate-700 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-slate-800 transition-colors mt-4"
+                  className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors text-center block"
                 >
                   Find Communities
                 </button>
@@ -646,59 +536,65 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
             )}
 
             {step === "searching" && (
-              <div className="p-8 flex flex-col items-center justify-center h-full">
-                <FontAwesomeIcon icon={faSpinner} className="text-3xl text-slate-600 animate-spin mb-4" />
-                <p className="text-sm text-slate-600">Finding communities...</p>
+              <div className="flex gap-3 animate-fade-in mt-4">
+                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                  <FontAwesomeIcon icon={faSpinner} className="text-xs animate-spin" />
+                </div>
+                <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                  <p>Finding communities...</p>
+                </div>
               </div>
             )}
 
             {step === "results" && (
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-medium text-slate-700">
-                    {communities.length} communities found
-                  </p>
+              <>
+                <div className="flex gap-3 animate-fade-in">
+                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-600">
+                    <FontAwesomeIcon icon={faUsers} className="text-xs" />
+                  </div>
+                  <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
+                    <p>I found {communities.length} communities matching your criteria.</p>
+                  </div>
+                </div>
+
+                {/* Active Criteria Recap */}
+                <div className="pl-11 mt-2 animate-fade-in">
+                  <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                    <p className="text-xs text-brand-red leading-relaxed">
+                      {buildRecapSummary()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions Row */}
+                <div className="pl-11 mt-3 animate-fade-in flex items-center gap-3">
                   <button
                     onClick={resetWidget}
-                    className="text-xs text-slate-600 hover:underline"
+                    className="text-xs text-slate-500 hover:text-brand-red transition-colors"
                   >
                     New search
                   </button>
                 </div>
 
-                <div className="space-y-3">
-                  {communities.map((community, i) => (
-                    <div 
-                      key={i} 
-                      className="bg-slate-50 rounded-lg p-3 border border-slate-100 hover:border-slate-300 transition-colors"
+                {/* Communities Section - Same layout as ChatWidget */}
+                <div className="flex flex-col gap-3 pl-11 mt-2 animate-fade-in pb-4">
+                  <p className="text-[10px] uppercase font-bold text-slate-400">Communities</p>
+                  {communities.map((community, index) => (
+                    <div
+                      key={index}
+                      className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white flex-shrink-0">
-                          <FontAwesomeIcon icon={faUsers} className="text-sm" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <a 
-                              href={community.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-medium text-slate-900 text-sm hover:text-slate-600 transition-colors"
-                            >
-                              {community.name}
-                            </a>
-                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] text-slate-400" />
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5">{community.description}</p>
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-800">{community.name}</p>
+                          <p className="text-[10px] text-slate-500">{community.description}</p>
                           <div className="flex flex-col gap-1.5 mt-1.5">
                             {community.theme && (
                               <span className="inline-block w-fit px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">
                                 {community.theme}
                               </span>
                             )}
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-slate-700 font-medium">
-                                {community.members.toLocaleString()} members
-                              </span>
+                            {community.tags && community.tags.length > 0 && (
                               <div className="flex gap-1">
                                 {community.tags.slice(0, 2).map((tag, j) => (
                                   <span key={j} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] rounded">
@@ -706,47 +602,50 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                                   </span>
                                 ))}
                               </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 mt-2">
-                            <button
-                              onClick={() => handleCommunityBookmark(community.name)}
-                              className={`text-xs flex items-center gap-1 transition-colors ${
-                                bookmarkedCommunities.includes(community.name) 
-                                  ? "text-slate-700" 
-                                  : "text-slate-400 hover:text-slate-700"
-                              }`}
-                            >
-                              <FontAwesomeIcon icon={faBookmark} />
-                              {bookmarkedCommunities.includes(community.name) ? "Bookmarked" : "Bookmark"}
-                            </button>
-                            <a 
-                              href={community.url}
-                              className="text-xs text-slate-700 hover:underline"
-                            >
-                              Join
-                            </a>
+                            )}
                           </div>
                         </div>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                          <FontAwesomeIcon icon={faUsers} className="text-[9px]" />
+                          {community.members.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
+                        <div className="flex items-center space-x-1.5">
+                          <Checkbox 
+                            id={`bookmark-community-${community.name}`}
+                            checked={bookmarkedCommunities.includes(community.name)}
+                            onCheckedChange={() => handleCommunityBookmark(community.name)}
+                          />
+                          <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
+                        </div>
+                        <a 
+                          href={community.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
+                        >
+                          Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                        </a>
                       </div>
                     </div>
                   ))}
-                </div>
 
-                {/* Create Community Button */}
-                <div className="mt-4 pt-3 border-t border-slate-200">
-                  <button
-                    disabled={true}
-                    className="w-full py-2.5 px-4 bg-slate-200 text-slate-400 text-xs font-medium rounded cursor-not-allowed"
-                    title="Available after 30 days of membership"
-                  >
-                    Create community
-                  </button>
-                  <p className="text-[10px] text-slate-400 text-center mt-1.5">
-                    Available after 30 days of membership
-                  </p>
+                  {/* Create Community Button */}
+                  <div className="mt-4 pt-3 border-t border-slate-200">
+                    <button
+                      disabled={true}
+                      className="w-full py-2.5 px-4 bg-slate-200 text-slate-400 text-xs font-medium rounded cursor-not-allowed"
+                      title="Available after 30 days of membership"
+                    >
+                      Create community
+                    </button>
+                    <p className="text-[10px] text-slate-400 text-center mt-1.5">
+                      Available after 30 days of membership
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -758,12 +657,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={step === "results" ? "Refine search..." : "Type a topic..."}
-                className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
+                className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-md text-sm focus:outline-none focus:border-brand-red focus:bg-white transition-all"
                 disabled={step !== "topic" && step !== "results"}
               />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-2"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-red transition-colors p-2"
               >
                 <FontAwesomeIcon icon={faPaperPlane} />
               </button>

@@ -1213,58 +1213,38 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 {/* Role - Now after Period - Alphabetically sorted */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">As</p>
-                  <div className="space-y-2">
+                  <RadioGroup value={roles[0] || "any"} onValueChange={(val) => setRoles(val === "any" ? [] : [val])} className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-author" 
-                        checked={roles.includes("author")}
-                        onCheckedChange={() => handleRoleToggle("author")}
-                      />
+                      <RadioGroupItem value="any" id="role-any" />
+                      <Label htmlFor="role-any" className="text-xs text-slate-700 cursor-pointer">Any content type</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="author" id="role-author" />
                       <Label htmlFor="role-author" className="text-xs text-slate-700 cursor-pointer">An author</Label>
                     </div>
                     {sourceFilter !== "my-org" && (
                       <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="role-consultant" 
-                          checked={roles.includes("consultant")}
-                          onCheckedChange={() => handleRoleToggle("consultant")}
-                        />
+                        <RadioGroupItem value="consultant" id="role-consultant" />
                         <Label htmlFor="role-consultant" className="text-xs text-slate-700 cursor-pointer">An external consultant/advisor</Label>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-contributor" 
-                        checked={roles.includes("contributor")}
-                        onCheckedChange={() => handleRoleToggle("contributor")}
-                      />
+                      <RadioGroupItem value="contributor" id="role-contributor" />
                       <Label htmlFor="role-contributor" className="text-xs text-slate-700 cursor-pointer">A contributor to a publication</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-researcher" 
-                        checked={roles.includes("researcher")}
-                        onCheckedChange={() => handleRoleToggle("researcher")}
-                      />
+                      <RadioGroupItem value="researcher" id="role-researcher" />
                       <Label htmlFor="role-researcher" className="text-xs text-slate-700 cursor-pointer">A contributor to a research study</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-leader" 
-                        checked={roles.includes("leader")}
-                        onCheckedChange={() => handleRoleToggle("leader")}
-                      />
+                      <RadioGroupItem value="leader" id="role-leader" />
                       <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="role-team" 
-                        checked={roles.includes("team")}
-                        onCheckedChange={() => handleRoleToggle("team")}
-                      />
+                      <RadioGroupItem value="team" id="role-team" />
                       <Label htmlFor="role-team" className="text-xs text-slate-700 cursor-pointer">A team member</Label>
                     </div>
-                  </div>
+                  </RadioGroup>
                 </div>
               </div>
 
