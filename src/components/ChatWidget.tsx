@@ -1295,7 +1295,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   <FontAwesomeIcon icon={faUserTie} className="text-xs" />
                 </div>
                 <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                  <p>I found 5 top experts matching your criteria based on recent citations and impact.</p>
+                  <p>I found 5 top experts and {communities.length} related communities matching your criteria based on recent citations and impact.</p>
                 </div>
               </div>
 
