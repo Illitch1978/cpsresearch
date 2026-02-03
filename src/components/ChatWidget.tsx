@@ -908,12 +908,16 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           {/* Filter Options */}
           {step === "filters" && (
             <div className="pl-11 flex flex-col gap-4 animate-fade-in">
-              {/* Recap Summary - Below Question */}
-              <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
-                <p className="text-xs text-brand-red leading-relaxed">
-                  {buildRecapSummary()}
-                </p>
-              </div>
+              {/* Recap Summary - Only show after selections have been made */}
+              {(sourceFilter !== "all" || selectedOrgs.length > 0 || locationFilter !== "any" || 
+                selectedContinents.length > 0 || selectedCountries.length > 0 || projectType !== "all" || 
+                contentPeriod !== "any" || expertRole !== "any" || roles.length > 0) && (
+                <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
+                  <p className="text-xs text-brand-red leading-relaxed">
+                    {buildRecapSummary()}
+                  </p>
+                </div>
+              )}
 
               <div className="bg-white border border-slate-200 rounded-md p-4 space-y-5">
                 
