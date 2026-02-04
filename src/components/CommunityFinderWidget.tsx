@@ -275,7 +275,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const buildRecapSummary = () => {
     // Contributions come first - what they will do in the community (use plural forms)
     const contributionsText = selectedContributions.length > 0 
-      ? `to contribute ${selectedContributions.map(c => contributionsList.find(item => item.singular === c)?.plural || c.toLowerCase()).join(", ")}`
+      ? selectedContributions.map(c => contributionsList.find(item => item.singular === c)?.plural || c.toLowerCase()).join(", ")
       : "";
 
     const expertiseText = selectedExpertise.length > 0 
@@ -299,11 +299,11 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
       ? selectedExternalFactors.slice(0, 2).join(", ") + (selectedExternalFactors.length > 2 ? ` +${selectedExternalFactors.length - 2} more` : "")
       : "any external factor";
 
-    // Build the summary with contributions first if selected - start with "Communities based on TOPIC"
+    // New format: Contributor of posts, case studies to "Leadership" communities for any location; any sector; any org type; any expertise; any external factor
     if (contributionsText) {
-      return `Communities based on "${topic}" ${contributionsText}; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
+      return `Contributor of ${contributionsText} to "${topic}" communities for ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
     }
-    return `Communities based on "${topic}"; ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
+    return `Contributor to "${topic}" communities for ${locationText}; ${sourceText}; ${orgTypeLabel}; ${expertiseText}; ${externalFactorsLabel}`;
   };
 
   return (
