@@ -655,6 +655,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [dateRangeFrom, setDateRangeFrom] = useState("");
   const [dateRangeTo, setDateRangeTo] = useState("");
   const [expertRole, setExpertRole] = useState("any");
+  const [selectedExpertRoles, setSelectedExpertRoles] = useState<string[]>([]);
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -716,7 +717,13 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     );
   };
 
-  // Expert role is now single select (radio)
+  const handleExpertRoleToggle = (role: string) => {
+    setSelectedExpertRoles(prev => 
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
+  // Expert role is now single select (radio) with checkboxes when "specific" selected
   // Roles (As) toggle is multi-select (checkboxes)
 
   const handleExpertBookmark = (expertName: string) => {
@@ -793,7 +800,9 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
         }).join(" + ")
       : "Experts";
     
-    const expertRoleText = expertRole !== "any" ? expertRole : "any expert role";
+    const expertRoleText = expertRole === "specific" && selectedExpertRoles.length > 0
+      ? selectedExpertRoles.slice(0, 2).join(", ") + (selectedExpertRoles.length > 2 ? ` +${selectedExpertRoles.length - 2} more` : "")
+      : "any expert role";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
@@ -1010,35 +1019,49 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                 {/* Expert Role Filter */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience in</p>
-                  <RadioGroup value={expertRole} onValueChange={setExpertRole} className="space-y-2">
+                  <RadioGroup value={expertRole} onValueChange={(value) => {
+                    setExpertRole(value);
+                    if (value === "any") {
+                      setSelectedExpertRoles([]);
+                    }
+                  }} className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="any" id="expert-role-any" />
                       <Label htmlFor="expert-role-any" className="text-xs text-slate-700 cursor-pointer">Unspecified</Label>
                     </div>
-                    {[
-                      "Academia",
-                      "Charities",
-                      "Diplomacy",
-                      "Entrepreneurship",
-                      "Financial services",
-                      "Health",
-                      "Leadership & Governance",
-                      "Management",
-                      "Mentorship",
-                      "Philanthropy",
-                      "Professional services",
-                      "Public policy",
-                      "Team membership",
-                      "Technology"
-                    ].map((role) => (
-                      <div key={role} className="flex items-center space-x-2">
-                        <RadioGroupItem 
-                          value={role} 
-                          id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} 
-                        />
-                        <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="expert-role-specific" />
+                      <Label htmlFor="expert-role-specific" className="text-xs text-slate-700 cursor-pointer">Specific experience</Label>
+                    </div>
+                    {expertRole === "specific" && (
+                      <div className="ml-5 max-h-48 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                        {[
+                          "Academia",
+                          "Charities",
+                          "Diplomacy",
+                          "Entrepreneurship",
+                          "Financial services",
+                          "Health",
+                          "Leadership & Governance",
+                          "Management",
+                          "Mentorship",
+                          "Philanthropy",
+                          "Professional services",
+                          "Public policy",
+                          "Team membership",
+                          "Technology"
+                        ].map((role) => (
+                          <div key={role} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`}
+                              checked={selectedExpertRoles.includes(role)}
+                              onCheckedChange={() => handleExpertRoleToggle(role)}
+                            />
+                            <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </RadioGroup>
                 </div>
 
@@ -1250,10 +1273,18 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
               <button
                 onClick={startSearch}
-                className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors text-center block"
+                disabled={roles.length === 0}
+                className={`w-full text-xs font-medium py-2.5 rounded transition-colors text-center block ${
+                  roles.length === 0
+                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    : "bg-slate-900 text-white hover:bg-brand-red"
+                }`}
               >
                 Find Experts
               </button>
+              {roles.length === 0 && (
+                <p className="text-[10px] text-slate-500 text-center mt-1">Please select at least one role in "As"</p>
+              )}
             </div>
           )}
 
