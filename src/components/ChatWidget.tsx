@@ -834,7 +834,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     else if (contentPeriod === "5-plus-years") periodText = "5+ years ago";
     else if (contentPeriod === "date-range") periodText = dateRangeFrom || dateRangeTo ? `${dateRangeFrom || "?"} - ${dateRangeTo || "?"}` : "date range";
 
-    return `${roleText} in "${topic}"; ${expertRoleText}; sourced from ${sourceText}; ${locationText}; ${projectText}; ${periodText}`;
+    return `${roleText} with expertise in "${topic}" for ${projectText}; based on content published in ${periodText}; sourced from ${sourceText}; ${locationText}; ${expertRoleText}`;
   };
 
   return (
@@ -1130,26 +1130,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   </RadioGroup>
                 </div>
 
-                {/* Project Type */}
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For</p>
-                  <RadioGroup value={projectType} onValueChange={setProjectType} className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="all" id="proj-all" />
-                      <Label htmlFor="proj-all" className="text-xs text-slate-700 cursor-pointer">Any project</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="client" id="proj-client" />
-                      <Label htmlFor="proj-client" className="text-xs text-slate-700 cursor-pointer">Client projects</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="internal" id="proj-internal" />
-                      <Label htmlFor="proj-internal" className="text-xs text-slate-700 cursor-pointer">Internal projects</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {/* Content Published Period - Moved above As */}
+                {/* Content Published Period - Before Project Type */}
                 <div>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With content published in</p>
                   <RadioGroup value={contentPeriod} onValueChange={setContentPeriod} className="space-y-2">
@@ -1211,6 +1192,25 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Project Type - After Period */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">For</p>
+                  <RadioGroup value={projectType} onValueChange={setProjectType} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all" id="proj-all" />
+                      <Label htmlFor="proj-all" className="text-xs text-slate-700 cursor-pointer">Any project</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="client" id="proj-client" />
+                      <Label htmlFor="proj-client" className="text-xs text-slate-700 cursor-pointer">Client projects</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="internal" id="proj-internal" />
+                      <Label htmlFor="proj-internal" className="text-xs text-slate-700 cursor-pointer">Internal projects</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
 
                 {/* Role - Now after Period - Alphabetically sorted */}
