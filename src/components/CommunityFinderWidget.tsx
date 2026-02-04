@@ -520,9 +520,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     </RadioGroup>
                   </div>
 
-                  {/* 4. Management Expertise Filter */}
+                  {/* 4. Expertise Filter (Management + Leadership & Governance) */}
                   <div>
-                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on management expertise</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on specific expertise</p>
                     <RadioGroup value={expertiseFilter} onValueChange={setExpertiseFilter} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="any" id="expertise-any" />
@@ -533,37 +533,42 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                         <Label htmlFor="expertise-specific" className="text-xs text-slate-700 cursor-pointer">Specific expertise</Label>
                       </div>
                       {expertiseFilter === "specific" && (
-                        <div className="ml-5 space-y-2 border-l-2 border-slate-100 pl-3 max-h-36 overflow-y-auto">
-                          {managementExpertiseList.map((expertise) => (
-                            <div key={expertise} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
-                                checked={selectedExpertise.includes(expertise)}
-                                onCheckedChange={() => handleExpertiseToggle(expertise)}
-                              />
-                              <Label htmlFor={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                        <div className="ml-5 space-y-3 border-l-2 border-slate-100 pl-3 max-h-48 overflow-y-auto">
+                          {/* Management sub-section */}
+                          <div>
+                            <p className="text-[11px] font-semibold text-slate-700 mb-1.5">Management</p>
+                            <div className="space-y-1.5 ml-2">
+                              {managementExpertiseList.map((expertise) => (
+                                <div key={expertise} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
+                                    checked={selectedExpertise.includes(expertise)}
+                                    onCheckedChange={() => handleExpertiseToggle(expertise)}
+                                  />
+                                  <Label htmlFor={`mgmt-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          </div>
+                          {/* Leadership & Governance sub-section */}
+                          <div>
+                            <p className="text-[11px] font-semibold text-slate-700 mb-1.5">Leadership & Governance</p>
+                            <div className="space-y-1.5 ml-2">
+                              {leadershipExpertiseList.map((expertise) => (
+                                <div key={expertise} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
+                                    checked={selectedExpertise.includes(expertise)}
+                                    onCheckedChange={() => handleExpertiseToggle(expertise)}
+                                  />
+                                  <Label htmlFor={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </RadioGroup>
-                  </div>
-
-                  {/* 5. Leadership & Governance Expertise Filter */}
-                  <div>
-                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on leadership & governance expertise</p>
-                    <div className="space-y-2">
-                      {leadershipExpertiseList.map((expertise) => (
-                        <div key={expertise} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`}
-                            checked={selectedExpertise.includes(expertise)}
-                            onCheckedChange={() => handleExpertiseToggle(expertise)}
-                          />
-                          <Label htmlFor={`lead-expertise-${expertise.toLowerCase().replace(/\s+/g, '-')}`} className="text-[11px] text-slate-600 cursor-pointer">{expertise}</Label>
-                        </div>
-                      ))}
-                    </div>
                   </div>
 
                   {/* 5. External Factors Filter */}

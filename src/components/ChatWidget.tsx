@@ -802,7 +802,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     
     const expertRoleText = expertRole === "specific" && selectedExpertRoles.length > 0
       ? selectedExpertRoles.slice(0, 2).join(", ") + (selectedExpertRoles.length > 2 ? ` +${selectedExpertRoles.length - 2} more` : "")
-      : "any expert role";
+      : "any experience";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
