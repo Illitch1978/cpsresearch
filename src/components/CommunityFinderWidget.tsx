@@ -110,11 +110,13 @@ const leadershipExpertiseList = [
 
 // Contribution areas for communities (singular for display, plural for recap)
 const contributionsList = [
-  { singular: "Case study", plural: "case studies" },
+  { singular: "Add/comment on posts", plural: "posts" },
+  { singular: "Case studies", plural: "case studies" },
+  { singular: "Community management", plural: "community management" },
   { singular: "Education", plural: "education" },
-  { singular: "Event", plural: "events" },
+  { singular: "Events", plural: "events" },
   { singular: "Mentorship", plural: "mentorship" },
-  { singular: "Publication", plural: "publications" },
+  { singular: "Publications", plural: "publications" },
   { singular: "Research", plural: "research" },
   { singular: "Thought leadership", plural: "thought leadership" }
 ];
@@ -602,7 +604,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                   {/* 6. Contributions Filter */}
                   <div>
-                    <p className="text-xs font-medium text-slate-700 mb-2">To contribute in the following areas</p>
+                    <p className="text-xs font-medium text-slate-700 mb-2">To contribute the following to the community</p>
                     <div className="space-y-2">
                       {contributionsList.map((contribution) => (
                         <div key={contribution.singular} className="flex items-center space-x-2">
@@ -620,10 +622,18 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
 
                 <button
                   onClick={handleFindCommunities}
-                  className="w-full bg-slate-900 text-white text-xs font-medium py-2.5 rounded hover:bg-brand-red transition-colors text-center block"
+                  disabled={selectedContributions.length === 0}
+                  className={`w-full text-xs font-medium py-2.5 rounded transition-colors text-center block ${
+                    selectedContributions.length === 0
+                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      : "bg-slate-900 text-white hover:bg-brand-red"
+                  }`}
                 >
                   Find Communities
                 </button>
+                {selectedContributions.length === 0 && (
+                  <p className="text-[10px] text-slate-500 text-center mt-1">Please select at least one contribution</p>
+                )}
               </div>
             )}
 
