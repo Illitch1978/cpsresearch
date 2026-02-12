@@ -36,7 +36,7 @@ const MissionSection = () => {
                 assumptions and raise the standard of debate about the sector.
               </p>
               <p>
-                The Centre is philanthropic and non commercial in intent. It does not advocate for
+                The Centre is a public interest, method led initiative with independent governance. It does not advocate for
                 individual firms or promote opinion driven commentary. Instead, it champions rigorous
                 methods, transparency and collaboration across professional firms, business schools,
                 professional bodies and independent researchers. A strong emphasis is placed on
