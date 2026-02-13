@@ -743,12 +743,12 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     <button
                       disabled={true}
                       className="w-full py-2.5 px-4 bg-slate-200 text-slate-400 text-xs font-medium rounded cursor-not-allowed"
-                      title="Available after 30 days of membership"
+                      title="Available after 30 days of registration"
                     >
                       Create community
                     </button>
                     <p className="text-[10px] text-slate-400 text-center mt-1.5">
-                      Available after 30 days of membership
+                      Available after 30 days of registration
                     </p>
                   </div>
                 </div>
