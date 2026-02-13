@@ -1491,7 +1491,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   >
                     Create community
                   </button>
-                  <p className="text-[10px] text-slate-400">Available after 30 days of membership</p>
+                  <p className="text-[10px] text-slate-400">Available after 30 days of registration</p>
                 </div>
               </div>
             </>
