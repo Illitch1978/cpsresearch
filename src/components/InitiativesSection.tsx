@@ -10,7 +10,7 @@ const initiatives = [
       "Short, focused briefings translate current research and member contributions into implications for policy, regulation and firm strategy, covering immediate challenges like AI adoption or regulatory divergence. These are designed to be read and used in boardrooms and policy discussions.",
   },
   {
-    title: "Credible voices market place",
+    title: "Credible voices marketplace",
     description:
       "The Centre maintains a curated pool of researchers and practitioners willing to contribute to consultations, panels and media commentary. Selection is based on evidence of sustained, high quality contribution rather than seniority or profile.",
   },

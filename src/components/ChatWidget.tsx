@@ -860,7 +860,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           <div className="flex items-center gap-3">
             <FontAwesomeIcon icon={faCommentDots} className="text-sm" />
             <div>
-              <h3 className="font-medium text-sm">Credible Voices Market Place<sup className="text-[8px] align-super ml-0.5">SM</sup></h3>
+              <h3 className="font-medium text-sm">Credible Voices Marketplace<sup className="text-[8px] align-super ml-0.5">SM</sup></h3>
               <p className="text-xs text-slate-400">Connect with verified experts</p>
             </div>
           </div>
