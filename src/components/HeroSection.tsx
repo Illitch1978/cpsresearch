@@ -40,8 +40,8 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionProps) => {
-  const experts = useCountUp(247);
-  const firms = useCountUp(86);
+  const experts = useCountUp(35245);
+  const firms = useCountUp(150);
 
   return (
     <header
