@@ -1,7 +1,38 @@
+import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots, faUsers } from "@fortawesome/free-solid-svg-icons";
 import heroImage from "@/assets/london-hero.png";
 import cpsrLogoWhite from "@/assets/cpsr-logo-white.png";
+
+const useCountUp = (target: number, duration = 1800) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let start = 0;
+          const startTime = performance.now();
+          const animate = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(eased * target));
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return { count, ref };
+};
 
 interface HeroSectionProps {
   onOpenExpertFinder: () => void;
@@ -9,6 +40,9 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionProps) => {
+  const experts = useCountUp(247);
+  const firms = useCountUp(86);
+
   return (
     <header
       className="hero-section py-20 sm:py-32 flex items-center justify-center min-h-screen relative -mt-20 sm:-mt-24"
@@ -53,6 +87,15 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
             <span className="font-medium text-sm tracking-wide">Find a community</span>
           </button>
         </div>
+
+        {/* Ticker Metrics */}
+        <p className="mt-8 text-sm text-white/60 font-light tracking-wide">
+          Sourced from{" "}
+          <span ref={experts.ref} className="text-white font-semibold tabular-nums">{experts.count.toLocaleString()}</span>
+          {" "}experts at{" "}
+          <span ref={firms.ref} className="text-white font-semibold tabular-nums">{firms.count.toLocaleString()}</span>
+          {" "}firms
+        </p>
       </div>
     </header>
   );
