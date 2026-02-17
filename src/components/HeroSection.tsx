@@ -89,7 +89,7 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
         </div>
 
         {/* Ticker Metrics */}
-        <p className="mt-8 text-sm text-white/60 font-light tracking-wide">
+        <p className="mt-8 text-base sm:text-lg text-white/60 font-light tracking-wide">
           Sourced from{" "}
           <span ref={experts.ref} className="text-white font-semibold tabular-nums">{experts.count.toLocaleString()}</span>
           {" "}experts at{" "}
