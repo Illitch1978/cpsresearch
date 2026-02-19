@@ -795,6 +795,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           if (r === "contributor") return "Publication Contributor";
           if (r === "researcher") return "Research Contributor";
           if (r === "team") return "Team Member";
+          if (r === "recruit") return "Recruit";
           if (r === "consultant") return "External Consultant";
           return r;
         }).join(" + ")
@@ -1258,6 +1259,14 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         onCheckedChange={() => handleRoleToggle("leader")}
                       />
                       <Label htmlFor="role-leader" className="text-xs text-slate-700 cursor-pointer">A future leader</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="role-recruit" 
+                        checked={roles.includes("recruit")}
+                        onCheckedChange={() => handleRoleToggle("recruit")}
+                      />
+                      <Label htmlFor="role-recruit" className="text-xs text-slate-700 cursor-pointer">A recruit</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
