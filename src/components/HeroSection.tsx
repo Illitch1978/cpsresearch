@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots, faUsers } from "@fortawesome/free-solid-svg-icons";
-import heroImage from "@/assets/london-hero.png";
+import heroImage from "@/assets/london-hero-new.png";
 import cpsrLogoWhite from "@/assets/cpsr-logo-white.png";
 
 const useCountUp = (target: number, duration = 1800) => {
