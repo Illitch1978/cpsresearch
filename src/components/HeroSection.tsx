@@ -77,14 +77,14 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
             className="bg-brand-red hover:bg-red-800 text-white py-3 px-6 sm:py-4 sm:px-8 rounded-full shadow-lg flex items-center gap-3 transition-colors duration-300"
           >
             <FontAwesomeIcon icon={faCommentDots} className="text-lg sm:text-xl" />
-            <span className="font-medium text-sm tracking-wide">Find an expert</span>
+            <span className="font-medium text-sm tracking-wide">Find an Expert</span>
           </button>
           <button
             onClick={onOpenCommunityFinder}
             className="bg-slate-700 hover:bg-slate-800 text-white py-3 px-6 sm:py-4 sm:px-8 rounded-full shadow-lg flex items-center gap-3 transition-colors duration-300"
           >
             <FontAwesomeIcon icon={faUsers} className="text-lg sm:text-xl" />
-            <span className="font-medium text-sm tracking-wide">Find a community</span>
+            <span className="font-medium text-sm tracking-wide">Find a Community</span>
           </button>
         </div>
 
