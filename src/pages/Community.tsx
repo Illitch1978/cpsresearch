@@ -47,6 +47,10 @@ import {
   faRightFromBracket,
   faPoll,
   faRepeat,
+  faLock,
+  faListAlt,
+  faShareAlt,
+  faHeart,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -91,6 +95,18 @@ interface Discussion {
   likes: number;
   tags: string[];
   pinned?: boolean;
+  repliesDisabled?: boolean;
+}
+
+interface Playlist {
+  id: string;
+  name: string;
+  description: string;
+  author: Member;
+  items: Resource[];
+  shared: boolean;
+  createdDate: string;
+  likes: number;
 }
 
 interface Resource {
@@ -144,6 +160,7 @@ const mockDiscussions: Discussion[] = [
     author: mockMembers[0],
     content: "Welcome to all new members. This community is dedicated to advancing rigorous, evidence-based research across the professional services sector. Please introduce yourselves and share your research interests.",
     date: "15 Feb 2026", replies: 24, likes: 47, tags: ["Welcome", "Community"],
+    repliesDisabled: true,
   },
   {
     id: "2",
@@ -165,6 +182,7 @@ const mockDiscussions: Discussion[] = [
     author: mockMembers[0],
     content: "We're planning a half-day workshop on mixed-methods research design for professional services studies. If you'd be interested in attending or presenting, please comment below.",
     date: "1 Mar 2026", replies: 15, likes: 19, tags: ["Events", "Methods", "Workshop"],
+    repliesDisabled: true,
   },
   {
     id: "5",
@@ -232,6 +250,39 @@ const mockPolls: Poll[] = [
     author: mockMembers[0],
     endsDate: "25 Mar 2026",
     tags: ["Membership", "Policy"],
+  },
+];
+
+const mockPlaylists: Playlist[] = [
+  {
+    id: "pl1",
+    name: "AI & Professional Services — Essential Reading",
+    description: "A curated collection of the most impactful papers and resources on AI adoption across consulting, audit, and legal services.",
+    author: mockMembers[1],
+    items: [mockResources[1], mockResources[0], mockResources[2]],
+    shared: true,
+    createdDate: "Feb 2026",
+    likes: 34,
+  },
+  {
+    id: "pl2",
+    name: "Diversity Research Collection",
+    description: "Key papers and datasets examining diversity, equity, and inclusion in professional services leadership.",
+    author: mockMembers[2],
+    items: [mockResources[3], mockResources[0]],
+    shared: true,
+    createdDate: "Mar 2026",
+    likes: 19,
+  },
+  {
+    id: "pl3",
+    name: "Regulatory Watch — EU & UK",
+    description: "Living collection tracking regulatory changes and analysis relevant to professional services firms.",
+    author: mockMembers[5],
+    items: [mockResources[4], mockResources[1]],
+    shared: true,
+    createdDate: "Mar 2026",
+    likes: 12,
   },
 ];
 
@@ -527,6 +578,13 @@ const Community = () => {
 
   // Poll voting state
   const [pollVotes, setPollVotes] = useState<Record<string, string>>({});
+
+  // Playlist state
+  const [userPlaylists, setUserPlaylists] = useState<Playlist[]>([]);
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
+  const [newPlaylistItems, setNewPlaylistItems] = useState<string[]>([]);
 
 
   const [isAdmin] = useState(true); // Current user is admin
@@ -970,6 +1028,9 @@ const Community = () => {
                 <TabsTrigger value="resources" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faFolderOpen} className="text-xs" /> Resources
                 </TabsTrigger>
+                <TabsTrigger value="playlists" className="gap-2 text-sm data-[state=active]:text-primary">
+                  <FontAwesomeIcon icon={faListAlt} className="text-xs" /> Playlists
+                </TabsTrigger>
                 <TabsTrigger value="events" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faCalendarDays} className="text-xs" /> Events
                 </TabsTrigger>
@@ -1039,6 +1100,7 @@ const Community = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {d.pinned && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0">Pinned</Badge>}
+                                {d.repliesDisabled && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30 flex items-center gap-1"><FontAwesomeIcon icon={faLock} className="text-[8px]" />Replies closed</Badge>}
                                 <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
                               </div>
                               <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
@@ -1320,6 +1382,146 @@ const Community = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </TabsContent>
+
+              {/* ─── PLAYLISTS TAB ─── */}
+              <TabsContent value="playlists">
+                <div className="space-y-6">
+                  {/* Create Playlist CTA */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-card-foreground flex items-center gap-2">
+                          <FontAwesomeIcon icon={faListAlt} className="text-primary text-xs" /> Create a Playlist
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">Curate resources into playlists and share them with the community.</p>
+                      </div>
+                      <button
+                        onClick={() => setShowCreatePlaylist(!showCreatePlaylist)}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> New Playlist
+                      </button>
+                    </div>
+
+                    {showCreatePlaylist && (
+                      <div className="mt-4 pt-4 border-t border-border space-y-3">
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Playlist name</label>
+                          <input
+                            type="text"
+                            value={newPlaylistName}
+                            onChange={e => setNewPlaylistName(e.target.value.slice(0, 80))}
+                            placeholder="e.g. Essential AI Reading…"
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Description</label>
+                          <textarea
+                            value={newPlaylistDesc}
+                            onChange={e => setNewPlaylistDesc(e.target.value.slice(0, 250))}
+                            placeholder="What does this playlist cover?"
+                            rows={2}
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Select resources to include</label>
+                          <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                            {mockResources.map(r => (
+                              <label key={r.id} className="flex items-center gap-2.5 cursor-pointer p-1.5 rounded-md hover:bg-muted/50 transition-colors">
+                                <span
+                                  onClick={() => setNewPlaylistItems(prev => prev.includes(r.id) ? prev.filter(i => i !== r.id) : [...prev, r.id])}
+                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${newPlaylistItems.includes(r.id) ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
+                                >
+                                  {newPlaylistItems.includes(r.id) && <FontAwesomeIcon icon={faCheck} className="text-[8px]" />}
+                                </span>
+                                <div className="min-w-0">
+                                  <span className="text-xs font-medium text-card-foreground block truncate">{r.title}</span>
+                                  <span className="text-[10px] text-muted-foreground">{r.author}</span>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-2 pt-2">
+                          <button
+                            onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); }}
+                            className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            disabled={!newPlaylistName.trim() || newPlaylistItems.length === 0}
+                            onClick={() => {
+                              const newPl: Playlist = {
+                                id: `pl-user-${Date.now()}`,
+                                name: newPlaylistName.trim(),
+                                description: newPlaylistDesc.trim(),
+                                author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
+                                items: mockResources.filter(r => newPlaylistItems.includes(r.id)),
+                                shared: true,
+                                createdDate: "Mar 2026",
+                                likes: 0,
+                              };
+                              setUserPlaylists(prev => [newPl, ...prev]);
+                              setShowCreatePlaylist(false);
+                              setNewPlaylistName("");
+                              setNewPlaylistDesc("");
+                              setNewPlaylistItems([]);
+                            }}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newPlaylistName.trim() && newPlaylistItems.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                          >
+                            <FontAwesomeIcon icon={faShareAlt} className="mr-1" /> Create & Share
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* All Playlists */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                      Community Playlists ({mockPlaylists.length + userPlaylists.length})
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[...userPlaylists, ...mockPlaylists].map(pl => (
+                        <div key={pl.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                                <FontAwesomeIcon icon={faListAlt} className="text-sm" />
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-card-foreground">{pl.name}</h4>
+                                <p className="text-[11px] text-muted-foreground">
+                                  by {pl.author.id === "self" ? <span className="text-primary font-medium">You</span> : pl.author.name} · {pl.createdDate}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <FontAwesomeIcon icon={faHeart} className="text-[10px]" /> {pl.likes}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed mb-3">{pl.description}</p>
+                          <div className="space-y-1.5">
+                            {pl.items.map((item, i) => (
+                              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-md px-2.5 py-1.5">
+                                <ResourceIcon type={item.type} />
+                                <span className="truncate flex-1">{item.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                            <span className="text-[10px] text-muted-foreground">{pl.items.length} items</span>
+                            <button className="text-xs font-medium text-primary hover:underline">View playlist →</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1859,36 +2061,45 @@ const Community = () => {
               </div>
 
               {/* Reply Input */}
-              <div className="pt-3 border-t border-border mt-auto">
-                {replyingTo && (
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 bg-slate-50 rounded-md px-3 py-1.5">
-                    <span>Replying to <span className="font-medium text-slate-700">{replyingTo.author.name}</span></span>
-                    <button onClick={() => setReplyingTo(null)} className="text-muted-foreground hover:text-foreground transition-colors ml-2">
-                      <FontAwesomeIcon icon={faTimes} className="text-xs" />
+              {selectedDiscussion.repliesDisabled ? (
+                <div className="pt-3 border-t border-border mt-auto">
+                  <div className="flex items-center gap-2 justify-center py-2 text-xs text-muted-foreground bg-muted/50 rounded-lg">
+                    <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+                    Replies have been disabled for this discussion
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-3 border-t border-border mt-auto">
+                  {replyingTo && (
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 bg-slate-50 rounded-md px-3 py-1.5">
+                      <span>Replying to <span className="font-medium text-slate-700">{replyingTo.author.name}</span></span>
+                      <button onClick={() => setReplyingTo(null)} className="text-muted-foreground hover:text-foreground transition-colors ml-2">
+                        <FontAwesomeIcon icon={faTimes} className="text-xs" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">RC</AvatarFallback>
+                    </Avatar>
+                    <input
+                      type="text"
+                      value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitReply(); } }}
+                      placeholder={replyingTo ? `Reply to ${replyingTo.author.name}…` : "Write a reply…"}
+                      className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                    />
+                    <button
+                      onClick={handleSubmitReply}
+                      disabled={!replyText.trim()}
+                      className={`transition-colors ${replyText.trim() ? "text-primary hover:text-primary/80" : "text-muted-foreground/30"}`}
+                    >
+                      <FontAwesomeIcon icon={faPaperPlane} />
                     </button>
                   </div>
-                )}
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">RC</AvatarFallback>
-                  </Avatar>
-                  <input
-                    type="text"
-                    value={replyText}
-                    onChange={e => setReplyText(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitReply(); } }}
-                    placeholder={replyingTo ? `Reply to ${replyingTo.author.name}…` : "Write a reply…"}
-                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                  />
-                  <button
-                    onClick={handleSubmitReply}
-                    disabled={!replyText.trim()}
-                    className={`transition-colors ${replyText.trim() ? "text-primary hover:text-primary/80" : "text-muted-foreground/30"}`}
-                  >
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                  </button>
                 </div>
-              </div>
+              )}
             </div>
             );
           })()}
