@@ -106,6 +106,18 @@ const MyCommunities = () => {
   const [formInviteExpiry, setFormInviteExpiry] = useState("90");
   const [formCommunityRules, setFormCommunityRules] = useState("Open community with no pre-approval of posts and content items.");
   const [rulesExpanded, setRulesExpanded] = useState(false);
+  // Messages state
+  const [messagesExpanded, setMessagesExpanded] = useState(false);
+  const [activeMessageTemplate, setActiveMessageTemplate] = useState("welcome");
+  const [messageTemplates, setMessageTemplates] = useState<Record<string, string>>({
+    welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+    decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+    "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+    "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+    "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+    invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+    leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+  });
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -170,6 +182,17 @@ const MyCommunities = () => {
     setFormInviteExpiry("90");
     setFormCommunityRules("Open community with no pre-approval of posts and content items.");
     setRulesExpanded(false);
+    setMessagesExpanded(false);
+    setActiveMessageTemplate("welcome");
+    setMessageTemplates({
+      welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+      decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+      "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+      "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+      "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+      invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+      leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+    });
   };
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -621,6 +644,65 @@ const MyCommunities = () => {
                         className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none"
                       />
                       <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{formCommunityRules.length}/500</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ─── Messages Section (Collapsible) ─── */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setMessagesExpanded(!messagesExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <span className="text-xs font-semibold text-card-foreground">Messages (optional)</span>
+                <span className="text-[10px] text-muted-foreground">{messagesExpanded ? "▲" : "▼"}</span>
+              </button>
+
+              {messagesExpanded && (
+                <div className="border-t border-border">
+                  <p className="text-[11px] text-muted-foreground leading-relaxed px-4 pt-3 pb-2">
+                    Salutations and valedictions are system-generated so please include just the body of your message in the box.
+                  </p>
+
+                  {/* Template selector */}
+                  <div className="px-4 pb-3">
+                    <select
+                      value={activeMessageTemplate}
+                      onChange={e => setActiveMessageTemplate(e.target.value)}
+                      className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground"
+                    >
+                      <option value="welcome">Welcome to the Community</option>
+                      <option value="decline">Decline request to join the Community</option>
+                      <option value="block-post">Block post to the Community</option>
+                      <option value="block-content">Block content shared to the Community</option>
+                      <option value="block-playlist">Block playlist shared to the Community</option>
+                      <option value="invitation">Invitation to join the Community</option>
+                      <option value="leave">Leave the Community</option>
+                    </select>
+                  </div>
+
+                  {/* Message editor */}
+                  <div className="px-4 pb-4">
+                    <div className="relative">
+                      <textarea
+                        value={messageTemplates[activeMessageTemplate] || ""}
+                        onChange={e => setMessageTemplates(prev => ({
+                          ...prev,
+                          [activeMessageTemplate]: e.target.value.slice(0, 2000),
+                        }))}
+                        rows={8}
+                        className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none font-mono leading-relaxed"
+                      />
+                      <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">
+                        {(messageTemplates[activeMessageTemplate] || "").length}/2000
+                      </span>
+                    </div>
+                    <div className="flex justify-end mt-2">
+                      <button className="text-xs text-primary font-medium hover:underline">
+                        Send me an example email
+                      </button>
                     </div>
                   </div>
                 </div>
