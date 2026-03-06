@@ -1987,9 +1987,13 @@ const Community = () => {
                             <option value="all">All firms</option>
                             {allFirms.map(f => <option key={f} value={f}>{f}</option>)}
                           </select>
-                          <select value={adminFilterLocation} onChange={e => { setAdminFilterLocation(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
-                            <option value="all">All locations</option>
-                            {allLocations.map(l => <option key={l} value={l}>{l}</option>)}
+                          <select value={adminFilterCountry} onChange={e => { setAdminFilterCountry(e.target.value); setAdminFilterCity("all"); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All countries</option>
+                            {allCountries.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <select value={adminFilterCity} onChange={e => { setAdminFilterCity(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All cities</option>
+                            {allCities.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           {adminStatusTab === "members" && (
                             <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
@@ -2000,6 +2004,27 @@ const Community = () => {
                               <option value="member">Member</option>
                             </select>
                           )}
+                        </div>
+                        {/* Extra Filters Row */}
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showExpiredInvites} onChange={() => setShowExpiredInvites(!showExpiredInvites)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Show expired invites
+                          </label>
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showAddedByManagement} onChange={() => setShowAddedByManagement(!showAddedByManagement)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Contacts added by community management
+                          </label>
+                          <div className="ml-auto flex items-center gap-1.5">
+                            <span className="text-[11px] text-muted-foreground">Show:</span>
+                            <select value={adminPerPage} onChange={e => { setAdminPerPage(e.target.value === "all" ? 9999 : Number(e.target.value)); setAdminPage(1); }} className="text-[11px] border border-border rounded-md px-2 py-1 bg-background focus:outline-none text-muted-foreground">
+                              <option value={5}>5</option>
+                              <option value={10}>10</option>
+                              <option value={20}>20</option>
+                              <option value="all">All</option>
+                            </select>
+                            <span className="text-[11px] text-muted-foreground">members</span>
+                          </div>
                         </div>
                       </div>
 
