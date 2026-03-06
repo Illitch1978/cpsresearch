@@ -16,6 +16,16 @@ import {
   faLock,
   faImage,
   faCheck,
+  faBold,
+  faItalic,
+  faAlignLeft,
+  faAlignCenter,
+  faAlignRight,
+  faAlignJustify,
+  faListUl,
+  faListOl,
+  faLink as faLinkIcon,
+  faImage as faImageIcon,
 } from "@fortawesome/free-solid-svg-icons";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -335,6 +345,25 @@ const MyCommunities = () => {
             >
               <FontAwesomeIcon icon={faPlus} className="text-xs" /> Add Community
             </button>
+          </div>
+        </div>
+
+        {/* Personal Involvement Rules */}
+        <div className="bg-card border border-border rounded-sm p-5 mb-6">
+          <h2 className="text-sm font-semibold text-card-foreground mb-2">Personal involvement</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            You may join up to <span className="font-semibold text-card-foreground">20</span> open Communities and an unlimited number of private Communities.
+          </p>
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="font-medium text-card-foreground">{activeCommunities.filter(c => c.role !== "Founder").length}</span> / 20 open communities joined
+            </div>
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${Math.min(100, (activeCommunities.filter(c => c.role !== "Founder").length / 20) * 100)}%` }}
+              />
+            </div>
           </div>
         </div>
 
@@ -683,8 +712,48 @@ const MyCommunities = () => {
                     </select>
                   </div>
 
-                  {/* Message editor */}
+                  {/* Mini text editor */}
                   <div className="px-4 pb-4">
+                    {/* Toolbar */}
+                    <div className="flex items-center gap-0.5 border border-border border-b-0 rounded-t-lg bg-muted/30 px-2 py-1.5">
+                      {[
+                        { icon: faBold, title: "Bold" },
+                        { icon: faItalic, title: "Italic" },
+                      ].map(btn => (
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
+                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
+                        </button>
+                      ))}
+                      <div className="w-px h-4 bg-border mx-1" />
+                      {[
+                        { icon: faAlignLeft, title: "Align left" },
+                        { icon: faAlignCenter, title: "Align centre" },
+                        { icon: faAlignRight, title: "Align right" },
+                        { icon: faAlignJustify, title: "Justify" },
+                      ].map(btn => (
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
+                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
+                        </button>
+                      ))}
+                      <div className="w-px h-4 bg-border mx-1" />
+                      {[
+                        { icon: faListUl, title: "Bullet list" },
+                        { icon: faListOl, title: "Numbered list" },
+                      ].map(btn => (
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
+                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
+                        </button>
+                      ))}
+                      <div className="w-px h-4 bg-border mx-1" />
+                      <button title="Insert link" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
+                        <FontAwesomeIcon icon={faLinkIcon} className="text-xs" />
+                      </button>
+                      <button title="Insert image" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
+                        <FontAwesomeIcon icon={faImageIcon} className="text-xs" />
+                      </button>
+                    </div>
+
+                    {/* Text area */}
                     <div className="relative">
                       <textarea
                         value={messageTemplates[activeMessageTemplate] || ""}
@@ -693,14 +762,14 @@ const MyCommunities = () => {
                           [activeMessageTemplate]: e.target.value.slice(0, 2000),
                         }))}
                         rows={8}
-                        className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none font-mono leading-relaxed"
+                        className="w-full text-sm border border-border rounded-b-lg rounded-t-none px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none leading-relaxed"
                       />
                       <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">
                         {(messageTemplates[activeMessageTemplate] || "").length}/2000
                       </span>
                     </div>
                     <div className="flex justify-end mt-2">
-                      <button className="text-xs text-primary font-medium hover:underline">
+                      <button className="text-xs font-medium text-primary border border-primary/30 rounded-md px-3 py-1.5 hover:bg-primary/5 transition-colors">
                         Send me an example email
                       </button>
                     </div>
