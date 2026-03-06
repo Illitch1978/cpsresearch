@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes, faBell, faClock, faComments, faUsers, faFolderOpen, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes, faBell, faClock, faComments, faUsers, faFolderOpen, faCalendarDays, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
 import UserAvatar from "./UserAvatar";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -11,9 +12,11 @@ interface NavigationProps {
   onShowContact: () => void;
   onNavigateToSection: (section: string) => void;
   isTransparent?: boolean;
+  isLoggedIn?: boolean;
 }
 
-const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToSection, isTransparent = false }: NavigationProps) => {
+const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToSection, isTransparent = false, isLoggedIn = true }: NavigationProps) => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -106,57 +109,72 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
             >
               Contact
             </button>
-            {/* Notification Bell */}
-            <div className="relative" ref={notifRef}>
+            {isLoggedIn ? (
+              <>
+                {/* Notification Bell */}
+                <div className="relative" ref={notifRef}>
+                  <button
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className={`relative p-1.5 rounded-md transition-colors ${
+                      notificationsOpen
+                        ? "bg-primary/10 text-primary"
+                        : isTransparent
+                          ? "text-white/80 hover:text-white"
+                          : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={faBell} className="text-lg" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  {notificationsOpen && (
+                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-background rounded-lg shadow-xl border border-border z-50 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-card-foreground">Notifications</h3>
+                        <button className="text-xs text-primary hover:underline">Mark all read</button>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                        {siteNotifications.map(item => (
+                          <div
+                            key={item.id}
+                            className={`px-4 py-3 hover:bg-muted/50 transition-colors flex items-start gap-3 cursor-pointer ${!item.read ? "bg-primary/[0.02]" : ""}`}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
+                              <FontAwesomeIcon icon={item.icon} className="text-xs" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-card-foreground leading-relaxed">{item.text}</p>
+                              <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
+                                <FontAwesomeIcon icon={faClock} className="text-[9px]" /> {item.time}
+                              </span>
+                            </div>
+                            {!item.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="px-4 py-2.5 border-t border-border text-center">
+                        <button className="text-xs text-primary font-medium hover:underline">View all notifications</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <UserAvatar />
+              </>
+            ) : (
               <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className={`relative p-1.5 rounded-md transition-colors ${
-                  notificationsOpen
-                    ? "bg-primary/10 text-primary"
-                    : isTransparent
-                      ? "text-white/80 hover:text-white"
-                      : "text-slate-500 hover:text-slate-700"
+                onClick={() => navigate("/login")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isTransparent
+                    ? "bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
                 }`}
               >
-                <FontAwesomeIcon icon={faBell} className="text-lg" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
-                    {unreadCount}
-                  </span>
-                )}
+                <FontAwesomeIcon icon={faSignInAlt} className="text-xs" /> Sign in
               </button>
-              {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-card-foreground">Notifications</h3>
-                    <button className="text-xs text-primary hover:underline">Mark all read</button>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
-                    {siteNotifications.map(item => (
-                      <div
-                        key={item.id}
-                        className={`px-4 py-3 hover:bg-slate-50 transition-colors flex items-start gap-3 cursor-pointer ${!item.read ? "bg-primary/[0.02]" : ""}`}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 mt-0.5">
-                          <FontAwesomeIcon icon={item.icon} className="text-xs" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs text-slate-700 leading-relaxed">{item.text}</p>
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
-                            <FontAwesomeIcon icon={faClock} className="text-[9px]" /> {item.time}
-                          </span>
-                        </div>
-                        {!item.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="px-4 py-2.5 border-t border-gray-100 text-center">
-                    <button className="text-xs text-primary font-medium hover:underline">View all notifications</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <UserAvatar />
+            )}
           </div>
 
           {/* Mobile Hamburger Button */}
