@@ -627,7 +627,26 @@ const Community = () => {
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
-  const allLocations = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location).filter(Boolean) as string[])).sort(), []);
+  const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
+  const citiesByCountry = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    mockMembers.forEach(m => {
+      if (!m.location) return;
+      const parts = m.location.split(", ");
+      if (parts.length >= 2) {
+        const country = parts[parts.length - 1];
+        const city = parts.slice(0, -1).join(", ");
+        if (!map[country]) map[country] = [];
+        if (!map[country].includes(city)) map[country].push(city);
+      }
+    });
+    Object.values(map).forEach(arr => arr.sort());
+    return map;
+  }, []);
+  const allCities = useMemo(() => {
+    if (adminFilterCountry === "all") return Array.from(new Set(mockMembers.map(m => m.location?.split(", ").slice(0, -1).join(", ")).filter(Boolean) as string[])).sort();
+    return citiesByCountry[adminFilterCountry] || [];
+  }, [adminFilterCountry, citiesByCountry]);
 
   // Mock invited/requested/blocked members
   const mockInvited = useMemo(() => [
@@ -657,11 +676,13 @@ const Community = () => {
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
       const matchesFirm = adminFilterFirm === "all" || m.firm === adminFilterFirm;
-      const matchesLocation = adminFilterLocation === "all" || m.location === adminFilterLocation;
+      const matchesCountry = adminFilterCountry === "all" || (m.location && m.location.endsWith(adminFilterCountry));
+      const matchesCity = adminFilterCity === "all" || (m.location && m.location.startsWith(adminFilterCity));
+      const matchesLocation = matchesCountry && matchesCity;
       const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
       return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterLocation, adminStatusMembers, memberRoles]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
