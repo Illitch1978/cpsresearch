@@ -1950,7 +1950,7 @@ const Community = () => {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 mb-4">
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
                           {([
                             { key: "members", label: "Group members", count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
@@ -1958,14 +1958,18 @@ const Community = () => {
                             { key: "requested", label: "Requested", count: mockRequested.length },
                             { key: "blocked", label: "Blocked", count: mockBlocked.length },
                           ] as const).map(tab => (
-                            <button
-                              key={tab.key}
-                              onClick={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
-                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${adminStatusTab === tab.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                            >
-                              {tab.label}
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-white/20" : "bg-background"}`}>{tab.count}</span>
-                            </button>
+                            <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={adminStatusTab === tab.key}
+                                onChange={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
+                                className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+                              />
+                              <span className={`font-medium ${adminStatusTab === tab.key ? "text-primary" : "text-muted-foreground"}`}>
+                                {tab.label}
+                              </span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
+                            </label>
                           ))}
                         </div>
                       </div>
