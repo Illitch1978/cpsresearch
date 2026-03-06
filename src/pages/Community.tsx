@@ -34,6 +34,8 @@ import {
   faGraduationCap,
   faLayerGroup,
   faFilter,
+  faStar,
+  faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -822,6 +824,78 @@ const Community = () => {
                         <p className="text-muted-foreground mt-1">{mockEvents[0].date} · {mockEvents[0].time}</p>
                         <button onClick={() => setActiveTab("events")} className="text-primary font-medium mt-2 hover:underline">View details →</button>
                       </div>
+                    </div>
+
+                    {/* Featured Member Spotlight */}
+                    <div className="bg-gradient-to-br from-primary/[0.04] to-primary/[0.01] border border-primary/15 rounded-lg p-5">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faStar} className="text-amber-400 text-xs" />
+                        <h3 className="text-sm font-semibold text-card-foreground">Member Spotlight</h3>
+                      </div>
+                      <button
+                        onClick={() => setSelectedMember(mockMembers[2])}
+                        className="w-full text-left group"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                              {mockMembers[2].name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <span className="text-sm font-semibold text-card-foreground group-hover:text-primary transition-colors block">{mockMembers[2].name}</span>
+                            <span className="text-xs text-muted-foreground">{mockMembers[2].role}</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{mockMembers[2].bio}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {mockMembers[2].expertise.map(e => (
+                            <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10">{e}</span>
+                          ))}
+                        </div>
+                        {mockMembers[2].publications && (
+                          <p className="text-[11px] text-muted-foreground mt-3 pt-2 border-t border-primary/10">
+                            <span className="font-semibold text-primary">{mockMembers[2].publications}</span> publications · {mockMembers[2].firm}
+                          </p>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* You Might Know */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-5">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faUserPlus} className="text-primary text-xs" />
+                        <h3 className="text-sm font-semibold text-card-foreground">You Might Know</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {/* Suggest members who share expertise with topics the user interacts with */}
+                        {[mockMembers[3], mockMembers[6], mockMembers[7]].map(m => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedMember(m)}
+                            className="flex items-start gap-3 w-full text-left hover:bg-slate-50 rounded-md p-1.5 -mx-1.5 transition-colors group"
+                          >
+                            <Avatar className="h-9 w-9 mt-0.5">
+                              <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-xs font-medium text-slate-700 group-hover:text-primary transition-colors block">{m.name}</span>
+                              <span className="text-[11px] text-muted-foreground block">{m.role} · {m.firm}</span>
+                              <span className="text-[10px] text-primary/70 mt-1 block">
+                                {m.expertise.slice(0, 2).join(" · ")}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setActiveTab("members")}
+                        className="text-xs text-primary font-medium mt-3 hover:underline block"
+                      >
+                        Discover more members →
+                      </button>
                     </div>
                   </aside>
                 </div>
