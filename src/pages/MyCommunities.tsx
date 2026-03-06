@@ -95,8 +95,10 @@ const MyCommunities = () => {
   const [formDescription, setFormDescription] = useState("");
   const [formAccess, setFormAccess] = useState<"open" | "private">("open");
   const [formFrontline, setFormFrontline] = useState(false);
-  const [formOfficial, setFormOfficial] = useState(false);
+  const [formOfficial, setFormOfficial] = useState<"yes" | "no">("no");
   const [formSaving, setFormSaving] = useState(false);
+  const [formThumbnail, setFormThumbnail] = useState<string | null>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -141,7 +143,7 @@ const MyCommunities = () => {
       setFormDescription("");
       setFormAccess("open");
       setFormFrontline(false);
-      setFormOfficial(false);
+      setFormOfficial("no");
       setFormSaving(false);
       setCreateOpen(false);
     }, 800);
@@ -153,7 +155,22 @@ const MyCommunities = () => {
     setFormDescription("");
     setFormAccess("open");
     setFormFrontline(false);
-    setFormOfficial(false);
+    setFormOfficial("no");
+    setFormThumbnail(null);
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) {
+      alert("Image must be less than 500KB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setFormThumbnail(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const renderCommunityCard = (community: CommunityItem) => (
@@ -376,10 +393,40 @@ const MyCommunities = () => {
               <label className="text-xs font-medium text-card-foreground mb-1.5 block">
                 Thumbnail
               </label>
-              <button className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
-                <FontAwesomeIcon icon={faImage} className="text-sm text-muted-foreground/50" />
-                <span>Choose image (max 500KB)</span>
-              </button>
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                className="hidden"
+              />
+              {formThumbnail ? (
+                <div className="flex items-center gap-3">
+                  <img src={formThumbnail} alt="Thumbnail preview" className="w-16 h-16 rounded-lg object-cover border border-border" />
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => thumbnailInputRef.current?.click()}
+                      className="text-xs text-primary font-medium hover:underline text-left"
+                    >
+                      Change image
+                    </button>
+                    <button
+                      onClick={() => setFormThumbnail(null)}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-colors text-left"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => thumbnailInputRef.current?.click()}
+                  className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full"
+                >
+                  <FontAwesomeIcon icon={faImage} className="text-sm text-muted-foreground/50" />
+                  <span>Choose image (max 500KB)</span>
+                </button>
+              )}
             </div>
 
             {/* Frontline content */}
@@ -430,16 +477,24 @@ const MyCommunities = () => {
             </div>
 
             {/* Official Community */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFormOfficial(!formOfficial)}
-                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${formOfficial ? "bg-primary border-primary text-primary-foreground" : "border-border bg-background"}`}
-              >
-                {formOfficial && <FontAwesomeIcon icon={faCheck} className="text-[8px]" />}
-              </button>
-              <label className="text-xs text-card-foreground font-medium cursor-pointer" onClick={() => setFormOfficial(!formOfficial)}>
+            <div>
+              <label className="text-xs font-medium text-card-foreground mb-1.5 block">
                 Official Community
               </label>
+              <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
+                <button
+                  onClick={() => setFormOfficial("yes")}
+                  className={`px-4 py-2 text-xs font-medium transition-colors ${formOfficial === "yes" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setFormOfficial("no")}
+                  className={`px-4 py-2 text-xs font-medium transition-colors ${formOfficial === "no" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                >
+                  No
+                </button>
+              </div>
             </div>
 
             {/* Actions */}
