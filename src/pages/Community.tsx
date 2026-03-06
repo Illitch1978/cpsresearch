@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -36,6 +36,8 @@ import {
   faFilter,
   faStar,
   faUserPlus,
+  faClock,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -231,6 +233,61 @@ const mockWorkingGroups: WorkingGroup[] = [
   },
 ];
 
+// ─── Mock Activity Feed ──────────────────────────────────────
+
+interface ActivityItem {
+  id: string;
+  type: "post" | "reply" | "join" | "resource" | "event";
+  actor: Member;
+  target?: string;
+  timestamp: string;
+  read: boolean;
+}
+
+const mockActivity: ActivityItem[] = [
+  { id: "a1", type: "post", actor: mockMembers[1], target: "The evolving role of AI in audit and assurance", timestamp: "2 hours ago", read: false },
+  { id: "a2", type: "reply", actor: mockMembers[2], target: "Welcome to the Professional Services Research Community", timestamp: "4 hours ago", read: false },
+  { id: "a3", type: "resource", actor: mockMembers[4], target: "AI Adoption in Audit: A Systematic Review", timestamp: "Yesterday", read: false },
+  { id: "a4", type: "join", actor: mockMembers[7], timestamp: "Yesterday", read: true },
+  { id: "a5", type: "event", actor: mockMembers[0], target: "Mixed-Methods Research Design Workshop", timestamp: "2 days ago", read: true },
+  { id: "a6", type: "reply", actor: mockMembers[3], target: "Transparency in consulting: are clients getting what they pay for?", timestamp: "3 days ago", read: true },
+];
+
+// ─── Mock Replies for Discussion Threading ───────────────────
+
+interface Reply {
+  id: string;
+  author: Member;
+  content: string;
+  date: string;
+  likes: number;
+  parentId?: string;
+}
+
+const mockReplies: Record<string, Reply[]> = {
+  "1": [
+    { id: "r1", author: mockMembers[1], content: "Thank you Sarah. Excited to be part of this community. My primary interest is in how AI is reshaping audit methodology — looking forward to cross-pollinating ideas with researchers from other disciplines.", date: "15 Feb 2026", likes: 12 },
+    { id: "r2", author: mockMembers[2], content: "Great to be here! I'm currently working on diversity metrics in Big Four leadership pipelines and would love to connect with others studying organisational culture in professional services.", date: "16 Feb 2026", likes: 8 },
+    { id: "r3", author: mockMembers[3], content: "Michael Chen here from McKinsey. Very much looking forward to collaborative research on measuring consulting impact. This community fills a real gap.", date: "16 Feb 2026", likes: 15, parentId: "r1" },
+    { id: "r4", author: mockMembers[4], content: "Hello everyone. My focus is on AI and machine learning applications in professional services. Happy to share our lab's latest working papers with the community.", date: "17 Feb 2026", likes: 9 },
+    { id: "r5", author: mockMembers[6], content: "Bonjour from INSEAD! I research organisational culture in global PS firms. Would love to collaborate on cross-cultural leadership studies.", date: "18 Feb 2026", likes: 6, parentId: "r2" },
+  ],
+  "2": [
+    { id: "r6", author: mockMembers[4], content: "James, we've been developing a framework at Imperial for evaluating AI readiness in audit firms. Happy to present at the next webinar if useful.", date: "4 Mar 2026", likes: 18 },
+    { id: "r7", author: mockMembers[5], content: "From a regulatory perspective, the FRC is watching this space closely. I can share some insights on what they're considering for guidance.", date: "4 Mar 2026", likes: 14 },
+    { id: "r8", author: mockMembers[0], content: "Excellent contributions. I'd suggest we formalise this into a working paper — there's clearly enough expertise in this group to produce something impactful.", date: "5 Mar 2026", likes: 22, parentId: "r6" },
+  ],
+  "3": [
+    { id: "r9", author: mockMembers[0], content: "Fascinating research, Emma. The 'frozen middle' concept resonates with what we've seen in our governance studies. Would you consider presenting this at the Spring Symposium?", date: "3 Mar 2026", likes: 11 },
+    { id: "r10", author: mockMembers[6], content: "The cross-cultural dimension of this is really interesting. In my research at INSEAD, I've found similar patterns in French and German professional services firms.", date: "4 Mar 2026", likes: 7 },
+  ],
+  "5": [
+    { id: "r11", author: mockMembers[0], content: "This is perhaps the central question for consulting as a profession. I'd be keen to co-author a review paper on existing impact measurement frameworks.", date: "26 Feb 2026", likes: 19 },
+    { id: "r12", author: mockMembers[7], content: "In emerging markets, this question is even more acute. Clients often have fewer benchmarks to evaluate consulting value. We need culturally-informed frameworks.", date: "26 Feb 2026", likes: 13 },
+    { id: "r13", author: mockMembers[1], content: "There are parallels with audit quality indicators. The profession went through a similar transparency journey. Happy to share lessons learned.", date: "27 Feb 2026", likes: 16, parentId: "r11" },
+  ],
+};
+
 // Collect all unique discussion tags
 const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap(d => d.tags))).sort();
 
@@ -391,6 +448,20 @@ const Community = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close notifications on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredDiscussions = useMemo(() => {
     if (!selectedTag) return mockDiscussions;
@@ -457,10 +528,64 @@ const Community = () => {
               >
                 <FontAwesomeIcon icon={searchOpen ? faTimes : faSearch} className="text-base" />
               </button>
-              <button className="relative text-slate-500 hover:text-slate-700 transition-colors">
-                <FontAwesomeIcon icon={faBell} className="text-lg" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold">3</span>
-              </button>
+              {/* Notifications Dropdown */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setNotificationsOpen(!notificationsOpen)}
+                  className={`relative text-slate-500 hover:text-slate-700 transition-colors p-1.5 rounded-md ${notificationsOpen ? "bg-primary/10 text-primary" : ""}`}
+                >
+                  <FontAwesomeIcon icon={faBell} className="text-lg" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold">
+                    {mockActivity.filter(a => !a.read).length}
+                  </span>
+                </button>
+                {notificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-card-foreground">Activity</h3>
+                      <button className="text-xs text-primary hover:underline">Mark all read</button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
+                      {mockActivity.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            if (item.type === "post" || item.type === "reply") {
+                              const disc = mockDiscussions.find(d => d.title === item.target);
+                              if (disc) { setSelectedDiscussion(disc); setNotificationsOpen(false); }
+                            }
+                            if (item.type === "join") { setSelectedMember(item.actor); setNotificationsOpen(false); }
+                          }}
+                          className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors flex items-start gap-3 ${!item.read ? "bg-primary/[0.02]" : ""}`}
+                        >
+                          <Avatar className="h-8 w-8 mt-0.5 shrink-0">
+                            <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
+                              {item.actor.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs text-slate-700 leading-relaxed">
+                              <span className="font-semibold">{item.actor.name}</span>
+                              {item.type === "post" && <> started a discussion: <span className="font-medium text-card-foreground">"{item.target}"</span></>}
+                              {item.type === "reply" && <> replied to <span className="font-medium text-card-foreground">"{item.target}"</span></>}
+                              {item.type === "join" && <> joined the community</>}
+                              {item.type === "resource" && <> shared a resource: <span className="font-medium text-card-foreground">"{item.target}"</span></>}
+                              {item.type === "event" && <> created an event: <span className="font-medium text-card-foreground">"{item.target}"</span></>}
+                            </p>
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-1">
+                              <FontAwesomeIcon icon={faClock} className="text-[9px]" /> {item.timestamp}
+                            </span>
+                          </div>
+                          {!item.read && <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-4 py-2.5 border-t border-gray-100 text-center">
+                      <button className="text-xs text-primary font-medium hover:underline">View all activity</button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <UserAvatar />
             </div>
           </div>
@@ -738,7 +863,7 @@ const Community = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 {d.pinned && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0">Pinned</Badge>}
-                                <h3 className="text-sm font-semibold text-card-foreground leading-snug">{d.title}</h3>
+                                <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
                               </div>
                               <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                                 <button onClick={() => setSelectedMember(d.author)} className="font-medium text-slate-600 hover:text-primary transition-colors">{d.author.name}</button>
@@ -769,8 +894,11 @@ const Community = () => {
                           <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
                             <FontAwesomeIcon icon={faThumbsUp} /> {d.likes}
                           </button>
-                          <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                          <button onClick={() => setSelectedDiscussion(d)} className="flex items-center gap-1.5 hover:text-primary transition-colors">
                             <FontAwesomeIcon icon={faReply} /> {d.replies} replies
+                          </button>
+                          <button onClick={() => setSelectedDiscussion(d)} className="ml-auto flex items-center gap-1.5 text-primary font-medium hover:underline">
+                            Open thread <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
                           </button>
                         </div>
                       </article>
@@ -1149,6 +1277,118 @@ const Community = () => {
 
       {/* Member Profile Modal */}
       <MemberProfileModal member={selectedMember} open={!!selectedMember} onClose={() => setSelectedMember(null)} />
+
+      {/* Discussion Thread Modal */}
+      <Dialog open={!!selectedDiscussion} onOpenChange={() => setSelectedDiscussion(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="sr-only">{selectedDiscussion?.title}</DialogTitle>
+            <DialogDescription className="sr-only">Discussion thread</DialogDescription>
+          </DialogHeader>
+          {selectedDiscussion && (
+            <div className="flex flex-col gap-0 overflow-hidden -mt-2">
+              {/* Original Post */}
+              <div className="pb-4 border-b border-border">
+                <div className="flex items-start gap-3">
+                  <button onClick={() => { setSelectedMember(selectedDiscussion.author); }} className="shrink-0">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                        {selectedDiscussion.author.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {selectedDiscussion.pinned && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0">Pinned</Badge>}
+                      <h2 className="text-base font-serif font-semibold text-card-foreground">{selectedDiscussion.title}</h2>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                      <button onClick={() => setSelectedMember(selectedDiscussion.author)} className="font-medium text-slate-600 hover:text-primary transition-colors">{selectedDiscussion.author.name}</button>
+                      <BadgeIcon badge={selectedDiscussion.author.badge} />
+                      <span>·</span>
+                      <span>{selectedDiscussion.author.firm}</span>
+                      <span>·</span>
+                      <span>{selectedDiscussion.date}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{selectedDiscussion.content}</p>
+                    <div className="flex items-center gap-3 mt-3">
+                      {selectedDiscussion.tags.map(tag => (
+                        <span key={tag} className="text-[11px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{tag}</span>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-5 mt-3 text-xs text-muted-foreground">
+                      <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                        <FontAwesomeIcon icon={faThumbsUp} /> {selectedDiscussion.likes}
+                      </button>
+                      <span className="flex items-center gap-1.5">
+                        <FontAwesomeIcon icon={faReply} /> {selectedDiscussion.replies} replies
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Replies */}
+              <div className="overflow-y-auto flex-1 pt-4 space-y-0">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                  {(mockReplies[selectedDiscussion.id] || []).length} Replies
+                </h3>
+                {(mockReplies[selectedDiscussion.id] || []).map(reply => {
+                  const isNested = !!reply.parentId;
+                  return (
+                    <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"}`}>
+                      <div className="flex items-start gap-3">
+                        <button onClick={() => setSelectedMember(reply.author)} className="shrink-0">
+                          <Avatar className={`${isNested ? "h-7 w-7" : "h-8 w-8"}`}>
+                            <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
+                              {reply.author.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <button onClick={() => setSelectedMember(reply.author)} className="font-medium text-slate-700 hover:text-primary transition-colors">{reply.author.name}</button>
+                            <BadgeIcon badge={reply.author.badge} />
+                            <span>·</span>
+                            <span>{reply.date}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <button className="flex items-center gap-1 hover:text-primary transition-colors">
+                              <FontAwesomeIcon icon={faThumbsUp} className="text-[10px]" /> {reply.likes}
+                            </button>
+                            <button className="hover:text-primary transition-colors">Reply</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {(mockReplies[selectedDiscussion.id] || []).length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-6">No replies yet. Be the first to respond.</p>
+                )}
+              </div>
+
+              {/* Reply Input */}
+              <div className="pt-3 border-t border-border mt-auto">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">RC</AvatarFallback>
+                  </Avatar>
+                  <input
+                    type="text"
+                    placeholder="Write a reply…"
+                    className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                  />
+                  <button className="text-primary hover:text-primary/80 transition-colors">
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="bg-footer-bg text-white py-8 mt-auto">
