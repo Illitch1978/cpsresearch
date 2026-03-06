@@ -589,6 +589,9 @@ const Community = () => {
 
   const [isAdmin] = useState(true); // Current user is admin
   const [inviteEmail, setInviteEmail] = useState("");
+  const [bulkEmails, setBulkEmails] = useState("");
+  const [showBulkInvite, setShowBulkInvite] = useState(false);
+  const [bulkInviteSent, setBulkInviteSent] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [memberRoles, setMemberRoles] = useState<Record<string, string>>(
@@ -674,6 +677,30 @@ const Community = () => {
     if (!inviteEmail.trim()) return;
     setInviteSent(true);
     setTimeout(() => { setInviteSent(false); setInviteEmail(""); }, 2500);
+  };
+
+  const parseBulkEmails = (text: string) => {
+    return text.split(/[\n,;]+/).map(e => e.trim()).filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  };
+
+  const handleBulkInvite = () => {
+    const emails = parseBulkEmails(bulkEmails);
+    if (emails.length === 0) return;
+    setBulkInviteSent(true);
+    setTimeout(() => { setBulkInviteSent(false); setBulkEmails(""); setShowBulkInvite(false); }, 3000);
+  };
+
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      const emails = text.split(/[\n,;]+/).map(l => l.trim()).filter(l => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(l));
+      setBulkEmails(prev => prev ? prev + "\n" + emails.join("\n") : emails.join("\n"));
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   const handleCopyLink = () => {
@@ -1710,20 +1737,28 @@ const Community = () => {
                 <TabsContent value="admin">
                   <div className="space-y-6">
                     {/* Invite Members Card */}
-                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="bg-background border border-border rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
                             <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
                           </h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Invite new members by email or share an invite link.</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Invite individually, in bulk, or share an invite link.</p>
                         </div>
-                        <button
-                          onClick={() => setShowAddContact(!showAddContact)}
-                          className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
-                        >
-                          <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Contact
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => { setShowBulkInvite(!showBulkInvite); setShowAddContact(false); }}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showBulkInvite ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
+                          >
+                            <FontAwesomeIcon icon={faUsers} className="text-[10px]" /> Bulk Invite
+                          </button>
+                          <button
+                            onClick={() => { setShowAddContact(!showAddContact); setShowBulkInvite(false); }}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                          >
+                            <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Contact
+                          </button>
+                        </div>
                       </div>
 
                       {/* Add Contact Form */}
@@ -1740,6 +1775,49 @@ const Community = () => {
                             <button disabled={!newContactName.trim() || !newContactEmail.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactName.trim() && newContactEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
                               Add & Invite
                             </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bulk Invite Panel */}
+                      {showBulkInvite && (
+                        <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-semibold text-card-foreground">Bulk invite by email</h4>
+                            <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
+                              <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
+                              <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
+                            </label>
+                          </div>
+                          <textarea
+                            value={bulkEmails}
+                            onChange={e => setBulkEmails(e.target.value)}
+                            placeholder={"Paste email addresses (one per line, or comma/semicolon separated):\n\njane@example.com\njohn@company.org\nteam@firm.co"}
+                            rows={5}
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none font-mono"
+                          />
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-muted-foreground">
+                              {parseBulkEmails(bulkEmails).length > 0
+                                ? <span className="text-primary font-medium">{parseBulkEmails(bulkEmails).length} valid email{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""} detected</span>
+                                : "No valid emails yet"}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => { setShowBulkInvite(false); setBulkEmails(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                              <button
+                                onClick={handleBulkInvite}
+                                disabled={parseBulkEmails(bulkEmails).length === 0 || bulkInviteSent}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                                  bulkInviteSent ? "bg-emerald-500 text-white" :
+                                  parseBulkEmails(bulkEmails).length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {bulkInviteSent
+                                  ? <><FontAwesomeIcon icon={faCheck} /> Invites sent!</>
+                                  : <><FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send {parseBulkEmails(bulkEmails).length} invite{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""}</>
+                                }
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
