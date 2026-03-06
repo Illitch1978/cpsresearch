@@ -38,6 +38,12 @@ import {
   faUserPlus,
   faClock,
   faArrowRight,
+  faUserShield,
+  faTrashAlt,
+  faBan,
+  faCopy,
+  faCheck,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -456,6 +462,68 @@ const Community = () => {
   const [replyingTo, setReplyingTo] = useState<Reply | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  // Admin state
+  const [isAdmin] = useState(true); // Current user is admin
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteSent, setInviteSent] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [memberRoles, setMemberRoles] = useState<Record<string, string>>(
+    Object.fromEntries(mockMembers.map(m => [m.id, m.badge || "member"]))
+  );
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState<string | null>(null);
+  const [adminSearchQuery, setAdminSearchQuery] = useState("");
+  const [adminFilterRole, setAdminFilterRole] = useState<string>("all");
+  const [adminFilterExpertise, setAdminFilterExpertise] = useState<string>("all");
+  const [confirmRemove, setConfirmRemove] = useState<Member | null>(null);
+  const [removedMembers, setRemovedMembers] = useState<Set<string>>(new Set());
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
+
+  const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
+
+  const filteredAdminMembers = useMemo(() => {
+    return mockMembers.filter(m => {
+      if (removedMembers.has(m.id)) return false;
+      const q = adminSearchQuery.toLowerCase();
+      const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
+      const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
+      const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
+      return matchesSearch && matchesRole && matchesExpertise;
+    });
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, memberRoles, removedMembers]);
+
+  const handleInvite = () => {
+    if (!inviteEmail.trim()) return;
+    setInviteSent(true);
+    setTimeout(() => { setInviteSent(false); setInviteEmail(""); }, 2500);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`https://cpsr.uk/community/prof-services-research/invite?token=abc123`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleChangeRole = (memberId: string, newRole: string) => {
+    setMemberRoles(prev => ({ ...prev, [memberId]: newRole }));
+    setRoleDropdownOpen(null);
+  };
+
+  const handleRemoveMember = (member: Member) => {
+    setRemovedMembers(prev => new Set(prev).add(member.id));
+    setConfirmRemove(null);
+  };
+
+  // Close role dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
+        setRoleDropdownOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   const toggleLike = (itemId: string) => {
     setLikedItems(prev => {
       const next = new Set(prev);
@@ -839,6 +907,11 @@ const Community = () => {
                 <TabsTrigger value="about" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faCircleInfo} className="text-xs" /> About
                 </TabsTrigger>
+                {isAdmin && (
+                  <TabsTrigger value="admin" className="gap-2 text-sm data-[state=active]:text-primary">
+                    <FontAwesomeIcon icon={faUserShield} className="text-xs" /> Admin
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               {/* ─── DISCUSSIONS TAB ─── */}
@@ -1230,6 +1303,216 @@ const Community = () => {
                 </div>
               </TabsContent>
 
+              {/* ─── ADMIN TAB ─── */}
+              {isAdmin && (
+                <TabsContent value="admin">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Main Admin Panel */}
+                    <div className="lg:col-span-2 space-y-6">
+                      {/* Invite Members */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <h3 className="text-base font-serif font-semibold text-card-foreground mb-1 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
+                        </h3>
+                        <p className="text-xs text-muted-foreground mb-4">Invite new members by email or share an invite link.</p>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <input
+                            type="email"
+                            value={inviteEmail}
+                            onChange={e => setInviteEmail(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
+                            placeholder="Enter email address…"
+                            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                          />
+                          <button
+                            onClick={handleInvite}
+                            disabled={!inviteEmail.trim() || inviteSent}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                          >
+                            {inviteSent ? (
+                              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span>
+                            ) : (
+                              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                          <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
+                          <span className="text-xs text-muted-foreground truncate flex-1">cpsr.uk/community/prof-services-research/invite?token=abc123</span>
+                          <button
+                            onClick={handleCopyLink}
+                            className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
+                          >
+                            <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
+                            {linkCopied ? "Copied!" : "Copy link"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Member Directory with Filters */}
+                      <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <h3 className="text-base font-serif font-semibold text-card-foreground mb-4 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faUsers} className="text-primary text-sm" /> Manage Members
+                          <span className="text-xs font-normal text-muted-foreground ml-auto">{filteredAdminMembers.length} of {mockMembers.length - removedMembers.size}</span>
+                        </h3>
+
+                        {/* Filters */}
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <div className="relative flex-1 min-w-[200px]">
+                            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                            <input
+                              type="text"
+                              value={adminSearchQuery}
+                              onChange={e => setAdminSearchQuery(e.target.value)}
+                              placeholder="Search by name, firm, email…"
+                              className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                            />
+                          </div>
+                          <select
+                            value={adminFilterRole}
+                            onChange={e => setAdminFilterRole(e.target.value)}
+                            className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
+                          >
+                            <option value="all">All roles</option>
+                            <option value="founder">Founder</option>
+                            <option value="moderator">Moderator</option>
+                            <option value="contributor">Contributor</option>
+                            <option value="member">Member</option>
+                          </select>
+                          <select
+                            value={adminFilterExpertise}
+                            onChange={e => setAdminFilterExpertise(e.target.value)}
+                            className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
+                          >
+                            <option value="all">All expertise</option>
+                            {allExpertise.map(e => <option key={e} value={e}>{e}</option>)}
+                          </select>
+                        </div>
+
+                        {/* Member List */}
+                        <div className="divide-y divide-gray-50">
+                          {filteredAdminMembers.map(m => (
+                            <div key={m.id} className="flex items-center gap-3 py-3 group">
+                              <button onClick={() => setSelectedMember(m)} className="shrink-0">
+                                <Avatar className="h-9 w-9">
+                                  <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                    {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </button>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <button onClick={() => setSelectedMember(m)} className="text-sm font-medium text-card-foreground hover:text-primary transition-colors truncate">{m.name}</button>
+                                  <BadgeIcon badge={memberRoles[m.id] !== "member" ? memberRoles[m.id] as any : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                  <span>{m.firm}</span>
+                                  {m.location && <><span>·</span><span>{m.location}</span></>}
+                                </div>
+                              </div>
+
+                              {/* Role Selector */}
+                              <div className="relative" ref={roleDropdownOpen === m.id ? roleDropdownRef : undefined}>
+                                <button
+                                  onClick={() => setRoleDropdownOpen(roleDropdownOpen === m.id ? null : m.id)}
+                                  className="text-xs border border-border rounded-md px-2.5 py-1.5 bg-background hover:border-primary/30 transition-colors flex items-center gap-1.5 min-w-[100px] justify-between"
+                                >
+                                  <span className="capitalize">{memberRoles[m.id]}</span>
+                                  <FontAwesomeIcon icon={faChevronDown} className="text-[9px] text-muted-foreground" />
+                                </button>
+                                {roleDropdownOpen === m.id && (
+                                  <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
+                                    {["founder", "moderator", "contributor", "member"].map(role => (
+                                      <button
+                                        key={role}
+                                        onClick={() => handleChangeRole(m.id, role)}
+                                        className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors capitalize flex items-center justify-between ${memberRoles[m.id] === role ? "text-primary font-medium" : "text-slate-700"}`}
+                                      >
+                                        {role}
+                                        {memberRoles[m.id] === role && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Remove Button */}
+                              <button
+                                onClick={() => setConfirmRemove(m)}
+                                className="text-slate-300 hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-destructive/5"
+                                title="Remove member"
+                              >
+                                <FontAwesomeIcon icon={faBan} className="text-sm" />
+                              </button>
+                            </div>
+                          ))}
+                          {filteredAdminMembers.length === 0 && (
+                            <div className="text-center py-8">
+                              <FontAwesomeIcon icon={faSearch} className="text-2xl text-muted-foreground/30 mb-2" />
+                              <p className="text-sm text-muted-foreground">No members match your filters.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Admin Sidebar */}
+                    <aside className="space-y-5">
+                      <div className="bg-white border border-gray-200 rounded-lg p-5">
+                        <h3 className="text-sm font-semibold text-card-foreground mb-3">Role Summary</h3>
+                        <div className="space-y-2.5">
+                          {["founder", "moderator", "contributor", "member"].map(role => {
+                            const count = Object.entries(memberRoles).filter(([id, r]) => r === role && !removedMembers.has(id)).length;
+                            return (
+                              <div key={role} className="flex items-center justify-between text-xs">
+                                <span className="capitalize text-muted-foreground flex items-center gap-2">
+                                  <BadgeIcon badge={role !== "member" ? role as any : undefined} />
+                                  {role}
+                                </span>
+                                <span className="font-medium text-card-foreground">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 rounded-lg p-5">
+                        <h3 className="text-sm font-semibold text-card-foreground mb-3">Admin Actions</h3>
+                        <ul className="space-y-2 text-xs text-muted-foreground">
+                          <li className="flex items-center gap-2">
+                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-[10px]" />
+                            Invite via email or shareable link
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <FontAwesomeIcon icon={faShieldHalved} className="text-primary text-[10px]" />
+                            Assign roles: Founder, Moderator, Contributor, Member
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <FontAwesomeIcon icon={faFilter} className="text-primary text-[10px]" />
+                            Filter by role, expertise, name or firm
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <FontAwesomeIcon icon={faBan} className="text-primary text-[10px]" />
+                            Remove or ban members from the community
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                        <h3 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faShieldHalved} className="text-xs" /> Admin Notice
+                        </h3>
+                        <p className="text-xs text-amber-700 leading-relaxed">
+                          Only Founders and Moderators can access this panel. Role changes and removals are logged for transparency.
+                        </p>
+                      </div>
+                    </aside>
+                  </div>
+                </TabsContent>
+              )}
+
               {/* ─── ABOUT TAB ─── */}
               <TabsContent value="about">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1467,7 +1750,32 @@ const Community = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Footer */}
+      {/* Remove Member Confirmation */}
+      <Dialog open={!!confirmRemove} onOpenChange={(open) => { if (!open) setConfirmRemove(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-serif">Remove Member</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Are you sure you want to remove <span className="font-semibold text-card-foreground">{confirmRemove?.name}</span> from this community? This action can be reversed by re-inviting them.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => setConfirmRemove(null)}
+              className="flex-1 text-sm font-medium border border-border rounded-lg py-2 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => confirmRemove && handleRemoveMember(confirmRemove)}
+              className="flex-1 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg py-2 hover:bg-destructive/90 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <FontAwesomeIcon icon={faBan} className="text-xs" /> Remove
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <footer className="bg-footer-bg text-white py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 font-light">
           &copy; 2026 Centre for Professional Services Research. All rights reserved.
