@@ -99,6 +99,13 @@ const MyCommunities = () => {
   const [formSaving, setFormSaving] = useState(false);
   const [formThumbnail, setFormThumbnail] = useState<string | null>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  // Rules state
+  const [formMembershipRule, setFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("anyone");
+  const [formPostReview, setFormPostReview] = useState<"none" | "criteria" | "all">("none");
+  const [formContentReview, setFormContentReview] = useState<"none" | "criteria" | "all">("none");
+  const [formInviteExpiry, setFormInviteExpiry] = useState("90");
+  const [formCommunityRules, setFormCommunityRules] = useState("Open community with no pre-approval of posts and content items.");
+  const [rulesExpanded, setRulesExpanded] = useState(false);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -157,6 +164,12 @@ const MyCommunities = () => {
     setFormFrontline(false);
     setFormOfficial("no");
     setFormThumbnail(null);
+    setFormMembershipRule("anyone");
+    setFormPostReview("none");
+    setFormContentReview("none");
+    setFormInviteExpiry("90");
+    setFormCommunityRules("Open community with no pre-approval of posts and content items.");
+    setRulesExpanded(false);
   };
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -341,15 +354,15 @@ const MyCommunities = () => {
 
       {/* Create Community Dialog */}
       <Dialog open={createOpen} onOpenChange={(open) => { if (!open) setCreateOpen(false); }}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="text-lg font-serif">Add Community</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Once a community has been saved, changes can only be made to its name or access by admins.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
             {/* Name */}
             <div>
               <label className="text-xs font-medium text-card-foreground mb-1.5 block">
@@ -495,6 +508,123 @@ const MyCommunities = () => {
                   No
                 </button>
               </div>
+            </div>
+
+            {/* ─── Rules Section (Collapsible) ─── */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setRulesExpanded(!rulesExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <span className="text-xs font-semibold text-card-foreground">Rules (optional)</span>
+                <span className="text-[10px] text-muted-foreground">{rulesExpanded ? "▲" : "▼"}</span>
+              </button>
+
+              {rulesExpanded && (
+                <div className="px-4 py-4 space-y-5 border-t border-border">
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    The default settings are 'Anyone can join' and 'No review required'. If alternative settings are adopted, please update the guidance in the 'Community rules' box.
+                  </p>
+
+                  {/* Membership rules */}
+                  <div>
+                    <label className="text-xs font-medium text-card-foreground mb-2 block">
+                      Rules for approval of membership applications <span className="text-destructive">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {([["anyone", "Anyone can join"], ["criteria", "Anyone meeting criteria"], ["approval", "Approval required"]] as const).map(([value, label]) => (
+                        <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                          <span
+                            onClick={() => setFormMembershipRule(value)}
+                            className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formMembershipRule === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}
+                          >
+                            {formMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </span>
+                          <span className="text-xs text-card-foreground font-medium" onClick={() => setFormMembershipRule(value)}>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Post review rules */}
+                  <div>
+                    <label className="text-xs font-medium text-card-foreground mb-2 block">
+                      Rules for review of posts added by members <span className="text-destructive">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {([["none", "No review required"], ["criteria", "Posts that meet criteria require review"], ["all", "Review required for all posts"]] as const).map(([value, label]) => (
+                        <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                          <span
+                            onClick={() => setFormPostReview(value)}
+                            className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formPostReview === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}
+                          >
+                            {formPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </span>
+                          <span className="text-xs text-card-foreground font-medium" onClick={() => setFormPostReview(value)}>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Content review rules */}
+                  <div>
+                    <label className="text-xs font-medium text-card-foreground mb-2 block">
+                      Rules for review of content items added by members <span className="text-destructive">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {([["none", "No review required"], ["criteria", "Content items that meet criteria require review"], ["all", "Review required for all content items"]] as const).map(([value, label]) => (
+                        <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                          <span
+                            onClick={() => setFormContentReview(value)}
+                            className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formContentReview === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}
+                          >
+                            {formContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </span>
+                          <span className="text-xs text-card-foreground font-medium" onClick={() => setFormContentReview(value)}>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Invite expiry */}
+                  <div>
+                    <label className="text-xs font-medium text-card-foreground mb-1.5 block">
+                      Invite expiry date <span className="text-destructive">*</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={formInviteExpiry}
+                        onChange={e => setFormInviteExpiry(e.target.value)}
+                        className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground"
+                      >
+                        <option value="30">30</option>
+                        <option value="60">60</option>
+                        <option value="90">90</option>
+                        <option value="120">120</option>
+                        <option value="180">180</option>
+                      </select>
+                      <span className="text-xs text-muted-foreground">days after being sent.</span>
+                    </div>
+                  </div>
+
+                  {/* Community rules text */}
+                  <div>
+                    <label className="text-xs font-medium text-card-foreground mb-1.5 block">
+                      Community rules <span className="text-destructive">*</span>
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        value={formCommunityRules}
+                        onChange={e => setFormCommunityRules(e.target.value.slice(0, 500))}
+                        placeholder="Describe the community rules and guidelines…"
+                        rows={4}
+                        className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none"
+                      />
+                      <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{formCommunityRules.length}/500</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Actions */}
