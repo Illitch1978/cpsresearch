@@ -611,24 +611,49 @@ const Community = () => {
   // Enhanced admin state
   const [adminStatusTab, setAdminStatusTab] = useState<"members" | "management" | "invited" | "requested" | "blocked">("members");
   const [adminFilterFirm, setAdminFilterFirm] = useState("all");
-  const [adminFilterLocation, setAdminFilterLocation] = useState("all");
+  const [adminFilterCountry, setAdminFilterCountry] = useState("all");
+  const [adminFilterCity, setAdminFilterCity] = useState("all");
   const [adminPage, setAdminPage] = useState(1);
-  const [adminPerPage] = useState(5);
+  const [adminPerPage, setAdminPerPage] = useState(10);
   const [adminSelected, setAdminSelected] = useState<Set<string>>(new Set());
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContactName, setNewContactName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
   const [newContactFirm, setNewContactFirm] = useState("");
+  const [showExpiredInvites, setShowExpiredInvites] = useState(false);
+  const [showAddedByManagement, setShowAddedByManagement] = useState(false);
+  // Multiple status tabs selected (checkboxes)
+  const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
-  const allLocations = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location).filter(Boolean) as string[])).sort(), []);
+  const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
+  const citiesByCountry = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    mockMembers.forEach(m => {
+      if (!m.location) return;
+      const parts = m.location.split(", ");
+      if (parts.length >= 2) {
+        const country = parts[parts.length - 1];
+        const city = parts.slice(0, -1).join(", ");
+        if (!map[country]) map[country] = [];
+        if (!map[country].includes(city)) map[country].push(city);
+      }
+    });
+    Object.values(map).forEach(arr => arr.sort());
+    return map;
+  }, []);
+  const allCities = useMemo(() => {
+    if (adminFilterCountry === "all") return Array.from(new Set(mockMembers.map(m => m.location?.split(", ").slice(0, -1).join(", ")).filter(Boolean) as string[])).sort();
+    return citiesByCountry[adminFilterCountry] || [];
+  }, [adminFilterCountry, citiesByCountry]);
 
   // Mock invited/requested/blocked members
   const mockInvited = useMemo(() => [
-    { id: "inv1", name: "Dr. Laura Stevens", role: "Professor", firm: "Cambridge Judge", joinedDate: "Invited 1 Mar 2026", location: "Cambridge, UK", expertise: ["Strategy"], email: "l.stevens@jbs.cam.ac.uk" },
-    { id: "inv2", name: "Mark Thompson", role: "Director", firm: "EY", joinedDate: "Invited 25 Feb 2026", location: "London, UK", expertise: ["Tax", "Advisory"], email: "mark.thompson@ey.com" },
-  ] as Member[], []);
+    { id: "inv1", name: "Dr. Laura Stevens", role: "Professor", firm: "Cambridge Judge", joinedDate: "Invited 1 Mar 2026", location: "Cambridge, UK", expertise: ["Strategy"], email: "l.stevens@jbs.cam.ac.uk", expired: false },
+    { id: "inv2", name: "Mark Thompson", role: "Director", firm: "EY", joinedDate: "Invited 25 Feb 2026", location: "London, UK", expertise: ["Tax", "Advisory"], email: "mark.thompson@ey.com", expired: true },
+    { id: "inv3", name: "Sarah Coleman", role: "Independent Consultant", firm: "", joinedDate: "Invited 10 Jan 2026", location: "Manchester, UK", expertise: ["Change Management"], email: "sarah@colemanconsulting.co.uk", expired: true },
+  ] as (Member & { expired?: boolean })[], []);
   const mockRequested = useMemo(() => [
     { id: "req1", name: "Yuki Tanaka", role: "Researcher", firm: "Waseda University", joinedDate: "Requested 4 Mar 2026", location: "Tokyo, Japan", expertise: ["Innovation"], email: "y.tanaka@waseda.jp" },
   ] as Member[], []);
@@ -652,11 +677,13 @@ const Community = () => {
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
       const matchesFirm = adminFilterFirm === "all" || m.firm === adminFilterFirm;
-      const matchesLocation = adminFilterLocation === "all" || m.location === adminFilterLocation;
+      const matchesCountry = adminFilterCountry === "all" || (m.location && m.location.endsWith(adminFilterCountry));
+      const matchesCity = adminFilterCity === "all" || (m.location && m.location.startsWith(adminFilterCity));
+      const matchesLocation = matchesCountry && matchesCity;
       const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
       return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterLocation, adminStatusMembers, memberRoles]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
@@ -1821,11 +1848,15 @@ const Community = () => {
                       {showAddContact && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <h4 className="text-xs font-semibold text-card-foreground">Add a new contact</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input type="text" value={newContactName} onChange={e => setNewContactName(e.target.value)} placeholder="Full name…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                             <input type="email" value={newContactEmail} onChange={e => setNewContactEmail(e.target.value)} placeholder="Email…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm / Organisation (optional)…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="Job title / Role…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="City…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="Country…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                           </div>
+                          <p className="text-[10px] text-muted-foreground">Only name and email are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
                             <button onClick={() => { setShowAddContact(false); setNewContactName(""); setNewContactEmail(""); setNewContactFirm(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
                             <button disabled={!newContactName.trim() || !newContactEmail.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactName.trim() && newContactEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
@@ -1840,11 +1871,31 @@ const Community = () => {
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <div className="flex items-center justify-between">
                             <h4 className="text-xs font-semibold text-card-foreground">Bulk invite by email</h4>
-                            <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
-                              <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
-                              <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
-                            </label>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  // Generate and download an Excel-compatible CSV template
+                                  const header = "Name,Email,Firm,Job Title,City,Country";
+                                  const example = "Jane Smith,jane@example.com,Deloitte,Senior Manager,London,UK\nJohn Doe,john@company.org,,Independent Consultant,New York,US";
+                                  const blob = new Blob([header + "\n" + example], { type: "text/csv" });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a");
+                                  a.href = url;
+                                  a.download = "community-invite-template.csv";
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                }}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-primary hover:bg-primary/5 cursor-pointer transition-colors"
+                              >
+                                <FontAwesomeIcon icon={faDownload} className="text-[10px]" /> Download template
+                              </button>
+                              <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
+                                <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
+                                <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
+                              </label>
+                            </div>
                           </div>
+                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members.</p>
                           <textarea
                             value={bulkEmails}
                             onChange={e => setBulkEmails(e.target.value)}
@@ -1924,7 +1975,7 @@ const Community = () => {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 mb-4">
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
                           {([
                             { key: "members", label: "Group members", count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
@@ -1932,14 +1983,18 @@ const Community = () => {
                             { key: "requested", label: "Requested", count: mockRequested.length },
                             { key: "blocked", label: "Blocked", count: mockBlocked.length },
                           ] as const).map(tab => (
-                            <button
-                              key={tab.key}
-                              onClick={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
-                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${adminStatusTab === tab.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                            >
-                              {tab.label}
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-white/20" : "bg-background"}`}>{tab.count}</span>
-                            </button>
+                            <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={adminStatusTab === tab.key}
+                                onChange={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
+                                className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+                              />
+                              <span className={`font-medium ${adminStatusTab === tab.key ? "text-primary" : "text-muted-foreground"}`}>
+                                {tab.label}
+                              </span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
+                            </label>
                           ))}
                         </div>
                       </div>
@@ -1961,9 +2016,13 @@ const Community = () => {
                             <option value="all">All firms</option>
                             {allFirms.map(f => <option key={f} value={f}>{f}</option>)}
                           </select>
-                          <select value={adminFilterLocation} onChange={e => { setAdminFilterLocation(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
-                            <option value="all">All locations</option>
-                            {allLocations.map(l => <option key={l} value={l}>{l}</option>)}
+                          <select value={adminFilterCountry} onChange={e => { setAdminFilterCountry(e.target.value); setAdminFilterCity("all"); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All countries</option>
+                            {allCountries.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <select value={adminFilterCity} onChange={e => { setAdminFilterCity(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All cities</option>
+                            {allCities.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           {adminStatusTab === "members" && (
                             <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
@@ -1974,6 +2033,27 @@ const Community = () => {
                               <option value="member">Member</option>
                             </select>
                           )}
+                        </div>
+                        {/* Extra Filters Row */}
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showExpiredInvites} onChange={() => setShowExpiredInvites(!showExpiredInvites)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Show expired invites
+                          </label>
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showAddedByManagement} onChange={() => setShowAddedByManagement(!showAddedByManagement)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Contacts added by community management
+                          </label>
+                          <div className="ml-auto flex items-center gap-1.5">
+                            <span className="text-[11px] text-muted-foreground">Show:</span>
+                            <select value={adminPerPage} onChange={e => { setAdminPerPage(e.target.value === "all" ? 9999 : Number(e.target.value)); setAdminPage(1); }} className="text-[11px] border border-border rounded-md px-2 py-1 bg-background focus:outline-none text-muted-foreground">
+                              <option value={5}>5</option>
+                              <option value={10}>10</option>
+                              <option value={20}>20</option>
+                              <option value="all">All</option>
+                            </select>
+                            <span className="text-[11px] text-muted-foreground">members</span>
+                          </div>
                         </div>
                       </div>
 
@@ -2023,16 +2103,17 @@ const Community = () => {
                               </div>
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                  adminStatusTab === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {adminStatusTab === "invited" ? "Invited" : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
+                                  {adminStatusTab === "invited" ? ((m as any).expired ? "Expired" : "Invited") : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
                                 </span>
                               </div>
                               <span className="text-[11px] text-muted-foreground">{m.joinedDate}</span>
-                              <span className="text-[11px] text-muted-foreground truncate">{m.firm}</span>
+                              <span className="text-[11px] text-muted-foreground truncate">{m.firm || <span className="italic text-muted-foreground/50">Independent</span>}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.location || "—"}</span>
                               <div className="flex items-center justify-end gap-1.5">
                                 {adminStatusTab === "members" && (
@@ -2058,6 +2139,14 @@ const Community = () => {
                                       </div>
                                     )}
                                   </div>
+                                )}
+                                {adminStatusTab === "invited" && (
+                                  <button
+                                    onClick={() => {/* re-send invite mock */}}
+                                    className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1"
+                                  >
+                                    <FontAwesomeIcon icon={faRepeat} className="text-[9px]" /> Re-send
+                                  </button>
                                 )}
                                 {adminStatusTab === "requested" && (
                                   <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
