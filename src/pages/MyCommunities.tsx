@@ -287,6 +287,21 @@ const MyCommunities = () => {
             <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">
               {community.role}
             </span>
+            {community.isPrivate && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <FontAwesomeIcon icon={faLock} className="text-[9px]" /> Private
+              </span>
+            )}
+            {community.isOfficial && (
+              <span className="flex items-center gap-1 text-[10px] text-primary">
+                <FontAwesomeIcon icon={faShieldHalved} className="text-[9px]" /> Official
+              </span>
+            )}
+            {community.lastVisited && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <FontAwesomeIcon icon={faClock} className="text-[9px]" /> Visited {community.lastVisited}
+              </span>
+            )}
             {community.archived && (
               <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
                 Archived
