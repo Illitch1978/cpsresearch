@@ -450,7 +450,38 @@ const Community = () => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const [threadReplies, setThreadReplies] = useState<Record<string, Reply[]>>({});
+  const [replyText, setReplyText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<Reply | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  const toggleLike = (itemId: string) => {
+    setLikedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  };
+
+  const handleSubmitReply = () => {
+    if (!replyText.trim() || !selectedDiscussion) return;
+    const newReply: Reply = {
+      id: `user-${Date.now()}`,
+      author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
+      content: replyText.trim(),
+      date: "Just now",
+      likes: 0,
+      parentId: replyingTo?.id,
+    };
+    setThreadReplies(prev => ({
+      ...prev,
+      [selectedDiscussion.id]: [...(prev[selectedDiscussion.id] || []), newReply],
+    }));
+    setReplyText("");
+    setReplyingTo(null);
+  };
 
   // Close notifications on outside click
   useEffect(() => {
@@ -1279,13 +1310,16 @@ const Community = () => {
       <MemberProfileModal member={selectedMember} open={!!selectedMember} onClose={() => setSelectedMember(null)} />
 
       {/* Discussion Thread Modal */}
-      <Dialog open={!!selectedDiscussion} onOpenChange={() => setSelectedDiscussion(null)}>
+      <Dialog open={!!selectedDiscussion} onOpenChange={(open) => { if (!open) { setSelectedDiscussion(null); setReplyingTo(null); setReplyText(""); } }}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="sr-only">{selectedDiscussion?.title}</DialogTitle>
             <DialogDescription className="sr-only">Discussion thread</DialogDescription>
           </DialogHeader>
-          {selectedDiscussion && (
+          {selectedDiscussion && (() => {
+            const allReplies = [...(mockReplies[selectedDiscussion.id] || []), ...(threadReplies[selectedDiscussion.id] || [])];
+            const postLiked = likedItems.has(`post-${selectedDiscussion.id}`);
+            return (
             <div className="flex flex-col gap-0 overflow-hidden -mt-2">
               {/* Original Post */}
               <div className="pb-4 border-b border-border">
@@ -1317,12 +1351,21 @@ const Community = () => {
                       ))}
                     </div>
                     <div className="flex items-center gap-5 mt-3 text-xs text-muted-foreground">
-                      <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                        <FontAwesomeIcon icon={faThumbsUp} /> {selectedDiscussion.likes}
+                      <button
+                        onClick={() => toggleLike(`post-${selectedDiscussion.id}`)}
+                        className={`flex items-center gap-1.5 transition-colors ${postLiked ? "text-primary font-medium" : "hover:text-primary"}`}
+                      >
+                        <FontAwesomeIcon icon={faThumbsUp} /> {selectedDiscussion.likes + (postLiked ? 1 : 0)}
                       </button>
                       <span className="flex items-center gap-1.5">
-                        <FontAwesomeIcon icon={faReply} /> {selectedDiscussion.replies} replies
+                        <FontAwesomeIcon icon={faReply} /> {allReplies.length} replies
                       </span>
+                      <button
+                        onClick={() => toggleBookmark(selectedDiscussion.id)}
+                        className={`ml-auto transition-colors ${bookmarkedDiscussions.includes(selectedDiscussion.id) ? "text-primary" : "text-slate-300 hover:text-primary"}`}
+                      >
+                        <FontAwesomeIcon icon={bookmarkedDiscussions.includes(selectedDiscussion.id) ? faBookmarkSolid : faBookmarkRegular} />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1331,16 +1374,17 @@ const Community = () => {
               {/* Replies */}
               <div className="overflow-y-auto flex-1 pt-4 space-y-0">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                  {(mockReplies[selectedDiscussion.id] || []).length} Replies
+                  {allReplies.length} {allReplies.length === 1 ? "Reply" : "Replies"}
                 </h3>
-                {(mockReplies[selectedDiscussion.id] || []).map(reply => {
+                {allReplies.map(reply => {
                   const isNested = !!reply.parentId;
+                  const replyLiked = likedItems.has(`reply-${reply.id}`);
                   return (
                     <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"}`}>
                       <div className="flex items-start gap-3">
                         <button onClick={() => setSelectedMember(reply.author)} className="shrink-0">
                           <Avatar className={`${isNested ? "h-7 w-7" : "h-8 w-8"}`}>
-                            <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
+                            <AvatarFallback className={`text-[10px] font-medium ${reply.author.id === "self" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-600"}`}>
                               {reply.author.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
@@ -1351,42 +1395,75 @@ const Community = () => {
                             <BadgeIcon badge={reply.author.badge} />
                             <span>·</span>
                             <span>{reply.date}</span>
+                            {reply.author.id === "self" && <Badge className="bg-primary/10 text-primary border-0 text-[9px] px-1.5 py-0 ml-1">You</Badge>}
                           </div>
+                          {reply.parentId && (() => {
+                            const parent = allReplies.find(r => r.id === reply.parentId);
+                            return parent ? (
+                              <p className="text-[11px] text-muted-foreground/70 mt-0.5 flex items-center gap-1">
+                                <FontAwesomeIcon icon={faReply} className="text-[9px]" /> Replying to {parent.author.name}
+                              </p>
+                            ) : null;
+                          })()}
                           <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                            <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                              <FontAwesomeIcon icon={faThumbsUp} className="text-[10px]" /> {reply.likes}
+                            <button
+                              onClick={() => toggleLike(`reply-${reply.id}`)}
+                              className={`flex items-center gap-1 transition-colors ${replyLiked ? "text-primary font-medium" : "hover:text-primary"}`}
+                            >
+                              <FontAwesomeIcon icon={faThumbsUp} className="text-[10px]" /> {reply.likes + (replyLiked ? 1 : 0)}
                             </button>
-                            <button className="hover:text-primary transition-colors">Reply</button>
+                            <button
+                              onClick={() => { setReplyingTo(reply); }}
+                              className={`transition-colors ${replyingTo?.id === reply.id ? "text-primary font-medium" : "hover:text-primary"}`}
+                            >
+                              Reply
+                            </button>
                           </div>
                         </div>
                       </div>
                     </div>
                   );
                 })}
-                {(mockReplies[selectedDiscussion.id] || []).length === 0 && (
+                {allReplies.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-6">No replies yet. Be the first to respond.</p>
                 )}
               </div>
 
               {/* Reply Input */}
               <div className="pt-3 border-t border-border mt-auto">
+                {replyingTo && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 bg-slate-50 rounded-md px-3 py-1.5">
+                    <span>Replying to <span className="font-medium text-slate-700">{replyingTo.author.name}</span></span>
+                    <button onClick={() => setReplyingTo(null)} className="text-muted-foreground hover:text-foreground transition-colors ml-2">
+                      <FontAwesomeIcon icon={faTimes} className="text-xs" />
+                    </button>
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8 shrink-0">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">RC</AvatarFallback>
                   </Avatar>
                   <input
                     type="text"
-                    placeholder="Write a reply…"
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmitReply(); } }}
+                    placeholder={replyingTo ? `Reply to ${replyingTo.author.name}…` : "Write a reply…"}
                     className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                   />
-                  <button className="text-primary hover:text-primary/80 transition-colors">
+                  <button
+                    onClick={handleSubmitReply}
+                    disabled={!replyText.trim()}
+                    className={`transition-colors ${replyText.trim() ? "text-primary hover:text-primary/80" : "text-muted-foreground/30"}`}
+                  >
                     <FontAwesomeIcon icon={faPaperPlane} />
                   </button>
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
