@@ -602,18 +602,73 @@ const Community = () => {
   const [removedMembers, setRemovedMembers] = useState<Set<string>>(new Set());
   const roleDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Enhanced admin state
+  const [adminStatusTab, setAdminStatusTab] = useState<"members" | "management" | "invited" | "requested" | "blocked">("members");
+  const [adminFilterFirm, setAdminFilterFirm] = useState("all");
+  const [adminFilterLocation, setAdminFilterLocation] = useState("all");
+  const [adminPage, setAdminPage] = useState(1);
+  const [adminPerPage] = useState(5);
+  const [adminSelected, setAdminSelected] = useState<Set<string>>(new Set());
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactEmail, setNewContactEmail] = useState("");
+  const [newContactFirm, setNewContactFirm] = useState("");
+
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
+  const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
+  const allLocations = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location).filter(Boolean) as string[])).sort(), []);
+
+  // Mock invited/requested/blocked members
+  const mockInvited = useMemo(() => [
+    { id: "inv1", name: "Dr. Laura Stevens", role: "Professor", firm: "Cambridge Judge", joinedDate: "Invited 1 Mar 2026", location: "Cambridge, UK", expertise: ["Strategy"], email: "l.stevens@jbs.cam.ac.uk" },
+    { id: "inv2", name: "Mark Thompson", role: "Director", firm: "EY", joinedDate: "Invited 25 Feb 2026", location: "London, UK", expertise: ["Tax", "Advisory"], email: "mark.thompson@ey.com" },
+  ] as Member[], []);
+  const mockRequested = useMemo(() => [
+    { id: "req1", name: "Yuki Tanaka", role: "Researcher", firm: "Waseda University", joinedDate: "Requested 4 Mar 2026", location: "Tokyo, Japan", expertise: ["Innovation"], email: "y.tanaka@waseda.jp" },
+  ] as Member[], []);
+  const mockBlocked = useMemo(() => [
+    { id: "blk1", name: "Spam Account", role: "Unknown", firm: "N/A", joinedDate: "Blocked 20 Feb 2026", location: "Unknown", expertise: [], email: "spam@example.com" },
+  ] as Member[], []);
+
+  const adminStatusMembers = useMemo(() => {
+    if (adminStatusTab === "invited") return mockInvited;
+    if (adminStatusTab === "requested") return mockRequested;
+    if (adminStatusTab === "blocked") return mockBlocked;
+    if (adminStatusTab === "management") {
+      return mockMembers.filter(m => !removedMembers.has(m.id) && (memberRoles[m.id] === "founder" || memberRoles[m.id] === "moderator"));
+    }
+    return mockMembers.filter(m => !removedMembers.has(m.id));
+  }, [adminStatusTab, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
 
   const filteredAdminMembers = useMemo(() => {
-    return mockMembers.filter(m => {
-      if (removedMembers.has(m.id)) return false;
+    return adminStatusMembers.filter(m => {
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
+      const matchesFirm = adminFilterFirm === "all" || m.firm === adminFilterFirm;
+      const matchesLocation = adminFilterLocation === "all" || m.location === adminFilterLocation;
       const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
-      return matchesSearch && matchesRole && matchesExpertise;
+      return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, memberRoles, removedMembers]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterLocation, adminStatusMembers, memberRoles]);
+
+  const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
+  const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
+
+  const toggleAdminSelect = (id: string) => {
+    setAdminSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleSelectAll = () => {
+    if (adminSelected.size === paginatedAdminMembers.length) {
+      setAdminSelected(new Set());
+    } else {
+      setAdminSelected(new Set(paginatedAdminMembers.map(m => m.id)));
+    }
+  };
 
   const handleInvite = () => {
     if (!inviteEmail.trim()) return;
@@ -1653,160 +1708,301 @@ const Community = () => {
               {/* ─── ADMIN TAB ─── */}
               {isAdmin && (
                 <TabsContent value="admin">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Admin Panel */}
-                    <div className="lg:col-span-2 space-y-6">
-                      {/* Invite Members */}
-                      <div className="bg-white border border-gray-200 rounded-lg p-6">
-                        <h3 className="text-base font-serif font-semibold text-card-foreground mb-1 flex items-center gap-2">
-                          <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
-                        </h3>
-                        <p className="text-xs text-muted-foreground mb-4">Invite new members by email or share an invite link.</p>
-                        
-                        <div className="flex items-center gap-2 mb-3">
-                          <input
-                            type="email"
-                            value={inviteEmail}
-                            onChange={e => setInviteEmail(e.target.value)}
-                            onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
-                            placeholder="Enter email address…"
-                            className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                          />
-                          <button
-                            onClick={handleInvite}
-                            disabled={!inviteEmail.trim() || inviteSent}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
-                          >
-                            {inviteSent ? (
-                              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span>
-                            ) : (
-                              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>
-                            )}
-                          </button>
+                  <div className="space-y-6">
+                    {/* Invite Members Card */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">Invite new members by email or share an invite link.</p>
+                        </div>
+                        <button
+                          onClick={() => setShowAddContact(!showAddContact)}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Contact
+                        </button>
+                      </div>
+
+                      {/* Add Contact Form */}
+                      {showAddContact && (
+                        <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
+                          <h4 className="text-xs font-semibold text-card-foreground">Add a new contact</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value={newContactName} onChange={e => setNewContactName(e.target.value)} placeholder="Full name…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="email" value={newContactEmail} onChange={e => setNewContactEmail(e.target.value)} placeholder="Email…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <button onClick={() => { setShowAddContact(false); setNewContactName(""); setNewContactEmail(""); setNewContactFirm(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                            <button disabled={!newContactName.trim() || !newContactEmail.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactName.trim() && newContactEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
+                              Add & Invite
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        <input
+                          type="email"
+                          value={inviteEmail}
+                          onChange={e => setInviteEmail(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
+                          placeholder="Enter email address…"
+                          className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                        />
+                        <button
+                          onClick={handleInvite}
+                          disabled={!inviteEmail.trim() || inviteSent}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                        >
+                          {inviteSent ? <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span> : <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                        <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
+                        <span className="text-xs text-muted-foreground truncate flex-1">cpsr.uk/community/prof-services-research/invite?token=abc123</span>
+                        <button
+                          onClick={handleCopyLink}
+                          className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
+                        >
+                          <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
+                          {linkCopied ? "Copied!" : "Copy link"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Member Management Card */}
+                    <div className="bg-white border border-gray-200 rounded-lg">
+                      {/* Status Tabs */}
+                      <div className="px-6 pt-5 pb-0">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faUsers} className="text-primary text-sm" /> Manage Members
+                          </h3>
+                          {adminSelected.size > 0 && (
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors">
+                              <FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send invites to {adminSelected.size} selected
+                            </button>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                          <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
-                          <span className="text-xs text-muted-foreground truncate flex-1">cpsr.uk/community/prof-services-research/invite?token=abc123</span>
-                          <button
-                            onClick={handleCopyLink}
-                            className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
-                          >
-                            <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
-                            {linkCopied ? "Copied!" : "Copy link"}
-                          </button>
+                        <div className="flex items-center gap-1.5 mb-4">
+                          {([
+                            { key: "members", label: "Group members", count: mockMembers.length - removedMembers.size },
+                            { key: "management", label: "Management", count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
+                            { key: "invited", label: "Invited", count: mockInvited.length },
+                            { key: "requested", label: "Requested", count: mockRequested.length },
+                            { key: "blocked", label: "Blocked", count: mockBlocked.length },
+                          ] as const).map(tab => (
+                            <button
+                              key={tab.key}
+                              onClick={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
+                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${adminStatusTab === tab.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                            >
+                              {tab.label}
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-white/20" : "bg-background"}`}>{tab.count}</span>
+                            </button>
+                          ))}
                         </div>
                       </div>
 
-                      {/* Member Directory with Filters */}
-                      <div className="bg-white border border-gray-200 rounded-lg p-6">
-                        <h3 className="text-base font-serif font-semibold text-card-foreground mb-4 flex items-center gap-2">
-                          <FontAwesomeIcon icon={faUsers} className="text-primary text-sm" /> Manage Members
-                          <span className="text-xs font-normal text-muted-foreground ml-auto">{filteredAdminMembers.length} of {mockMembers.length - removedMembers.size}</span>
-                        </h3>
-
-                        {/* Filters */}
-                        <div className="flex flex-wrap items-center gap-3 mb-4">
-                          <div className="relative flex-1 min-w-[200px]">
+                      {/* Filters Row */}
+                      <div className="px-6 pb-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="relative flex-1 min-w-[180px]">
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
                             <input
                               type="text"
                               value={adminSearchQuery}
-                              onChange={e => setAdminSearchQuery(e.target.value)}
-                              placeholder="Search by name, firm, email…"
+                              onChange={e => { setAdminSearchQuery(e.target.value); setAdminPage(1); }}
+                              placeholder="Search…"
                               className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
                             />
                           </div>
-                          <select
-                            value={adminFilterRole}
-                            onChange={e => setAdminFilterRole(e.target.value)}
-                            className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
-                          >
-                            <option value="all">All roles</option>
-                            <option value="founder">Founder</option>
-                            <option value="moderator">Moderator</option>
-                            <option value="contributor">Contributor</option>
-                            <option value="member">Member</option>
+                          <select value={adminFilterFirm} onChange={e => { setAdminFilterFirm(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All firms</option>
+                            {allFirms.map(f => <option key={f} value={f}>{f}</option>)}
                           </select>
-                          <select
-                            value={adminFilterExpertise}
-                            onChange={e => setAdminFilterExpertise(e.target.value)}
-                            className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
-                          >
-                            <option value="all">All expertise</option>
-                            {allExpertise.map(e => <option key={e} value={e}>{e}</option>)}
+                          <select value={adminFilterLocation} onChange={e => { setAdminFilterLocation(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All locations</option>
+                            {allLocations.map(l => <option key={l} value={l}>{l}</option>)}
                           </select>
+                          {adminStatusTab === "members" && (
+                            <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                              <option value="all">All roles</option>
+                              <option value="founder">Founder</option>
+                              <option value="moderator">Moderator</option>
+                              <option value="contributor">Contributor</option>
+                              <option value="member">Member</option>
+                            </select>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Table Header */}
+                      <div className="border-t border-border">
+                        <div className="grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-2.5 bg-muted/30 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={toggleSelectAll}
+                              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
+                            >
+                              {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                            </button>
+                          </div>
+                          <span>Name & Position</span>
+                          <span>Involvement</span>
+                          <span>Join date</span>
+                          <span>Firm</span>
+                          <span>Location</span>
+                          <span className="text-right">Actions</span>
                         </div>
 
-                        {/* Member List */}
-                        <div className="divide-y divide-gray-50">
-                          {filteredAdminMembers.map(m => (
-                            <div key={m.id} className="flex items-center gap-3 py-3 group">
-                              <button onClick={() => setSelectedMember(m)} className="shrink-0">
-                                <Avatar className="h-9 w-9">
-                                  <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                    {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                                  </AvatarFallback>
-                                </Avatar>
-                              </button>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <button onClick={() => setSelectedMember(m)} className="text-sm font-medium text-card-foreground hover:text-primary transition-colors truncate">{m.name}</button>
-                                  <BadgeIcon badge={memberRoles[m.id] !== "member" ? memberRoles[m.id] as any : undefined} />
-                                </div>
-                                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                  <span>{m.firm}</span>
-                                  {m.location && <><span>·</span><span>{m.location}</span></>}
+                        {/* Member Rows */}
+                        <div className="divide-y divide-border">
+                          {paginatedAdminMembers.map(m => (
+                            <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
+                              <div className="flex items-center justify-center">
+                                <button
+                                  onClick={() => toggleAdminSelect(m.id)}
+                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
+                                >
+                                  {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <button onClick={() => setSelectedMember(m)} className="shrink-0">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                      {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </button>
+                                <div className="min-w-0">
+                                  <button onClick={() => setSelectedMember(m)} className="text-xs font-medium text-card-foreground hover:text-primary transition-colors truncate block">{m.name}</button>
+                                  <span className="text-[10px] text-muted-foreground truncate block">{m.role}</span>
                                 </div>
                               </div>
-
-                              {/* Role Selector */}
-                              <div className="relative" ref={roleDropdownOpen === m.id ? roleDropdownRef : undefined}>
-                                <button
-                                  onClick={() => setRoleDropdownOpen(roleDropdownOpen === m.id ? null : m.id)}
-                                  className="text-xs border border-border rounded-md px-2.5 py-1.5 bg-background hover:border-primary/30 transition-colors flex items-center gap-1.5 min-w-[100px] justify-between"
-                                >
-                                  <span className="capitalize">{memberRoles[m.id]}</span>
-                                  <FontAwesomeIcon icon={faChevronDown} className="text-[9px] text-muted-foreground" />
-                                </button>
-                                {roleDropdownOpen === m.id && (
-                                  <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
-                                    {["founder", "moderator", "contributor", "member"].map(role => (
-                                      <button
-                                        key={role}
-                                        onClick={() => handleChangeRole(m.id, role)}
-                                        className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors capitalize flex items-center justify-between ${memberRoles[m.id] === role ? "text-primary font-medium" : "text-slate-700"}`}
-                                      >
-                                        {role}
-                                        {memberRoles[m.id] === role && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
-                                      </button>
-                                    ))}
+                              <div>
+                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                  memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                                  memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                                  memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                                  "bg-muted text-muted-foreground border border-border"
+                                }`}>
+                                  {adminStatusTab === "invited" ? "Invited" : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-muted-foreground">{m.joinedDate}</span>
+                              <span className="text-[11px] text-muted-foreground truncate">{m.firm}</span>
+                              <span className="text-[11px] text-muted-foreground truncate">{m.location || "—"}</span>
+                              <div className="flex items-center justify-end gap-1.5">
+                                {adminStatusTab === "members" && (
+                                  <div className="relative" ref={roleDropdownOpen === m.id ? roleDropdownRef : undefined}>
+                                    <button
+                                      onClick={() => setRoleDropdownOpen(roleDropdownOpen === m.id ? null : m.id)}
+                                      className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium"
+                                    >
+                                      {memberRoles[m.id] === "founder" ? "Make manager" : memberRoles[m.id] === "moderator" ? "Demote" : "Make manager"}
+                                    </button>
+                                    {roleDropdownOpen === m.id && (
+                                      <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
+                                        {["founder", "moderator", "contributor", "member"].map(role => (
+                                          <button
+                                            key={role}
+                                            onClick={() => handleChangeRole(m.id, role)}
+                                            className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors capitalize flex items-center justify-between ${memberRoles[m.id] === role ? "text-primary font-medium" : "text-muted-foreground"}`}
+                                          >
+                                            {role}
+                                            {memberRoles[m.id] === role && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
+                                {adminStatusTab === "requested" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
+                                    Approve
+                                  </button>
+                                )}
+                                {adminStatusTab === "blocked" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
+                                    Unblock
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => setConfirmRemove(m)}
+                                  className="text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/5"
+                                  title="Remove"
+                                >
+                                  <FontAwesomeIcon icon={faBan} className="text-xs" />
+                                </button>
                               </div>
-
-                              {/* Remove Button */}
-                              <button
-                                onClick={() => setConfirmRemove(m)}
-                                className="text-slate-300 hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-destructive/5"
-                                title="Remove member"
-                              >
-                                <FontAwesomeIcon icon={faBan} className="text-sm" />
-                              </button>
                             </div>
                           ))}
-                          {filteredAdminMembers.length === 0 && (
-                            <div className="text-center py-8">
+                          {paginatedAdminMembers.length === 0 && (
+                            <div className="text-center py-10">
                               <FontAwesomeIcon icon={faSearch} className="text-2xl text-muted-foreground/30 mb-2" />
                               <p className="text-sm text-muted-foreground">No members match your filters.</p>
                             </div>
                           )}
                         </div>
                       </div>
+
+                      {/* Pagination */}
+                      <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-muted/20">
+                        <span className="text-[11px] text-muted-foreground">
+                          Showing {filteredAdminMembers.length > 0 ? (adminPage - 1) * adminPerPage + 1 : 0}–{Math.min(adminPage * adminPerPage, filteredAdminMembers.length)} of {filteredAdminMembers.length} entries
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            disabled={adminPage === 1}
+                            onClick={() => setAdminPage(1)}
+                            className={`text-[11px] px-2 py-1 rounded transition-colors ${adminPage === 1 ? "text-muted-foreground/40" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                          >
+                            First
+                          </button>
+                          <button
+                            disabled={adminPage === 1}
+                            onClick={() => setAdminPage(p => Math.max(1, p - 1))}
+                            className={`text-[11px] px-2 py-1 rounded transition-colors ${adminPage === 1 ? "text-muted-foreground/40" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                          >
+                            Previous
+                          </button>
+                          {Array.from({ length: adminTotalPages }, (_, i) => i + 1).map(p => (
+                            <button
+                              key={p}
+                              onClick={() => setAdminPage(p)}
+                              className={`text-[11px] w-7 h-7 rounded transition-colors ${adminPage === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                          <button
+                            disabled={adminPage === adminTotalPages}
+                            onClick={() => setAdminPage(p => Math.min(adminTotalPages, p + 1))}
+                            className={`text-[11px] px-2 py-1 rounded transition-colors ${adminPage === adminTotalPages ? "text-muted-foreground/40" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                          >
+                            Next
+                          </button>
+                          <button
+                            disabled={adminPage === adminTotalPages}
+                            onClick={() => setAdminPage(adminTotalPages)}
+                            className={`text-[11px] px-2 py-1 rounded transition-colors ${adminPage === adminTotalPages ? "text-muted-foreground/40" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                          >
+                            Last
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Admin Sidebar */}
-                    <aside className="space-y-5">
+                    {/* Admin Info Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-white border border-gray-200 rounded-lg p-5">
                         <h3 className="text-sm font-semibold text-card-foreground mb-3">Role Summary</h3>
                         <div className="space-y-2.5">
@@ -1826,24 +2022,12 @@ const Community = () => {
                       </div>
 
                       <div className="bg-white border border-gray-200 rounded-lg p-5">
-                        <h3 className="text-sm font-semibold text-card-foreground mb-3">Admin Actions</h3>
+                        <h3 className="text-sm font-semibold text-card-foreground mb-3">Quick Actions</h3>
                         <ul className="space-y-2 text-xs text-muted-foreground">
-                          <li className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-[10px]" />
-                            Invite via email or shareable link
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faShieldHalved} className="text-primary text-[10px]" />
-                            Assign roles: Founder, Moderator, Contributor, Member
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faFilter} className="text-primary text-[10px]" />
-                            Filter by role, expertise, name or firm
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faBan} className="text-primary text-[10px]" />
-                            Remove or ban members from the community
-                          </li>
+                          <li className="flex items-center gap-2"><FontAwesomeIcon icon={faUserPlus} className="text-primary text-[10px]" /> Invite via email or link</li>
+                          <li className="flex items-center gap-2"><FontAwesomeIcon icon={faShieldHalved} className="text-primary text-[10px]" /> Assign roles</li>
+                          <li className="flex items-center gap-2"><FontAwesomeIcon icon={faFilter} className="text-primary text-[10px]" /> Filter by role, firm, location</li>
+                          <li className="flex items-center gap-2"><FontAwesomeIcon icon={faBan} className="text-primary text-[10px]" /> Remove or block members</li>
                         </ul>
                       </div>
 
@@ -1855,7 +2039,7 @@ const Community = () => {
                           Only Founders and Moderators can access this panel. Role changes and removals are logged for transparency.
                         </p>
                       </div>
-                    </aside>
+                    </div>
                   </div>
                 </TabsContent>
               )}
