@@ -32,6 +32,8 @@ import {
   faEnvelope,
   faBuilding,
   faGraduationCap,
+  faLayerGroup,
+  faFilter,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -162,6 +164,73 @@ const mockEvents: Event[] = [
   { id: "3", title: "CPSR Spring Research Symposium", date: "15 May 2026", time: "09:00 BST", type: "conference", attendees: 120, description: "Full-day symposium featuring 20 paper presentations and 3 panel discussions on current research." },
   { id: "4", title: "London Meetup: Emerging Researchers Network", date: "22 Apr 2026", time: "18:30 BST", type: "meetup", attendees: 25, description: "Informal networking event for early-career researchers studying professional services." },
 ];
+
+interface WorkingGroup {
+  id: string;
+  name: string;
+  description: string;
+  avatar: string;
+  members: Member[];
+  discussions: number;
+  resources: number;
+  lastActive: string;
+  tags: string[];
+  lead: Member;
+}
+
+const mockWorkingGroups: WorkingGroup[] = [
+  {
+    id: "ai-in-audit",
+    name: "AI in Audit & Assurance",
+    description: "Examining how artificial intelligence is transforming audit methodologies, regulatory frameworks, and assurance quality across the profession.",
+    avatar: "AIA",
+    members: [mockMembers[1], mockMembers[4], mockMembers[0], mockMembers[5]],
+    discussions: 23,
+    resources: 11,
+    lastActive: "2 hours ago",
+    tags: ["AI", "Audit", "Regulation", "Technology"],
+    lead: mockMembers[1],
+  },
+  {
+    id: "diversity-research",
+    name: "Diversity Research Initiative",
+    description: "Collaborative research programme tracking diversity, equity and inclusion metrics across professional services firms globally.",
+    avatar: "DRI",
+    members: [mockMembers[2], mockMembers[0], mockMembers[6], mockMembers[3]],
+    discussions: 15,
+    resources: 8,
+    lastActive: "Yesterday",
+    tags: ["Diversity", "Inclusion", "Research", "Big Four"],
+    lead: mockMembers[2],
+  },
+  {
+    id: "consulting-impact",
+    name: "Measuring Consulting Impact",
+    description: "Developing rigorous frameworks and methodologies for measuring and demonstrating the value and impact of management consulting engagements.",
+    avatar: "MCI",
+    members: [mockMembers[3], mockMembers[7], mockMembers[0]],
+    discussions: 18,
+    resources: 6,
+    lastActive: "3 days ago",
+    tags: ["Consulting", "Impact", "Methodology", "Transparency"],
+    lead: mockMembers[3],
+  },
+  {
+    id: "emerging-markets",
+    name: "Professional Services in Emerging Markets",
+    description: "Studying the growth, challenges, and opportunities for professional services firms operating in Africa, Asia, and Latin America.",
+    avatar: "EM",
+    members: [mockMembers[7], mockMembers[6], mockMembers[4]],
+    discussions: 9,
+    resources: 4,
+    lastActive: "1 week ago",
+    tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
+    lead: mockMembers[7],
+  },
+];
+
+// Collect all unique discussion tags
+const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap(d => d.tags))).sort();
 
 const communityData = {
   "prof-services-research": {
@@ -319,6 +388,12 @@ const Community = () => {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  const filteredDiscussions = useMemo(() => {
+    if (!selectedTag) return mockDiscussions;
+    return mockDiscussions.filter(d => d.tags.includes(selectedTag));
+  }, [selectedTag]);
 
   const community = communityData["prof-services-research"];
 
@@ -600,6 +675,9 @@ const Community = () => {
                 <TabsTrigger value="events" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faCalendarDays} className="text-xs" /> Events
                 </TabsTrigger>
+                <TabsTrigger value="groups" className="gap-2 text-sm data-[state=active]:text-primary">
+                  <FontAwesomeIcon icon={faLayerGroup} className="text-xs" /> Groups
+                </TabsTrigger>
                 <TabsTrigger value="about" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faCircleInfo} className="text-xs" /> About
                 </TabsTrigger>
@@ -621,8 +699,30 @@ const Community = () => {
                       <FontAwesomeIcon icon={faPaperPlane} className="ml-auto text-muted-foreground text-sm" />
                     </div>
 
+                    {/* Tag Filter Bar */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <FontAwesomeIcon icon={faFilter} className="text-[10px]" /> Filter:
+                      </span>
+                      <button
+                        onClick={() => setSelectedTag(null)}
+                        className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${!selectedTag ? "bg-primary text-primary-foreground border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/30"}`}
+                      >
+                        All
+                      </button>
+                      {allDiscussionTags.map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                          className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${selectedTag === tag ? "bg-primary text-primary-foreground border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/30"}`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+
                     {/* Discussion List */}
-                    {mockDiscussions.map(d => (
+                    {filteredDiscussions.map(d => (
                       <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${d.pinned ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -808,6 +908,90 @@ const Community = () => {
                       </p>
                       <p className="text-xs text-muted-foreground leading-relaxed">{e.description}</p>
                       <button className="mt-4 text-xs font-medium text-primary hover:underline">Register →</button>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              {/* ─── GROUPS TAB ─── */}
+              <TabsContent value="groups">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">
+                      {mockWorkingGroups.length} working groups within this community
+                    </p>
+                  </div>
+                  {mockWorkingGroups.map(group => (
+                    <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all">
+                      <div className="flex items-start gap-4">
+                        {/* Group Avatar */}
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary font-serif font-semibold text-sm flex items-center justify-center shrink-0">
+                          {group.avatar}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
+                              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{group.description}</p>
+                            </div>
+                          </div>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {group.tags.map(tag => (
+                              <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{tag}</span>
+                            ))}
+                          </div>
+
+                          {/* Stats Row */}
+                          <div className="flex items-center gap-5 mt-4 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1.5">
+                              <FontAwesomeIcon icon={faUsers} className="text-[10px]" />
+                              {group.members.length} members
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <FontAwesomeIcon icon={faComments} className="text-[10px]" />
+                              {group.discussions} discussions
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <FontAwesomeIcon icon={faFolderOpen} className="text-[10px]" />
+                              {group.resources} resources
+                            </span>
+                            <span className="text-muted-foreground/60">·</span>
+                            <span>Active {group.lastActive}</span>
+                          </div>
+
+                          {/* Lead + Member Avatars */}
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
+                            <button
+                              onClick={() => setSelectedMember(group.lead)}
+                              className="flex items-center gap-2 text-xs hover:text-primary transition-colors"
+                            >
+                              <Avatar className="h-6 w-6">
+                                <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
+                                  {group.lead.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-muted-foreground">Led by <span className="font-medium text-slate-700">{group.lead.name}</span></span>
+                            </button>
+                            <div className="flex items-center">
+                              <div className="flex -space-x-2">
+                                {group.members.slice(0, 4).map((m, i) => (
+                                  <Avatar key={m.id} className="h-7 w-7 border-2 border-white">
+                                    <AvatarFallback className="bg-slate-100 text-slate-500 text-[9px] font-medium">
+                                      {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ))}
+                              </div>
+                              <button className="ml-3 text-xs font-medium text-primary hover:underline">
+                                View group →
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
