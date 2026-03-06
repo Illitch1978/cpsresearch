@@ -420,6 +420,28 @@ const MyCommunities = () => {
           </div>
         </div>
 
+        {/* Filter Checkboxes */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
+          {[
+            { label: "Open", state: filterOpen, setter: setFilterOpen },
+            { label: "Private", state: filterPrivate, setter: setFilterPrivate },
+            { label: "Favourites", state: filterFavourites, setter: setFilterFavourites },
+            { label: "Official", state: filterOfficial, setter: setFilterOfficial },
+            { label: "Recently visited", state: filterRecentlyVisited, setter: setFilterRecentlyVisited },
+          ].map(f => (
+            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={f.state}
+                onChange={() => f.setter(!f.state)}
+                className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+              />
+              {f.label}
+            </label>
+          ))}
+        </div>
+
         {/* Active Communities */}
         <div className="space-y-4">
           {activeCommunities.map(renderCommunityCard)}
