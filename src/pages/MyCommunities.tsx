@@ -27,7 +27,11 @@ import {
   faLink as faLinkIcon,
   faImage as faImageIcon,
   faRightFromBracket,
+  faStar as faStarSolid,
+  faShieldHalved,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -51,6 +55,10 @@ interface CommunityItem {
   lastActive: string;
   avatar: string;
   archived?: boolean;
+  isPrivate?: boolean;
+  isFavourite?: boolean;
+  isOfficial?: boolean;
+  lastVisited?: string;
 }
 
 const initialCommunities: CommunityItem[] = [
@@ -65,6 +73,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Member",
     lastActive: "2 hours ago",
     avatar: "PSR",
+    isPrivate: false,
+    isFavourite: true,
+    isOfficial: true,
+    lastVisited: "2 hours ago",
   },
   {
     id: "legal-market-intel",
@@ -77,6 +89,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Contributor",
     lastActive: "Yesterday",
     avatar: "LMI",
+    isPrivate: true,
+    isFavourite: false,
+    isOfficial: false,
+    lastVisited: "Yesterday",
   },
   {
     id: "consulting-trends",
@@ -89,6 +105,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Member",
     lastActive: "3 days ago",
     avatar: "MCT",
+    isPrivate: false,
+    isFavourite: true,
+    isOfficial: true,
+    lastVisited: undefined,
   },
 ];
 
@@ -141,8 +161,29 @@ const MyCommunities = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const activeCommunities = communities.filter(c => !c.archived);
+  // Filter state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterPrivate, setFilterPrivate] = useState(false);
+  const [filterFavourites, setFilterFavourites] = useState(false);
+  const [filterOfficial, setFilterOfficial] = useState(false);
+  const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
+
+  const activeCommunities = communities.filter(c => {
+    if (c.archived) return false;
+    if (filterOpen && c.isPrivate) return false;
+    if (filterPrivate && !c.isPrivate) return false;
+    if (filterFavourites && !c.isFavourite) return false;
+    if (filterOfficial && !c.isOfficial) return false;
+    if (filterRecentlyVisited && !c.lastVisited) return false;
+    return true;
+  });
   const archivedCommunities = communities.filter(c => c.archived);
+
+  const toggleFavourite = (id: string) => {
+    setCommunities(prev =>
+      prev.map(c => c.id === id ? { ...c, isFavourite: !c.isFavourite } : c)
+    );
+  };
 
   const toggleArchive = (id: string) => {
     setCommunities(prev =>
