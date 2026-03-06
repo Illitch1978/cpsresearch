@@ -1848,11 +1848,15 @@ const Community = () => {
                       {showAddContact && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <h4 className="text-xs font-semibold text-card-foreground">Add a new contact</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input type="text" value={newContactName} onChange={e => setNewContactName(e.target.value)} placeholder="Full name…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                             <input type="email" value={newContactEmail} onChange={e => setNewContactEmail(e.target.value)} placeholder="Email…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm / Organisation (optional)…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="Job title / Role…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="City…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" placeholder="Country…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                           </div>
+                          <p className="text-[10px] text-muted-foreground">Only name and email are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
                             <button onClick={() => { setShowAddContact(false); setNewContactName(""); setNewContactEmail(""); setNewContactFirm(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
                             <button disabled={!newContactName.trim() || !newContactEmail.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactName.trim() && newContactEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
@@ -1867,10 +1871,31 @@ const Community = () => {
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <div className="flex items-center justify-between">
                             <h4 className="text-xs font-semibold text-card-foreground">Bulk invite by email</h4>
-                            <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
-                              <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
-                              <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
-                            </label>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  // Generate and download an Excel-compatible CSV template
+                                  const header = "Name,Email,Firm,Job Title,City,Country";
+                                  const example = "Jane Smith,jane@example.com,Deloitte,Senior Manager,London,UK\nJohn Doe,john@company.org,,Independent Consultant,New York,US";
+                                  const blob = new Blob([header + "\n" + example], { type: "text/csv" });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement("a");
+                                  a.href = url;
+                                  a.download = "community-invite-template.csv";
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                }}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-primary hover:bg-primary/5 cursor-pointer transition-colors"
+                              >
+                                <FontAwesomeIcon icon={faDownload} className="text-[10px]" /> Download template
+                              </button>
+                              <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
+                                <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
+                                <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
+                              </label>
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members.</p>
                           </div>
                           <textarea
                             value={bulkEmails}
