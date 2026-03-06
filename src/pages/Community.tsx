@@ -611,14 +611,19 @@ const Community = () => {
   // Enhanced admin state
   const [adminStatusTab, setAdminStatusTab] = useState<"members" | "management" | "invited" | "requested" | "blocked">("members");
   const [adminFilterFirm, setAdminFilterFirm] = useState("all");
-  const [adminFilterLocation, setAdminFilterLocation] = useState("all");
+  const [adminFilterCountry, setAdminFilterCountry] = useState("all");
+  const [adminFilterCity, setAdminFilterCity] = useState("all");
   const [adminPage, setAdminPage] = useState(1);
-  const [adminPerPage] = useState(5);
+  const [adminPerPage, setAdminPerPage] = useState(10);
   const [adminSelected, setAdminSelected] = useState<Set<string>>(new Set());
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContactName, setNewContactName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
   const [newContactFirm, setNewContactFirm] = useState("");
+  const [showExpiredInvites, setShowExpiredInvites] = useState(false);
+  const [showAddedByManagement, setShowAddedByManagement] = useState(false);
+  // Multiple status tabs selected (checkboxes)
+  const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
