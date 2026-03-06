@@ -816,10 +816,17 @@ const Community = () => {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/my-communities")}
                 className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
               >
                 <FontAwesomeIcon icon={faArrowLeft} />
+                <span className="hidden sm:inline">My Communities</span>
+              </button>
+              <div className="h-5 w-px bg-gray-200" />
+              <button
+                onClick={() => navigate("/")}
+                className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
+              >
                 <span className="hidden sm:inline">Back to Centre</span>
               </button>
               <div className="h-5 w-px bg-gray-200" />
@@ -1089,6 +1096,23 @@ const Community = () => {
                       <div className="text-xs text-muted-foreground">Resources</div>
                     </div>
                   </div>
+
+                  {/* Owner & Manager */}
+                  <div className="border-t border-gray-100 pt-3 mt-1 space-y-2 md:text-right">
+                    <button onClick={() => setSelectedMember(mockMembers[0])} className="flex items-center gap-2 text-xs hover:text-primary transition-colors md:ml-auto">
+                      <Avatar className="h-5 w-5">
+                        <AvatarFallback className="bg-amber-50 text-amber-600 text-[8px] font-semibold">SM</AvatarFallback>
+                      </Avatar>
+                      <span className="text-muted-foreground"><FontAwesomeIcon icon={faCrown} className="text-amber-500 text-[9px] mr-1" />Owner: <span className="font-medium text-card-foreground">{mockMembers[0].name}</span></span>
+                    </button>
+                    <button onClick={() => setSelectedMember(mockMembers[1])} className="flex items-center gap-2 text-xs hover:text-primary transition-colors md:ml-auto">
+                      <Avatar className="h-5 w-5">
+                        <AvatarFallback className="bg-blue-50 text-blue-600 text-[8px] font-semibold">JH</AvatarFallback>
+                      </Avatar>
+                      <span className="text-muted-foreground"><FontAwesomeIcon icon={faShieldHalved} className="text-blue-500 text-[9px] mr-1" />Manager: <span className="font-medium text-card-foreground">{mockMembers[1].name}</span></span>
+                    </button>
+                  </div>
+
                   <button
                     onClick={() => setShowLeaveConfirm(true)}
                     className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
@@ -1746,7 +1770,13 @@ const Community = () => {
                                   </Avatar>
                                 ))}
                               </div>
-                              <button className="ml-3 text-xs font-medium text-primary hover:underline">
+                              <button
+                                onClick={() => {
+                                  // Navigate to a sub-view or expand the group inline
+                                  setActiveTab("discussions");
+                                }}
+                                className="ml-3 text-xs font-medium text-primary hover:underline"
+                              >
                                 View group →
                               </button>
                             </div>
