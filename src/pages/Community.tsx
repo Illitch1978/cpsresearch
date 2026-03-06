@@ -650,9 +650,10 @@ const Community = () => {
 
   // Mock invited/requested/blocked members
   const mockInvited = useMemo(() => [
-    { id: "inv1", name: "Dr. Laura Stevens", role: "Professor", firm: "Cambridge Judge", joinedDate: "Invited 1 Mar 2026", location: "Cambridge, UK", expertise: ["Strategy"], email: "l.stevens@jbs.cam.ac.uk" },
-    { id: "inv2", name: "Mark Thompson", role: "Director", firm: "EY", joinedDate: "Invited 25 Feb 2026", location: "London, UK", expertise: ["Tax", "Advisory"], email: "mark.thompson@ey.com" },
-  ] as Member[], []);
+    { id: "inv1", name: "Dr. Laura Stevens", role: "Professor", firm: "Cambridge Judge", joinedDate: "Invited 1 Mar 2026", location: "Cambridge, UK", expertise: ["Strategy"], email: "l.stevens@jbs.cam.ac.uk", expired: false },
+    { id: "inv2", name: "Mark Thompson", role: "Director", firm: "EY", joinedDate: "Invited 25 Feb 2026", location: "London, UK", expertise: ["Tax", "Advisory"], email: "mark.thompson@ey.com", expired: true },
+    { id: "inv3", name: "Sarah Coleman", role: "Independent Consultant", firm: "", joinedDate: "Invited 10 Jan 2026", location: "Manchester, UK", expertise: ["Change Management"], email: "sarah@colemanconsulting.co.uk", expired: true },
+  ] as (Member & { expired?: boolean })[], []);
   const mockRequested = useMemo(() => [
     { id: "req1", name: "Yuki Tanaka", role: "Researcher", firm: "Waseda University", joinedDate: "Requested 4 Mar 2026", location: "Tokyo, Japan", expertise: ["Innovation"], email: "y.tanaka@waseda.jp" },
   ] as Member[], []);
