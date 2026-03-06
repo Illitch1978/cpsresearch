@@ -386,7 +386,6 @@ const MyCommunities = () => {
         </div>
       </div>
     </div>
-    </div>
   );
 
   return (
