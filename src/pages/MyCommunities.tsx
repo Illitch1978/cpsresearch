@@ -337,8 +337,16 @@ const MyCommunities = () => {
           </p>
         </div>
 
-        {/* Actions Menu */}
-        <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
+        {/* Favourite + Actions */}
+        <div className="flex items-start gap-1">
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
+            className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
+            title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
+          >
+            <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
+          </button>
+          <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === community.id ? null : community.id); }}
             className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted"
