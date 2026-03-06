@@ -51,6 +51,7 @@ import {
   faListAlt,
   faShareAlt,
   faHeart,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -586,8 +587,10 @@ const Community = () => {
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
   const [newPlaylistItems, setNewPlaylistItems] = useState<string[]>([]);
 
-
-  const [isAdmin] = useState(true); // Current user is admin
+  type ViewRole = "member" | "manager" | "god";
+  const [viewRole, setViewRole] = useState<ViewRole>("god");
+  const isAdmin = viewRole === "manager" || viewRole === "god";
+  const isGod = viewRole === "god";
   const [inviteEmail, setInviteEmail] = useState("");
   const [bulkEmails, setBulkEmails] = useState("");
   const [showBulkInvite, setShowBulkInvite] = useState(false);
@@ -1097,10 +1100,33 @@ const Community = () => {
             </div>
           </div>
 
+          {/* Role Preview Switcher */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded-lg w-fit">
+              <FontAwesomeIcon icon={faEye} className="text-muted-foreground text-xs" />
+              <span className="text-[11px] font-medium text-muted-foreground mr-1">Viewing as:</span>
+              {([
+                { key: "member" as ViewRole, label: "Member", icon: faUsers, color: "bg-muted text-muted-foreground" },
+                { key: "manager" as ViewRole, label: "Owner / Manager", icon: faShieldHalved, color: "bg-blue-50 text-blue-700 border-blue-200" },
+                { key: "god" as ViewRole, label: "God", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
+              ]).map(r => (
+                <button
+                  key={r.key}
+                  onClick={() => { setViewRole(r.key); if (r.key === "member" && activeTab === "admin") setActiveTab("discussions"); }}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all border ${
+                    viewRole === r.key ? r.color + " shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={r.icon} className="text-[10px]" /> {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Main Content with Tabs */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="bg-white border border-gray-200 h-11 p-1 mb-6">
+              <TabsList className="bg-background border border-border h-11 p-1 mb-6">
                 <TabsTrigger value="discussions" className="gap-2 text-sm data-[state=active]:text-primary">
                   <FontAwesomeIcon icon={faComments} className="text-xs" /> Discussions
                 </TabsTrigger>
@@ -2118,6 +2144,54 @@ const Community = () => {
                         </p>
                       </div>
                     </div>
+
+                    {/* God-level: Cross-community controls */}
+                    {isGod && (
+                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6 space-y-4">
+                        <h3 className="text-base font-serif font-semibold text-amber-900 flex items-center gap-2">
+                          <FontAwesomeIcon icon={faCrown} className="text-amber-600 text-sm" /> God Mode — Platform Controls
+                        </h3>
+                        <p className="text-xs text-amber-700">You have cross-community super admin access. Changes here affect all communities on the platform.</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="bg-background border border-border rounded-lg p-4 space-y-2">
+                            <h4 className="text-xs font-semibold text-card-foreground flex items-center gap-2">
+                              <FontAwesomeIcon icon={faGlobe} className="text-primary text-[10px]" /> Cross-Community Access
+                            </h4>
+                            <ul className="text-[11px] text-muted-foreground space-y-1.5">
+                              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> View & manage all 12 communities</li>
+                              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Override any community settings</li>
+                              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Access all member data across communities</li>
+                              <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> View analytics across all communities</li>
+                            </ul>
+                          </div>
+                          <div className="bg-background border border-border rounded-lg p-4 space-y-2">
+                            <h4 className="text-xs font-semibold text-card-foreground flex items-center gap-2">
+                              <FontAwesomeIcon icon={faShieldHalved} className="text-primary text-[10px]" /> Quick Actions
+                            </h4>
+                            <div className="space-y-1.5">
+                              <button className="w-full text-left text-[11px] px-3 py-2 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                                <FontAwesomeIcon icon={faUsers} className="text-[10px] text-primary" /> View all platform members ({mockMembers.length * 3})
+                              </button>
+                              <button className="w-full text-left text-[11px] px-3 py-2 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                                <FontAwesomeIcon icon={faBan} className="text-[10px] text-destructive" /> Platform-wide ban user
+                              </button>
+                              <button className="w-full text-left text-[11px] px-3 py-2 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                                <FontAwesomeIcon icon={faChartLine} className="text-[10px] text-primary" /> Platform analytics dashboard
+                              </button>
+                              <button className="w-full text-left text-[11px] px-3 py-2 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                                <FontAwesomeIcon icon={faStar} className="text-[10px] text-amber-500" /> Feature this community
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 pt-2 border-t border-amber-200">
+                          <span className="text-[10px] text-amber-600 font-medium">AUDIT:</span>
+                          <span className="text-[10px] text-amber-700">All God-level actions are logged with timestamp and operator ID.</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               )}
