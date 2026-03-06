@@ -27,7 +27,11 @@ import {
   faLink as faLinkIcon,
   faImage as faImageIcon,
   faRightFromBracket,
+  faStar as faStarSolid,
+  faShieldHalved,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -51,6 +55,10 @@ interface CommunityItem {
   lastActive: string;
   avatar: string;
   archived?: boolean;
+  isPrivate?: boolean;
+  isFavourite?: boolean;
+  isOfficial?: boolean;
+  lastVisited?: string;
 }
 
 const initialCommunities: CommunityItem[] = [
@@ -65,6 +73,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Member",
     lastActive: "2 hours ago",
     avatar: "PSR",
+    isPrivate: false,
+    isFavourite: true,
+    isOfficial: true,
+    lastVisited: "2 hours ago",
   },
   {
     id: "legal-market-intel",
@@ -77,6 +89,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Contributor",
     lastActive: "Yesterday",
     avatar: "LMI",
+    isPrivate: true,
+    isFavourite: false,
+    isOfficial: false,
+    lastVisited: "Yesterday",
   },
   {
     id: "consulting-trends",
@@ -89,6 +105,10 @@ const initialCommunities: CommunityItem[] = [
     role: "Member",
     lastActive: "3 days ago",
     avatar: "MCT",
+    isPrivate: false,
+    isFavourite: true,
+    isOfficial: true,
+    lastVisited: undefined,
   },
 ];
 
@@ -141,8 +161,29 @@ const MyCommunities = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const activeCommunities = communities.filter(c => !c.archived);
+  // Filter state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterPrivate, setFilterPrivate] = useState(false);
+  const [filterFavourites, setFilterFavourites] = useState(false);
+  const [filterOfficial, setFilterOfficial] = useState(false);
+  const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
+
+  const activeCommunities = communities.filter(c => {
+    if (c.archived) return false;
+    if (filterOpen && c.isPrivate) return false;
+    if (filterPrivate && !c.isPrivate) return false;
+    if (filterFavourites && !c.isFavourite) return false;
+    if (filterOfficial && !c.isOfficial) return false;
+    if (filterRecentlyVisited && !c.lastVisited) return false;
+    return true;
+  });
   const archivedCommunities = communities.filter(c => c.archived);
+
+  const toggleFavourite = (id: string) => {
+    setCommunities(prev =>
+      prev.map(c => c.id === id ? { ...c, isFavourite: !c.isFavourite } : c)
+    );
+  };
 
   const toggleArchive = (id: string) => {
     setCommunities(prev =>
@@ -246,6 +287,21 @@ const MyCommunities = () => {
             <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">
               {community.role}
             </span>
+            {community.isPrivate && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <FontAwesomeIcon icon={faLock} className="text-[9px]" /> Private
+              </span>
+            )}
+            {community.isOfficial && (
+              <span className="flex items-center gap-1 text-[10px] text-primary">
+                <FontAwesomeIcon icon={faShieldHalved} className="text-[9px]" /> Official
+              </span>
+            )}
+            {community.lastVisited && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <FontAwesomeIcon icon={faClock} className="text-[9px]" /> Visited {community.lastVisited}
+              </span>
+            )}
             {community.archived && (
               <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
                 Archived
@@ -281,8 +337,16 @@ const MyCommunities = () => {
           </p>
         </div>
 
-        {/* Actions Menu */}
-        <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
+        {/* Favourite + Actions */}
+        <div className="flex items-start gap-1">
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
+            className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
+            title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
+          >
+            <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
+          </button>
+          <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
           <button
             onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === community.id ? null : community.id); }}
             className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted"
@@ -318,6 +382,7 @@ const MyCommunities = () => {
               )}
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
@@ -377,6 +442,28 @@ const MyCommunities = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Filter Checkboxes */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
+          {[
+            { label: "Open", state: filterOpen, setter: setFilterOpen },
+            { label: "Private", state: filterPrivate, setter: setFilterPrivate },
+            { label: "Favourites", state: filterFavourites, setter: setFilterFavourites },
+            { label: "Official", state: filterOfficial, setter: setFilterOfficial },
+            { label: "Recently visited", state: filterRecentlyVisited, setter: setFilterRecentlyVisited },
+          ].map(f => (
+            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={f.state}
+                onChange={() => f.setter(!f.state)}
+                className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+              />
+              {f.label}
+            </label>
+          ))}
         </div>
 
         {/* Active Communities */}
