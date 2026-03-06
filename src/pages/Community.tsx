@@ -44,6 +44,9 @@ import {
   faCopy,
   faCheck,
   faChevronDown,
+  faRightFromBracket,
+  faPoll,
+  faRepeat,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -109,6 +112,18 @@ interface Event {
   attendees: number;
   description: string;
   speaker?: string;
+  recurring?: "weekly" | "biweekly" | "monthly";
+  nextOccurrences?: string[];
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  options: { id: string; label: string; votes: number }[];
+  totalVotes: number;
+  author: Member;
+  endsDate: string;
+  tags: string[];
 }
 
 const mockMembers: Member[] = [
@@ -170,9 +185,54 @@ const mockResources: Resource[] = [
 
 const mockEvents: Event[] = [
   { id: "1", title: "Mixed-Methods Research Design Workshop", date: "28 Mar 2026", time: "14:00 GMT", type: "workshop", attendees: 32, description: "Half-day workshop on applying mixed-methods approaches to professional services research.", speaker: "Prof. Sarah Mitchell" },
-  { id: "2", title: "AI in Professional Services — Monthly Webinar", date: "10 Apr 2026", time: "12:00 BST", type: "webinar", attendees: 78, description: "Monthly discussion on the latest developments in AI across consulting, audit, and legal services.", speaker: "Dr. Aisha Patel" },
+  { id: "2", title: "AI in Professional Services — Monthly Webinar", date: "10 Apr 2026", time: "12:00 BST", type: "webinar", attendees: 78, description: "Monthly discussion on the latest developments in AI across consulting, audit, and legal services.", speaker: "Dr. Aisha Patel", recurring: "monthly", nextOccurrences: ["8 May 2026", "12 Jun 2026", "10 Jul 2026"] },
   { id: "3", title: "CPSR Spring Research Symposium", date: "15 May 2026", time: "09:00 BST", type: "conference", attendees: 120, description: "Full-day symposium featuring 20 paper presentations and 3 panel discussions on current research." },
   { id: "4", title: "London Meetup: Emerging Researchers Network", date: "22 Apr 2026", time: "18:30 BST", type: "meetup", attendees: 25, description: "Informal networking event for early-career researchers studying professional services." },
+  { id: "5", title: "Weekly Research Round-Up — Live Session", date: "Every Friday", time: "16:00 BST", type: "webinar", attendees: 45, description: "A weekly 30-minute live session where members share research updates, ask questions, and discuss trending topics in professional services.", speaker: "Prof. Sarah Mitchell", recurring: "weekly", nextOccurrences: ["14 Mar 2026", "21 Mar 2026", "28 Mar 2026", "4 Apr 2026"] },
+  { id: "6", title: "Peer Review Circle — Fortnightly Feedback Session", date: "Every other Tuesday", time: "11:00 BST", type: "workshop", attendees: 18, description: "Bring your draft papers and working documents for constructive peer review in a supportive, structured session.", recurring: "biweekly", nextOccurrences: ["18 Mar 2026", "1 Apr 2026", "15 Apr 2026"] },
+];
+
+const mockPolls: Poll[] = [
+  {
+    id: "p1",
+    question: "What should be the focus of our next research workshop?",
+    options: [
+      { id: "o1", label: "AI governance in professional services", votes: 34 },
+      { id: "o2", label: "Measuring consulting impact", votes: 28 },
+      { id: "o3", label: "Diversity & inclusion metrics", votes: 19 },
+      { id: "o4", label: "Cross-border regulatory challenges", votes: 12 },
+    ],
+    totalVotes: 93,
+    author: mockMembers[0],
+    endsDate: "20 Mar 2026",
+    tags: ["Research", "Workshop"],
+  },
+  {
+    id: "p2",
+    question: "Preferred time for the weekly live session?",
+    options: [
+      { id: "o5", label: "Fridays 12:00 BST", votes: 22 },
+      { id: "o6", label: "Fridays 16:00 BST", votes: 31 },
+      { id: "o7", label: "Thursdays 14:00 BST", votes: 15 },
+    ],
+    totalVotes: 68,
+    author: mockMembers[1],
+    endsDate: "15 Mar 2026",
+    tags: ["Events", "Scheduling"],
+  },
+  {
+    id: "p3",
+    question: "Should we open the community to undergraduate researchers?",
+    options: [
+      { id: "o8", label: "Yes, fully open", votes: 14 },
+      { id: "o9", label: "Yes, with mentor pairing", votes: 41 },
+      { id: "o10", label: "No, postgraduate and above only", votes: 23 },
+    ],
+    totalVotes: 78,
+    author: mockMembers[0],
+    endsDate: "25 Mar 2026",
+    tags: ["Membership", "Policy"],
+  },
 ];
 
 interface WorkingGroup {
@@ -462,7 +522,13 @@ const Community = () => {
   const [replyingTo, setReplyingTo] = useState<Reply | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Admin state
+  // Leave community state
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+
+  // Poll voting state
+  const [pollVotes, setPollVotes] = useState<Record<string, string>>({});
+
+
   const [isAdmin] = useState(true); // Current user is admin
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteSent, setInviteSent] = useState(false);
@@ -880,6 +946,12 @@ const Community = () => {
                       <div className="text-xs text-muted-foreground">Resources</div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => setShowLeaveConfirm(true)}
+                    className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
+                  </button>
                 </div>
               </div>
             </div>
@@ -1129,6 +1201,59 @@ const Community = () => {
                         Discover more members →
                       </button>
                     </div>
+
+                    {/* ─── Community Polls ─── */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-5">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faPoll} className="text-primary text-xs" />
+                        <h3 className="text-sm font-semibold text-card-foreground">Active Polls</h3>
+                      </div>
+                      <div className="space-y-5">
+                        {mockPolls.map(poll => {
+                          const voted = pollVotes[poll.id];
+                          const currentTotal = voted ? poll.totalVotes + 1 : poll.totalVotes;
+                          return (
+                            <div key={poll.id} className="pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                              <p className="text-xs font-semibold text-card-foreground mb-2">{poll.question}</p>
+                              <div className="space-y-1.5">
+                                {poll.options.map(opt => {
+                                  const optVotes = opt.votes + (voted === opt.id ? 1 : 0);
+                                  const pct = Math.round((optVotes / currentTotal) * 100);
+                                  return (
+                                    <button
+                                      key={opt.id}
+                                      onClick={() => {
+                                        if (!voted) setPollVotes(prev => ({ ...prev, [poll.id]: opt.id }));
+                                      }}
+                                      disabled={!!voted}
+                                      className={`w-full text-left relative rounded-md overflow-hidden transition-all ${voted ? "cursor-default" : "hover:bg-primary/5 cursor-pointer"}`}
+                                    >
+                                      {voted && (
+                                        <div
+                                          className={`absolute inset-y-0 left-0 rounded-md transition-all ${voted === opt.id ? "bg-primary/15" : "bg-muted/50"}`}
+                                          style={{ width: `${pct}%` }}
+                                        />
+                                      )}
+                                      <div className="relative flex items-center justify-between px-2.5 py-1.5">
+                                        <span className={`text-[11px] ${voted === opt.id ? "font-semibold text-primary" : "text-muted-foreground"}`}>
+                                          {voted === opt.id && <FontAwesomeIcon icon={faCheck} className="mr-1 text-[9px]" />}
+                                          {opt.label}
+                                        </span>
+                                        {voted && <span className="text-[10px] font-medium text-muted-foreground">{pct}%</span>}
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+                                <span>{currentTotal} votes</span>
+                                <span>Ends {poll.endsDate}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </aside>
                 </div>
               </TabsContent>
@@ -1202,9 +1327,17 @@ const Community = () => {
               <TabsContent value="events">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {mockEvents.map(e => (
-                    <div key={e.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
+                    <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-gray-200"}`}>
                       <div className="flex items-start justify-between mb-3">
-                        <EventTypeBadge type={e.type} />
+                        <div className="flex items-center gap-2">
+                          <EventTypeBadge type={e.type} />
+                          {e.recurring && (
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
+                              <FontAwesomeIcon icon={faRepeat} className="text-[8px]" />
+                              {e.recurring === "weekly" ? "Weekly" : e.recurring === "biweekly" ? "Fortnightly" : "Monthly"}
+                            </span>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">{e.attendees} attending</span>
                       </div>
                       <h3 className="text-sm font-semibold text-card-foreground mb-1">{e.title}</h3>
@@ -1213,6 +1346,18 @@ const Community = () => {
                         {e.speaker && <> · Speaker: <button onClick={() => { const member = mockMembers.find(m => m.name === e.speaker); if (member) setSelectedMember(member); }} className="font-medium text-slate-600 hover:text-primary transition-colors">{e.speaker}</button></>}
                       </p>
                       <p className="text-xs text-muted-foreground leading-relaxed">{e.description}</p>
+                      {e.nextOccurrences && e.nextOccurrences.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-50">
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming sessions</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {e.nextOccurrences.map((date, i) => (
+                              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                                {date}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <button className="mt-4 text-xs font-medium text-primary hover:underline">Register →</button>
                     </div>
                   ))}
@@ -1771,6 +1916,32 @@ const Community = () => {
               className="flex-1 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg py-2 hover:bg-destructive/90 transition-colors flex items-center justify-center gap-1.5"
             >
               <FontAwesomeIcon icon={faBan} className="text-xs" /> Remove
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Community Confirmation */}
+      <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-serif">Leave Community</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Are you sure you want to leave <span className="font-semibold text-card-foreground">{community.name}</span>? You will lose access to discussions, resources, and events. You can request to rejoin later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => setShowLeaveConfirm(false)}
+              className="flex-1 text-sm font-medium border border-border rounded-lg py-2 hover:bg-muted transition-colors"
+            >
+              Stay
+            </button>
+            <button
+              onClick={() => { setShowLeaveConfirm(false); navigate("/my-communities"); }}
+              className="flex-1 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg py-2 hover:bg-destructive/90 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} className="text-xs" /> Leave
             </button>
           </div>
         </DialogContent>

@@ -26,6 +26,7 @@ import {
   faListOl,
   faLink as faLinkIcon,
   faImage as faImageIcon,
+  faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -98,6 +99,7 @@ const MyCommunities = () => {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [confirmLeave, setConfirmLeave] = useState<string | null>(null);
 
   // Create form state
   const [formName, setFormName] = useState("");
@@ -290,12 +292,22 @@ const MyCommunities = () => {
           {menuOpen === community.id && (
             <div className="absolute right-0 mt-1 w-44 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
               {!community.archived ? (
-                <button
-                  onClick={() => toggleArchive(community.id)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
-                >
-                  <FontAwesomeIcon icon={faBoxArchive} className="text-[10px]" /> Archive community
-                </button>
+                <>
+                  <button
+                    onClick={() => toggleArchive(community.id)}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                  >
+                    <FontAwesomeIcon icon={faBoxArchive} className="text-[10px]" /> Archive community
+                  </button>
+                  {community.role !== "Founder" && (
+                    <button
+                      onClick={() => { setConfirmLeave(community.id); setMenuOpen(null); }}
+                      className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
+                    >
+                      <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
+                    </button>
+                  )}
+                </>
               ) : (
                 <button
                   onClick={() => toggleArchive(community.id)}
@@ -794,6 +806,37 @@ const MyCommunities = () => {
                 {formSaving ? "Saving…" : "Save"}
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Community Confirmation */}
+      <Dialog open={!!confirmLeave} onOpenChange={(open) => { if (!open) setConfirmLeave(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-serif">Leave Community</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Are you sure you want to leave <span className="font-semibold text-card-foreground">{communities.find(c => c.id === confirmLeave)?.name}</span>? You will lose access to discussions, resources, and events. You can request to rejoin later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => setConfirmLeave(null)}
+              className="flex-1 text-sm font-medium border border-border rounded-lg py-2 hover:bg-muted transition-colors"
+            >
+              Stay
+            </button>
+            <button
+              onClick={() => {
+                if (confirmLeave) {
+                  setCommunities(prev => prev.filter(c => c.id !== confirmLeave));
+                  setConfirmLeave(null);
+                }
+              }}
+              className="flex-1 text-sm font-medium bg-destructive text-destructive-foreground rounded-lg py-2 hover:bg-destructive/90 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} className="text-xs" /> Leave
+            </button>
           </div>
         </DialogContent>
       </Dialog>
