@@ -2103,16 +2103,17 @@ const Community = () => {
                               </div>
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                                  adminStatusTab === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {adminStatusTab === "invited" ? "Invited" : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
+                                  {adminStatusTab === "invited" ? ((m as any).expired ? "Expired" : "Invited") : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
                                 </span>
                               </div>
                               <span className="text-[11px] text-muted-foreground">{m.joinedDate}</span>
-                              <span className="text-[11px] text-muted-foreground truncate">{m.firm}</span>
+                              <span className="text-[11px] text-muted-foreground truncate">{m.firm || <span className="italic text-muted-foreground/50">Independent</span>}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.location || "—"}</span>
                               <div className="flex items-center justify-end gap-1.5">
                                 {adminStatusTab === "members" && (
@@ -2138,6 +2139,14 @@ const Community = () => {
                                       </div>
                                     )}
                                   </div>
+                                )}
+                                {adminStatusTab === "invited" && (
+                                  <button
+                                    onClick={() => {/* re-send invite mock */}}
+                                    className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1"
+                                  >
+                                    <FontAwesomeIcon icon={faRepeat} className="text-[9px]" /> Re-send
+                                  </button>
                                 )}
                                 {adminStatusTab === "requested" && (
                                   <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
