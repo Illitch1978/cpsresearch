@@ -38,6 +38,8 @@ const communities: Community[] = [
   { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms. Practical discussions on operations, funding, talent, and technology for growing businesses.", url: "#", tags: ["SME", "Business development"], theme: "Business Growth", requiresApproval: false },
 ];
 
+const MAX_COMMUNITIES = 20;
+
 type ChatStep = "topic" | "filters" | "searching" | "results";
 
 interface CommunityFinderWidgetProps {
