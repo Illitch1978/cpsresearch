@@ -2171,6 +2171,24 @@ const Community = () => {
                             <input type="checkbox" checked={showAddedByManagement} onChange={() => setShowAddedByManagement(!showAddedByManagement)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
                             Contacts added by community management
                           </label>
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showResearchPanelMembers} onChange={() => setShowResearchPanelMembers(!showResearchPanelMembers)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Show research panel members
+                          </label>
+                          <button
+                            onClick={() => {
+                              const panelMembers = mockMembers.filter(m => researchPanelMemberIds.has(m.id));
+                              const csv = "Name,Email,Firm,Role,Location\n" + panelMembers.map(m => `"${m.name}","${m.email || ""}","${m.firm}","${m.role}","${m.location || ""}"`).join("\n");
+                              const blob = new Blob([csv], { type: "text/csv" });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url; a.download = "research-panel-members.csv"; a.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                            className="flex items-center gap-1.5 text-[11px] text-primary font-medium hover:underline cursor-pointer"
+                          >
+                            <FontAwesomeIcon icon={faFileExport} className="text-[10px]" /> Export research panel
+                          </button>
                           <div className="ml-auto flex items-center gap-1.5">
                             <span className="text-[11px] text-muted-foreground">Show:</span>
                             <select value={adminPerPage} onChange={e => { setAdminPerPage(e.target.value === "all" ? 9999 : Number(e.target.value)); setAdminPage(1); }} className="text-[11px] border border-border rounded-md px-2 py-1 bg-background focus:outline-none text-muted-foreground">
