@@ -59,6 +59,7 @@ interface CommunityItem {
   isFavourite?: boolean;
   isOfficial?: boolean;
   lastVisited?: string;
+  isResearchPanel?: boolean;
 }
 
 const initialCommunities: CommunityItem[] = [
