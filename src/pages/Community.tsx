@@ -2411,35 +2411,9 @@ const Community = () => {
                                 setShowAddContact(false);
                                 setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
                               }}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all border ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "border-primary/30 text-primary hover:bg-primary/5" : "border-border text-muted-foreground"}`}
-                            >
-                              Add
-                            </button>
-                            <button
-                              disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
-                              onClick={() => {
-                                const newInvited: Member & { _source?: string; expired?: boolean } = {
-                                  id: `inv-${Date.now()}`,
-                                  name: `${newContactFirstName.trim()} ${newContactLastName.trim()}`,
-                                  role: newContactJobTitle.trim(),
-                                  firm: newContactFirm.trim(),
-                                  joinedDate: `Invited ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
-                                  expertise: [],
-                                  email: newContactEmail.trim(),
-                                  location: `${newContactCity.trim()}, ${newContactCountry.trim()}`,
-                                  _source: "invited",
-                                  expired: false,
-                                };
-                                // For now just add as prospect with invited source for visual feedback
-                                setProspectContacts(prev => [{ ...newInvited, _source: "prospect" }, ...prev]);
-                                setShowAddContact(false);
-                                setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
-                                setInviteSent(true);
-                                setTimeout(() => setInviteSent(false), 3000);
-                              }}
                               className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
-                              <FontAwesomeIcon icon={faPaperPlane} className="mr-1 text-[10px]" /> Add & Invite
+                              <FontAwesomeIcon icon={faPlus} className="mr-1 text-[10px]" /> Add Contact
                             </button>
                           </div>
                         </div>
@@ -2675,7 +2649,7 @@ const Community = () => {
                           {([
                             { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
-                            { key: "prospects", label: "Prospects", checked: adminShowProspects, toggle: () => setAdminShowProspects(v => !v), count: prospectContacts.length },
+                            { key: "prospects", label: "Shortlisted", checked: adminShowProspects, toggle: () => setAdminShowProspects(v => !v), count: prospectContacts.length },
                             { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
                             { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
                           ]).map(tab => (
@@ -2824,13 +2798,13 @@ const Community = () => {
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                   (m as any)._source === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
-                                  (m as any)._source === "prospect" ? "bg-violet-50 text-violet-700 border border-violet-200" :
+                                  (m as any)._source === "prospect" ? "bg-slate-50 text-slate-600 border border-slate-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {(m as any)._source === "prospect" ? "Prospect" :
+                                  {(m as any)._source === "prospect" ? "Shortlisted" :
                                    (m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
                                    (m as any)._source === "requested" ? "Requested" :
                                    (m as any)._source === "blocked" ? "Blocked" :
