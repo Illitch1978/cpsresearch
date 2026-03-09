@@ -56,6 +56,8 @@ import {
   faUserMinus,
   faFileExport,
   faHome,
+  faSort,
+  faThumbtack,
   faCalendar as faCalendarSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
@@ -610,10 +612,10 @@ const Community = () => {
   // Member action menu in admin
   const [memberMenuOpen, setMemberMenuOpen] = useState<string | null>(null);
 
-  type ViewRole = "member" | "manager" | "god";
-  const [viewRole, setViewRole] = useState<ViewRole>("god");
-  const isAdmin = viewRole === "manager" || viewRole === "god";
-  const isGod = viewRole === "god";
+  type ViewRole = "member" | "manager" | "hq";
+  const [viewRole, setViewRole] = useState<ViewRole>("hq");
+  const isAdmin = viewRole === "manager" || viewRole === "hq";
+  const isHQ = viewRole === "hq";
   const [inviteEmail, setInviteEmail] = useState("");
   const [bulkEmails, setBulkEmails] = useState("");
   const [showBulkInvite, setShowBulkInvite] = useState(false);
@@ -665,6 +667,18 @@ const Community = () => {
   const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
   const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
   const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
+
+  // Discussion sort/search state
+  const [discussionSearch, setDiscussionSearch] = useState("");
+  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author">("date");
+  const [discussionSortDir, setDiscussionSortDir] = useState<"asc" | "desc">("desc");
+  const [pinnedDiscussions, setPinnedDiscussions] = useState<Set<string>>(new Set(mockDiscussions.filter(d => d.pinned).map(d => d.id)));
+
+  // Resource sort/search/pin state
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author">("date");
+  const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
+  const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
@@ -843,9 +857,49 @@ const Community = () => {
   }, []);
 
   const filteredDiscussions = useMemo(() => {
-    if (!selectedTag) return mockDiscussions;
-    return mockDiscussions.filter(d => d.tags.includes(selectedTag));
-  }, [selectedTag]);
+    let list = [...mockDiscussions];
+    // Tag filter
+    if (selectedTag) list = list.filter(d => d.tags.includes(selectedTag));
+    // Search filter
+    if (discussionSearch.trim()) {
+      const q = discussionSearch.toLowerCase();
+      list = list.filter(d => d.title.toLowerCase().includes(q) || d.author.name.toLowerCase().includes(q) || d.date.toLowerCase().includes(q));
+    }
+    // Sort: pinned always first
+    const pinned = list.filter(d => pinnedDiscussions.has(d.id));
+    const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
+    const sortFn = (a: Discussion, b: Discussion) => {
+      let cmp = 0;
+      if (discussionSort === "name") cmp = a.title.localeCompare(b.title);
+      else if (discussionSort === "author") cmp = a.author.name.localeCompare(b.author.name);
+      else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
+      return discussionSortDir === "asc" ? -cmp : cmp;
+    };
+    pinned.sort(sortFn);
+    unpinned.sort(sortFn);
+    return [...pinned, ...unpinned];
+  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions]);
+
+  // Sorted/filtered resources
+  const sortedResources = useMemo(() => {
+    let list = [...communityResources];
+    if (resourceSearch.trim()) {
+      const q = resourceSearch.toLowerCase();
+      list = list.filter(r => r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.date.toLowerCase().includes(q));
+    }
+    const pinned = list.filter(r => pinnedResources.has(r.id));
+    const unpinned = list.filter(r => !pinnedResources.has(r.id));
+    const sortFn = (a: Resource, b: Resource) => {
+      let cmp = 0;
+      if (resourceSort === "name") cmp = a.title.localeCompare(b.title);
+      else if (resourceSort === "author") cmp = a.author.localeCompare(b.author);
+      else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
+      return resourceSortDir === "asc" ? -cmp : cmp;
+    };
+    pinned.sort(sortFn);
+    unpinned.sort(sortFn);
+    return [...pinned, ...unpinned];
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources]);
 
   const community = communityData["prof-services-research"];
 
@@ -1222,7 +1276,7 @@ const Community = () => {
               {([
                 { key: "member" as ViewRole, label: "Member", icon: faUsers, color: "bg-muted text-muted-foreground" },
                 { key: "manager" as ViewRole, label: "Owner / Manager", icon: faShieldHalved, color: "bg-blue-50 text-blue-700 border-blue-200" },
-                { key: "god" as ViewRole, label: "God", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
+                { key: "hq" as ViewRole, label: "HQ", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
               ]).map(r => (
                 <button
                   key={r.key}
@@ -1285,6 +1339,43 @@ const Community = () => {
                       <FontAwesomeIcon icon={faPaperPlane} className="ml-auto text-muted-foreground text-sm" />
                     </div>
 
+                    {/* Approval Notice */}
+                    <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                      <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 mt-0.5" />
+                      <span>New discussions are subject to review by the community management team or HQ before appearing publicly. See <button onClick={() => setActiveTab("about")} className="text-primary underline font-medium">Rules</button> for details.</span>
+                    </div>
+
+                    {/* Search & Sort Controls */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative flex-1 min-w-[160px]">
+                        <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                        <input
+                          type="text"
+                          value={discussionSearch}
+                          onChange={e => setDiscussionSearch(e.target.value)}
+                          placeholder="Search discussions…"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                        <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                        {(["date", "name", "author"] as const).map(s => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              if (discussionSort === s) setDiscussionSortDir(d => d === "asc" ? "desc" : "asc");
+                              else { setDiscussionSort(s); setDiscussionSortDir(s === "date" ? "desc" : "asc"); }
+                            }}
+                            className={`text-xs px-2 py-1 rounded-md transition-colors ${discussionSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                          >
+                            {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                            {discussionSort === s && <span className="ml-0.5">{discussionSortDir === "asc" ? "↑" : "↓"}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Tag Filter Bar */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -1309,7 +1400,7 @@ const Community = () => {
 
                     {/* Discussion List */}
                     {filteredDiscussions.map(d => (
-                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${d.pinned ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             <button onClick={() => setSelectedMember(d.author)} className="shrink-0">
@@ -1321,7 +1412,7 @@ const Community = () => {
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                {d.pinned && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0">Pinned</Badge>}
+                                {pinnedDiscussions.has(d.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                                 {d.repliesDisabled && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30 flex items-center gap-1"><FontAwesomeIcon icon={faLock} className="text-[8px]" />Replies closed</Badge>}
                                 <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
                               </div>
@@ -1343,12 +1434,27 @@ const Community = () => {
                               </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => toggleBookmark(d.id)}
-                            className="text-slate-300 hover:text-primary transition-colors mt-1 shrink-0"
-                          >
-                            <FontAwesomeIcon icon={bookmarkedDiscussions.includes(d.id) ? faBookmarkSolid : faBookmarkRegular} />
-                          </button>
+                          <div className="flex flex-col items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => toggleBookmark(d.id)}
+                              className="text-slate-300 hover:text-primary transition-colors mt-1"
+                            >
+                              <FontAwesomeIcon icon={bookmarkedDiscussions.includes(d.id) ? faBookmarkSolid : faBookmarkRegular} />
+                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => setPinnedDiscussions(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(d.id)) next.delete(d.id); else next.add(d.id);
+                                  return next;
+                                })}
+                                className={`text-xs transition-colors ${pinnedDiscussions.has(d.id) ? "text-primary" : "text-slate-300 hover:text-primary"}`}
+                                title={pinnedDiscussions.has(d.id) ? "Unpin discussion" : "Pin discussion"}
+                              >
+                                <FontAwesomeIcon icon={faThumbtack} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-50 text-xs text-muted-foreground">
                           <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
@@ -1593,6 +1699,43 @@ const Community = () => {
                     </button>
                   </div>
 
+                  {/* Approval Notice */}
+                  <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 mt-0.5" />
+                    <span>New resources are subject to review by the community management team or HQ before appearing publicly. See <button onClick={() => setActiveTab("about")} className="text-primary underline font-medium">Rules</button> for details.</span>
+                  </div>
+
+                  {/* Search & Sort Controls */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input
+                        type="text"
+                        value={resourceSearch}
+                        onChange={e => setResourceSearch(e.target.value)}
+                        placeholder="Search resources…"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                      <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                      {(["date", "name", "author"] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            if (resourceSort === s) setResourceSortDir(d => d === "asc" ? "desc" : "asc");
+                            else { setResourceSort(s); setResourceSortDir(s === "date" ? "desc" : "asc"); }
+                          }}
+                          className={`text-xs px-2 py-1 rounded-md transition-colors ${resourceSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                        >
+                          {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                          {resourceSort === s && <span className="ml-0.5">{resourceSortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Add Resource Form */}
                   {showAddResource && (
                     <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-3">
@@ -1648,8 +1791,8 @@ const Community = () => {
                   )}
 
                   {/* Resource List */}
-                  {communityResources.map(r => (
-                    <div key={r.id} className="bg-white border border-gray-200 rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
+                  {sortedResources.map(r => (
+                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                       <div className="flex items-center gap-3 shrink-0">
                         <label className="flex items-center cursor-pointer" title="Make available for playlists">
                           <input
@@ -1664,7 +1807,10 @@ const Community = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
+                        <div className="flex items-center gap-2">
+                          {pinnedResources.has(r.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
+                          <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">{r.author} · {r.date}</p>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.description}</p>
                         {playlistEnabledResources.has(r.id) && (
@@ -1673,15 +1819,30 @@ const Community = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        {r.downloads && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <FontAwesomeIcon icon={faDownload} /> {r.downloads}
-                          </span>
+                      <div className="flex flex-col items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-3">
+                          {r.downloads && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <FontAwesomeIcon icon={faDownload} /> {r.downloads}
+                            </span>
+                          )}
+                          <button className="text-primary hover:text-primary/80 transition-colors text-sm">
+                            <FontAwesomeIcon icon={r.type === "link" ? faLink : faDownload} />
+                          </button>
+                        </div>
+                        {isAdmin && (
+                          <button
+                            onClick={() => setPinnedResources(prev => {
+                              const next = new Set(prev);
+                              if (next.has(r.id)) next.delete(r.id); else next.add(r.id);
+                              return next;
+                            })}
+                            className={`text-xs transition-colors ${pinnedResources.has(r.id) ? "text-primary" : "text-slate-300 hover:text-primary"}`}
+                            title={pinnedResources.has(r.id) ? "Unpin resource" : "Pin resource"}
+                          >
+                            <FontAwesomeIcon icon={faThumbtack} />
+                          </button>
                         )}
-                        <button className="text-primary hover:text-primary/80 transition-colors text-sm">
-                          <FontAwesomeIcon icon={r.type === "link" ? faLink : faDownload} />
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -2630,13 +2791,13 @@ const Community = () => {
                       </div>
                     </div>
 
-                    {/* God-level: Cross-community controls */}
-                    {isGod && (
+                    {/* HQ-level: Cross-community controls */}
+                    {isHQ && (
                       <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6 space-y-4">
                         <h3 className="text-base font-serif font-semibold text-amber-900 flex items-center gap-2">
-                          <FontAwesomeIcon icon={faCrown} className="text-amber-600 text-sm" /> God Mode — Platform Controls
+                          <FontAwesomeIcon icon={faCrown} className="text-amber-600 text-sm" /> HQ — Platform Controls
                         </h3>
-                        <p className="text-xs text-amber-700">You have cross-community super admin access. Changes here affect all communities on the platform.</p>
+                        <p className="text-xs text-amber-700">You have cross-community HQ admin access. Changes here affect all communities on the platform.</p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div className="bg-background border border-border rounded-lg p-4 space-y-2">
@@ -2673,7 +2834,7 @@ const Community = () => {
 
                         <div className="flex items-center gap-3 pt-2 border-t border-amber-200">
                           <span className="text-[10px] text-amber-600 font-medium">AUDIT:</span>
-                          <span className="text-[10px] text-amber-700">All God-level actions are logged with timestamp and operator ID.</span>
+                          <span className="text-[10px] text-amber-700">All HQ-level actions are logged with timestamp and operator ID.</span>
                         </div>
                       </div>
                     )}
