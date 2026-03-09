@@ -2078,8 +2078,11 @@ const Community = () => {
                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">{r.type}</span>
                               </label>
                             ))}
+                                  </div>
+                                </>
+                              );
+                            })()}
                           </div>
-                        </div>
                         <div className="flex items-center justify-end gap-2 pt-2">
                           <button
                             onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); setSelectedMMPlaylist(""); }}
