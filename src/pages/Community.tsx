@@ -591,6 +591,21 @@ const Community = () => {
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
   const [newPlaylistItems, setNewPlaylistItems] = useState<string[]>([]);
+  const [viewPlaylistId, setViewPlaylistId] = useState<string | null>(null);
+  // Research panel state
+  const [isInResearchPanel, setIsInResearchPanel] = useState(false);
+  // Resource state
+  const [communityResources, setCommunityResources] = useState<Resource[]>(mockResources);
+  const [showAddResource, setShowAddResource] = useState(false);
+  const [playlistEnabledResources, setPlaylistEnabledResources] = useState<Set<string>>(new Set());
+  const [newResourceTitle, setNewResourceTitle] = useState("");
+  const [newResourceType, setNewResourceType] = useState<Resource["type"]>("link");
+  const [newResourceUrl, setNewResourceUrl] = useState("");
+  const [newResourceAuthor, setNewResourceAuthor] = useState("");
+  const [newResourceDate, setNewResourceDate] = useState("");
+  const [newResourceDesc, setNewResourceDesc] = useState("");
+  // Member action menu in admin
+  const [memberMenuOpen, setMemberMenuOpen] = useState<string | null>(null);
 
   type ViewRole = "member" | "manager" | "god";
   const [viewRole, setViewRole] = useState<ViewRole>("god");
