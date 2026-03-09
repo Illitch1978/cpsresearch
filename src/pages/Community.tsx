@@ -827,11 +827,12 @@ const Community = () => {
       return next;
     });
   };
+  const invitedOnPage = paginatedAdminMembers.filter(m => (m as any)._source === "invited");
   const toggleSelectAll = () => {
-    if (adminSelected.size === paginatedAdminMembers.length) {
+    if (adminSelected.size === invitedOnPage.length && invitedOnPage.length > 0) {
       setAdminSelected(new Set());
     } else {
-      setAdminSelected(new Set(paginatedAdminMembers.map(m => m.id)));
+      setAdminSelected(new Set(invitedOnPage.map(m => m.id)));
     }
   };
 
