@@ -1281,7 +1281,7 @@ const Community = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${communityBannerDefault})` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-transparent to-white/20" />
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                 <div className="flex-1">
