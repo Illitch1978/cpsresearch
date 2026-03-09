@@ -2314,6 +2314,41 @@ const Community = () => {
                                 >
                                   <FontAwesomeIcon icon={faBan} className="text-xs" />
                                 </button>
+                                {/* Hamburger menu */}
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setMemberMenuOpen(memberMenuOpen === m.id ? null : m.id)}
+                                    className="text-muted-foreground/40 hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                                    title="More actions"
+                                  >
+                                    <FontAwesomeIcon icon={faEllipsisH} className="text-xs" />
+                                  </button>
+                                  {memberMenuOpen === m.id && (
+                                    <div className="absolute right-0 mt-1 w-52 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
+                                      {!researchPanelMemberIds.has(m.id) ? (
+                                        <button
+                                          onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.add(m.id); return n; }); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faVials} className="text-[10px] text-primary" /> Add to research panel
+                                        </button>
+                                      ) : (
+                                        <button
+                                          onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faUserMinus} className="text-[10px] text-amber-600" /> Remove from research panel
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                        className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
+                                      >
+                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block from research panel
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))}
