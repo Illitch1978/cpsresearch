@@ -24,6 +24,7 @@ interface Community {
   url: string;
   tags: string[];
   theme?: string;
+  requiresApproval?: boolean;
 }
 
 const communities: Community[] = [
