@@ -2411,35 +2411,9 @@ const Community = () => {
                                 setShowAddContact(false);
                                 setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
                               }}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all border ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "border-primary/30 text-primary hover:bg-primary/5" : "border-border text-muted-foreground"}`}
-                            >
-                              Add
-                            </button>
-                            <button
-                              disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
-                              onClick={() => {
-                                const newInvited: Member & { _source?: string; expired?: boolean } = {
-                                  id: `inv-${Date.now()}`,
-                                  name: `${newContactFirstName.trim()} ${newContactLastName.trim()}`,
-                                  role: newContactJobTitle.trim(),
-                                  firm: newContactFirm.trim(),
-                                  joinedDate: `Invited ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
-                                  expertise: [],
-                                  email: newContactEmail.trim(),
-                                  location: `${newContactCity.trim()}, ${newContactCountry.trim()}`,
-                                  _source: "invited",
-                                  expired: false,
-                                };
-                                // For now just add as prospect with invited source for visual feedback
-                                setProspectContacts(prev => [{ ...newInvited, _source: "prospect" }, ...prev]);
-                                setShowAddContact(false);
-                                setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
-                                setInviteSent(true);
-                                setTimeout(() => setInviteSent(false), 3000);
-                              }}
                               className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
-                              <FontAwesomeIcon icon={faPaperPlane} className="mr-1 text-[10px]" /> Add & Invite
+                              <FontAwesomeIcon icon={faPlus} className="mr-1 text-[10px]" /> Add Contact
                             </button>
                           </div>
                         </div>
