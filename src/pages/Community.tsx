@@ -2104,6 +2104,11 @@ const Community = () => {
                                 likes: 0,
                               };
                               setUserPlaylists(prev => [newPl, ...prev]);
+                              setPlaylistEnabledResources(prev => {
+                                const next = new Set(prev);
+                                newPlaylistItems.forEach(id => next.delete(id));
+                                return next;
+                              });
                               setShowCreatePlaylist(false);
                               setNewPlaylistName("");
                               setNewPlaylistDesc("");
