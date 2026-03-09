@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch, faLockOpen, faCircleInfo, faClock } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch, faLockOpen, faCircleInfo, faClock, faUserShield } from "@fortawesome/free-solid-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -224,7 +224,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 <FontAwesomeIcon icon={faUsers} className="text-xs" />
               </div>
               <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                <p>Hello. I can help you identify free-to-join online communities where you can collaborate with peers on topics of mutual interest.</p>
+                <p>Hello. I can help you identify free-to-join open communities where you can collaborate with peers on topics of mutual interest.</p>
               </div>
             </div>
 
@@ -537,9 +537,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-medium text-slate-800">{community.name}</p>
                               {community.requiresApproval ? (
-                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5"><FontAwesomeIcon icon={faUserShield} className="text-[7px]" /> Approval required</span>
                               ) : (
-                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">Open</span>
+                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5"><FontAwesomeIcon icon={faLockOpen} className="text-[7px]" /> Open</span>
                               )}
                             </div>
                             <p className="text-[10px] text-slate-500 line-clamp-1">{community.description.split('.')[0]}.</p>
@@ -614,7 +614,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 <h3 className="font-medium text-sm">{previewCommunity.name}</h3>
                 <div className="flex items-center gap-2 mt-0.5">
                   {previewCommunity.requiresApproval ? (
-                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                      <FontAwesomeIcon icon={faUserShield} className="text-[7px]" /> Approval required
+                    </span>
                   ) : (
                     <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
                       <FontAwesomeIcon icon={faLockOpen} className="text-[7px]" /> Open community
