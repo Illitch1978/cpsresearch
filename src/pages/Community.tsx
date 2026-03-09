@@ -1374,23 +1374,11 @@ const Community = () => {
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => setIsInResearchPanel(!isInResearchPanel)}
-                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-white hover:text-white/70" : "text-white/60 hover:text-white"}`}
-                  >
-                    <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
-                  </button>
                   {isInResearchPanel && (
-                    <span className="mt-1 text-[10px] text-white bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 backdrop-blur-sm">
+                    <span className="mt-2 text-[10px] text-white bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 backdrop-blur-sm">
                       <FontAwesomeIcon icon={faVials} className="text-[8px]" /> Research panel member
                     </span>
                   )}
-                  <button
-                    onClick={() => setShowLeaveConfirm(true)}
-                    className="mt-3 flex items-center gap-1.5 text-xs text-white/50 hover:text-red-300 transition-colors"
-                  >
-                    <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
-                  </button>
                 </div>
               </div>
             </div>
