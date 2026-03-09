@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch, faLockOpen, faCircleInfo, faClock } from "@fortawesome/free-solid-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
