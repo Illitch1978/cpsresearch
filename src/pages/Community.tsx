@@ -764,7 +764,7 @@ const Community = () => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
       });
     }
-    if (adminShowRequested) {
+    if (false) { // Requested contacts hidden — reserved for future use
       mockRequested.forEach(m => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
       });
@@ -2631,7 +2631,6 @@ const Community = () => {
                             { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
                             { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
-                            { key: "requested", label: "Requested", checked: adminShowRequested, toggle: () => setAdminShowRequested(v => !v), count: mockRequested.length },
                             { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
                           ]).map(tab => (
                             <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
@@ -2649,8 +2648,8 @@ const Community = () => {
                           ))}
                         </div>
                         <div className="flex items-center gap-3 mb-4">
-                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowRequested(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
-                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowRequested(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
@@ -2679,15 +2678,13 @@ const Community = () => {
                             <option value="all">All cities</option>
                             {allCities.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
-                          {adminStatusTab === "members" && (
-                            <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
-                              <option value="all">All roles</option>
-                              <option value="founder">Founder</option>
-                              <option value="moderator">Moderator</option>
-                              <option value="contributor">Contributor</option>
-                              <option value="member">Member</option>
-                            </select>
-                          )}
+                          <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All roles</option>
+                            <option value="founder">Owner</option>
+                            <option value="moderator">Manager</option>
+                            <option value="contributor">Contributor</option>
+                            <option value="member">Member</option>
+                          </select>
                         </div>
                         {/* Extra Filters Row */}
                         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
@@ -2734,14 +2731,12 @@ const Community = () => {
                       <div className="border-t border-border">
                         <div className="grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-2.5 bg-muted/30 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                           <div className="flex items-center justify-center">
-                            {(adminStatusTab === "invited" || adminStatusTab === "requested" || adminStatusTab === "blocked") ? (
-                              <button
-                                onClick={toggleSelectAll}
-                                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
-                              >
-                                {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                              </button>
-                            ) : <span />}
+                            <button
+                              onClick={toggleSelectAll}
+                              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
+                            >
+                              {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                            </button>
                           </div>
                           <span>Name & Position</span>
                           <span>Involvement</span>
@@ -2756,14 +2751,12 @@ const Community = () => {
                           {paginatedAdminMembers.map(m => (
                             <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
                               <div className="flex items-center justify-center">
-                                {(adminStatusTab === "invited" || adminStatusTab === "requested" || adminStatusTab === "blocked") ? (
-                                  <button
-                                    onClick={() => toggleAdminSelect(m.id)}
-                                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
-                                  >
-                                    {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                                  </button>
-                                ) : <span />}
+                                <button
+                                  onClick={() => toggleAdminSelect(m.id)}
+                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
+                                >
+                                  {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                                </button>
                               </div>
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <button onClick={() => setSelectedMember(m)} className="shrink-0">
