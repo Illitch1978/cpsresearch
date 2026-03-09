@@ -766,6 +766,11 @@ const Community = () => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
       });
     }
+    if (adminShowProspects) {
+      prospectContacts.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "prospect" }); }
+      });
+    }
     if (false) { // Requested contacts hidden — reserved for future use
       mockRequested.forEach(m => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
@@ -777,7 +782,7 @@ const Community = () => {
       });
     }
     return combined;
-  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
+  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowProspects, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked, prospectContacts]);
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
