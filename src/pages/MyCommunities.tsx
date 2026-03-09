@@ -78,6 +78,7 @@ const initialCommunities: CommunityItem[] = [
     isFavourite: true,
     isOfficial: true,
     lastVisited: "2 hours ago",
+    isResearchPanel: true,
   },
   {
     id: "legal-market-intel",
