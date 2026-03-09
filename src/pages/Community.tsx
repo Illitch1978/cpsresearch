@@ -637,9 +637,13 @@ const Community = () => {
   const [adminPerPage, setAdminPerPage] = useState(10);
   const [adminSelected, setAdminSelected] = useState<Set<string>>(new Set());
   const [showAddContact, setShowAddContact] = useState(false);
-  const [newContactName, setNewContactName] = useState("");
+  const [newContactFirstName, setNewContactFirstName] = useState("");
+  const [newContactLastName, setNewContactLastName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
   const [newContactFirm, setNewContactFirm] = useState("");
+  const [newContactCity, setNewContactCity] = useState("");
+  const [newContactCountry, setNewContactCountry] = useState("");
+  const [newContactJobTitle, setNewContactJobTitle] = useState("");
   const [showExpiredInvites, setShowExpiredInvites] = useState(false);
   const [showAddedByManagement, setShowAddedByManagement] = useState(false);
   const [showResearchPanelMembers, setShowResearchPanelMembers] = useState(false);
