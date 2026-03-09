@@ -2710,8 +2710,8 @@ const Community = () => {
                           ))}
                         </div>
                         <div className="flex items-center gap-3 mb-4">
-                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
-                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowProspects(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowProspects(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
