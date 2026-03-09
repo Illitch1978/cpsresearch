@@ -1158,6 +1158,10 @@ const Community = () => {
                       <div className="text-xl font-semibold text-card-foreground">{community.resources}</div>
                       <div className="text-xs text-muted-foreground">Resources</div>
                     </div>
+                    <div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.events}</div>
+                      <div className="text-xs text-muted-foreground">Events</div>
+                    </div>
                   </div>
 
                   {/* Owner & Manager */}
