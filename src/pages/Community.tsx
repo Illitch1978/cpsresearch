@@ -1857,7 +1857,12 @@ const Community = () => {
                           </div>
                         </div>
                       )}
-                      <button className="mt-4 text-xs font-medium text-primary hover:underline">Register →</button>
+                      <button
+                        onClick={() => alert(`Registered for "${e.title}"! A confirmation email has been sent.`)}
+                        className="mt-4 text-xs font-medium text-primary hover:underline"
+                      >
+                        Register →
+                      </button>
                     </div>
                   ))}
                 </div>
