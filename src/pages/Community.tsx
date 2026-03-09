@@ -1558,16 +1558,97 @@ const Community = () => {
 
               {/* ─── RESOURCES TAB ─── */}
               <TabsContent value="resources">
-                <div className="space-y-3">
-                  {mockResources.map(r => (
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">{communityResources.length} resources shared in this community</p>
+                    <button
+                      onClick={() => setShowAddResource(!showAddResource)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Resource
+                    </button>
+                  </div>
+
+                  {/* Add Resource Form */}
+                  {showAddResource && (
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-3">
+                      <h3 className="text-sm font-semibold text-card-foreground">Add a resource</h3>
+                      <p className="text-[11px] text-muted-foreground">The item URL must have public access. Once processed, items may surface in the 'Find an Expert' interface.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Title <span className="text-destructive">*</span></label>
+                          <input type="text" value={newResourceTitle} onChange={e => setNewResourceTitle(e.target.value)} placeholder="Resource title…" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Type <span className="text-destructive">*</span></label>
+                          <select value={newResourceType} onChange={e => setNewResourceType(e.target.value as Resource["type"])} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="paper">Paper</option>
+                            <option value="report">Report</option>
+                            <option value="presentation">Presentation</option>
+                            <option value="video">Video</option>
+                            <option value="link">Link</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">URL <span className="text-destructive">*</span></label>
+                          <input type="url" value={newResourceUrl} onChange={e => setNewResourceUrl(e.target.value)} placeholder="https://… (must be publicly accessible)" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Author <span className="text-destructive">*</span></label>
+                          <input type="text" value={newResourceAuthor} onChange={e => setNewResourceAuthor(e.target.value)} placeholder="Author name…" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Date</label>
+                          <input type="text" value={newResourceDate} onChange={e => setNewResourceDate(e.target.value)} placeholder="e.g. Mar 2026" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Description</label>
+                          <textarea value={newResourceDesc} onChange={e => setNewResourceDesc(e.target.value)} placeholder="Brief description…" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 pt-2">
+                        <button onClick={() => { setShowAddResource(false); setNewResourceTitle(""); setNewResourceType("link"); setNewResourceUrl(""); setNewResourceAuthor(""); setNewResourceDate(""); setNewResourceDesc(""); }} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5">Cancel</button>
+                        <button
+                          disabled={!newResourceTitle.trim() || !newResourceUrl.trim() || !newResourceAuthor.trim()}
+                          onClick={() => {
+                            const nr: Resource = { id: `r-${Date.now()}`, title: newResourceTitle.trim(), type: newResourceType, author: newResourceAuthor.trim(), date: newResourceDate.trim() || "Mar 2026", description: newResourceDesc.trim(), url: newResourceUrl.trim() };
+                            setCommunityResources(prev => [nr, ...prev]);
+                            setShowAddResource(false); setNewResourceTitle(""); setNewResourceType("link"); setNewResourceUrl(""); setNewResourceAuthor(""); setNewResourceDate(""); setNewResourceDesc("");
+                          }}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newResourceTitle.trim() && newResourceUrl.trim() && newResourceAuthor.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                        >
+                          Add Resource
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Resource List */}
+                  {communityResources.map(r => (
                     <div key={r.id} className="bg-white border border-gray-200 rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
-                      <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                        <ResourceIcon type={r.type} />
+                      <div className="flex items-center gap-3 shrink-0">
+                        <label className="flex items-center cursor-pointer" title="Make available for playlists">
+                          <input
+                            type="checkbox"
+                            checked={playlistEnabledResources.has(r.id)}
+                            onChange={() => setPlaylistEnabledResources(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; })}
+                            className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+                          />
+                        </label>
+                        <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                          <ResourceIcon type={r.type} />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
                         <p className="text-xs text-muted-foreground mt-1">{r.author} · {r.date}</p>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.description}</p>
+                        {playlistEnabledResources.has(r.id) && (
+                          <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-primary bg-primary/5 border border-primary/15 rounded-full px-2 py-0.5">
+                            <FontAwesomeIcon icon={faListAlt} className="text-[8px]" /> Available for playlists
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {r.downloads && (
