@@ -73,6 +73,13 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   // Join modal state
   const [joiningCommunity, setJoiningCommunity] = useState<Community | null>(null);
   const [joinContributions, setJoinContributions] = useState<string[]>([]);
+  // Preview popup state
+  const [previewCommunity, setPreviewCommunity] = useState<Community | null>(null);
+  // Track joined/pending communities (mock: user has joined 17 communities)
+  const [joinedCount] = useState(17);
+  const [pendingCommunities, setPendingCommunities] = useState<string[]>([]);
+  const [joinedCommunities, setJoinedCommunities] = useState<string[]>([]);
+  const isAtMax = (joinedCount + joinedCommunities.length) >= MAX_COMMUNITIES;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
