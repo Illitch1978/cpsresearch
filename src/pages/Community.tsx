@@ -1699,6 +1699,43 @@ const Community = () => {
                     </button>
                   </div>
 
+                  {/* Approval Notice */}
+                  <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 mt-0.5" />
+                    <span>New resources are subject to review by the community management team or HQ before appearing publicly. See <button onClick={() => setActiveTab("about")} className="text-primary underline font-medium">Rules</button> for details.</span>
+                  </div>
+
+                  {/* Search & Sort Controls */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input
+                        type="text"
+                        value={resourceSearch}
+                        onChange={e => setResourceSearch(e.target.value)}
+                        placeholder="Search resources…"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                      <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                      {(["date", "name", "author"] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            if (resourceSort === s) setResourceSortDir(d => d === "asc" ? "desc" : "asc");
+                            else { setResourceSort(s); setResourceSortDir(s === "date" ? "desc" : "asc"); }
+                          }}
+                          className={`text-xs px-2 py-1 rounded-md transition-colors ${resourceSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                        >
+                          {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                          {resourceSort === s && <span className="ml-0.5">{resourceSortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Add Resource Form */}
                   {showAddResource && (
                     <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-3">
@@ -1754,8 +1791,8 @@ const Community = () => {
                   )}
 
                   {/* Resource List */}
-                  {communityResources.map(r => (
-                    <div key={r.id} className="bg-white border border-gray-200 rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
+                  {sortedResources.map(r => (
+                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                       <div className="flex items-center gap-3 shrink-0">
                         <label className="flex items-center cursor-pointer" title="Make available for playlists">
                           <input
@@ -1770,7 +1807,10 @@ const Community = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
+                        <div className="flex items-center gap-2">
+                          {pinnedResources.has(r.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
+                          <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">{r.author} · {r.date}</p>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.description}</p>
                         {playlistEnabledResources.has(r.id) && (
@@ -1779,15 +1819,30 @@ const Community = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        {r.downloads && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <FontAwesomeIcon icon={faDownload} /> {r.downloads}
-                          </span>
+                      <div className="flex flex-col items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-3">
+                          {r.downloads && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <FontAwesomeIcon icon={faDownload} /> {r.downloads}
+                            </span>
+                          )}
+                          <button className="text-primary hover:text-primary/80 transition-colors text-sm">
+                            <FontAwesomeIcon icon={r.type === "link" ? faLink : faDownload} />
+                          </button>
+                        </div>
+                        {isAdmin && (
+                          <button
+                            onClick={() => setPinnedResources(prev => {
+                              const next = new Set(prev);
+                              if (next.has(r.id)) next.delete(r.id); else next.add(r.id);
+                              return next;
+                            })}
+                            className={`text-xs transition-colors ${pinnedResources.has(r.id) ? "text-primary" : "text-slate-300 hover:text-primary"}`}
+                            title={pinnedResources.has(r.id) ? "Unpin resource" : "Pin resource"}
+                          >
+                            <FontAwesomeIcon icon={faThumbtack} />
+                          </button>
                         )}
-                        <button className="text-primary hover:text-primary/80 transition-colors text-sm">
-                          <FontAwesomeIcon icon={r.type === "link" ? faLink : faDownload} />
-                        </button>
                       </div>
                     </div>
                   ))}
