@@ -1015,18 +1015,18 @@ const Community = () => {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-4">
               <button
+                onClick={() => navigate("/")}
+                className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
+              >
+                <FontAwesomeIcon icon={faHome} className="text-base" />
+              </button>
+              <div className="h-5 w-px bg-gray-200" />
+              <button
                 onClick={() => navigate("/my-communities")}
                 className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
               >
                 <FontAwesomeIcon icon={faArrowLeft} />
                 <span className="hidden sm:inline">My Communities</span>
-              </button>
-              <div className="h-5 w-px bg-gray-200" />
-              <button
-                onClick={() => navigate("/")}
-                className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
-              >
-                <FontAwesomeIcon icon={faHome} className="text-base" />
               </button>
               <div className="h-5 w-px bg-gray-200" />
               <div className="flex items-center gap-2.5">
