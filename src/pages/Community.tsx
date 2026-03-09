@@ -699,6 +699,18 @@ const Community = () => {
   const [adminShowProspects, setAdminShowProspects] = useState(true);
   const [bulkUploadCount, setBulkUploadCount] = useState(0);
   const [prospectContacts, setProspectContacts] = useState<(Member & { _source?: string })[]>([]);
+  const [communityIcon, setCommunityIcon] = useState<string | null>(null);
+  const iconInputRef = useRef<HTMLInputElement>(null);
+
+  const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) return; // 500KB limit
+    const reader = new FileReader();
+    reader.onload = (ev) => setCommunityIcon(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
