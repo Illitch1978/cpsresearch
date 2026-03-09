@@ -63,6 +63,8 @@ import {
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
+import communityBannerDefault from "@/assets/community-banner-default.jpg";
+import { faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
 import UserAvatar from "@/components/UserAvatar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
