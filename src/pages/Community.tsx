@@ -1724,38 +1724,83 @@ const Community = () => {
 
               {/* ─── MEMBERS TAB ─── */}
               <TabsContent value="members">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {mockMembers.map(m => (
-                    <button
-                      key={m.id}
-                      onClick={() => setSelectedMember(m)}
-                      className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-primary/20 transition-all group"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <Avatar className="h-11 w-11">
-                          <AvatarFallback className="bg-slate-100 text-slate-600 text-sm font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                            {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <div className="flex items-center">
-                            <span className="text-sm font-semibold text-card-foreground truncate group-hover:text-primary transition-colors">{m.name}</span>
-                            <BadgeIcon badge={m.badge} />
+                <div className="space-y-4">
+                  {/* Search & Sort */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input
+                        type="text"
+                        value={memberSearch}
+                        onChange={e => setMemberSearch(e.target.value)}
+                        placeholder="Search by name or organisation…"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                      <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                      {([
+                        { key: "name" as const, label: "Last name" },
+                        { key: "firm" as const, label: "Organisation" },
+                        { key: "posts" as const, label: "Posts" },
+                        { key: "role" as const, label: "Job title" },
+                        { key: "joined" as const, label: "Date joined" },
+                      ]).map(s => (
+                        <button
+                          key={s.key}
+                          onClick={() => {
+                            if (memberSort === s.key) setMemberSortDir(d => d === "asc" ? "desc" : "asc");
+                            else { setMemberSort(s.key); setMemberSortDir("asc"); }
+                          }}
+                          className={`text-xs px-2 py-1 rounded-md transition-colors ${memberSort === s.key ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                        >
+                          {s.label}
+                          {memberSort === s.key && <span className="ml-0.5">{memberSortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {sortedMembers.map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => setSelectedMember(m)}
+                        className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-primary/20 transition-all group"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <Avatar className="h-11 w-11">
+                            <AvatarFallback className="bg-slate-100 text-slate-600 text-sm font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                              {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <div className="flex items-center">
+                              <span className="text-sm font-semibold text-card-foreground truncate group-hover:text-primary transition-colors">{m.name}</span>
+                              <BadgeIcon badge={m.badge} />
+                            </div>
+                            <span className="text-xs text-muted-foreground">{m.role}</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{m.role}</span>
                         </div>
+                        <p className="text-xs text-muted-foreground mb-3">{m.firm}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.expertise.map(e => (
+                            <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
+                          ))}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
+                          Member since {m.joinedDate}
+                        </div>
+                      </button>
+                    ))}
+                    {sortedMembers.length === 0 && (
+                      <div className="col-span-full text-center py-10">
+                        <FontAwesomeIcon icon={faSearch} className="text-2xl text-muted-foreground/30 mb-2" />
+                        <p className="text-sm text-muted-foreground">No members match your search.</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-3">{m.firm}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {m.expertise.map(e => (
-                          <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
-                        ))}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
-                        Member since {m.joinedDate}
-                      </div>
-                    </button>
-                  ))}
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
