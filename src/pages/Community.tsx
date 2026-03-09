@@ -695,6 +695,7 @@ const Community = () => {
   const [adminShowRequested, setAdminShowRequested] = useState(true);
   const [adminShowBlocked, setAdminShowBlocked] = useState(true);
   const [adminShowProspects, setAdminShowProspects] = useState(true);
+  const [bulkUploadCount, setBulkUploadCount] = useState(0);
   const [prospectContacts, setProspectContacts] = useState<(Member & { _source?: string })[]>([]);
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
