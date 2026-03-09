@@ -418,6 +418,7 @@ const communityData = {
     name: "Professional Services Research",
     description: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector. We bring together academics, practitioners, and policymakers to champion transparency, methodological excellence, and impactful collaboration.",
     members: 247,
+    researchPanelMembers: 42,
     discussions: 89,
     resources: 34,
     tags: ["Research", "Professional Services", "Methods", "Governance"],
