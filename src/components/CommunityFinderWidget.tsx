@@ -28,14 +28,14 @@ interface Community {
 }
 
 const communities: Community[] = [
-  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services", url: "#", tags: ["Technology", "Innovation"], theme: "Digital Transformation" },
-  { name: "CEO Roundtable UK", members: 890, description: "Strategic discussions for chief executives", url: "#", tags: ["CEO", "Leadership"], theme: "Executive Leadership" },
-  { name: "Future Leaders Network", members: 4120, description: "Emerging talent in professional services", url: "#", tags: ["Millennial", "Mentor"], theme: "Career Development" },
-  { name: "Sustainability Champions", members: 1560, description: "ESG and CSR best practices forum", url: "#", tags: ["Sustainability", "DEI"], theme: "ESG & Sustainability" },
-  { name: "High Net Worth Advisors", members: 720, description: "Wealth management and advisory network", url: "#", tags: ["High Net Worth", "Finance"], theme: "Wealth Management" },
-  { name: "NED Connect", members: 1890, description: "Non-executive director community", url: "#", tags: ["NED", "Governance"], theme: "Corporate Governance" },
-  { name: "Entrepreneurship Hub", members: 3450, description: "Founders and startup enthusiasts", url: "#", tags: ["Entrepreneur", "Innovation"], theme: "Entrepreneurship" },
-  { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms", url: "#", tags: ["SME", "Business development"], theme: "Business Growth" },
+  { name: "Legal Tech Innovators", members: 2340, description: "Digital transformation in legal services. Open community for legal professionals exploring technology-driven change across contracts, compliance, and case management.", url: "#", tags: ["Technology", "Innovation"], theme: "Digital Transformation", requiresApproval: false },
+  { name: "CEO Roundtable UK", members: 890, description: "Strategic discussions for chief executives. A peer-to-peer forum for CEOs to exchange insights on leadership, growth strategy, and board governance.", url: "#", tags: ["CEO", "Leadership"], theme: "Executive Leadership", requiresApproval: true },
+  { name: "Future Leaders Network", members: 4120, description: "Emerging talent in professional services. Designed for early-to-mid career professionals seeking mentorship, peer learning, and career development resources.", url: "#", tags: ["Millennial", "Mentor"], theme: "Career Development", requiresApproval: false },
+  { name: "Sustainability Champions", members: 1560, description: "ESG and CSR best practices forum. Collaborative space for sustainability officers and consultants sharing frameworks, case studies, and regulatory updates.", url: "#", tags: ["Sustainability", "DEI"], theme: "ESG & Sustainability", requiresApproval: false },
+  { name: "High Net Worth Advisors", members: 720, description: "Wealth management and advisory network. For financial advisors, family offices, and private bankers discussing investment strategies and client engagement.", url: "#", tags: ["High Net Worth", "Finance"], theme: "Wealth Management", requiresApproval: true },
+  { name: "NED Connect", members: 1890, description: "Non-executive director community. A network for NEDs and aspiring board members to share governance best practices and board-level insights.", url: "#", tags: ["NED", "Governance"], theme: "Corporate Governance", requiresApproval: false },
+  { name: "Entrepreneurship Hub", members: 3450, description: "Founders and startup enthusiasts. Open community connecting entrepreneurs with mentors, investors, and fellow founders to accelerate venture growth.", url: "#", tags: ["Entrepreneur", "Innovation"], theme: "Entrepreneurship", requiresApproval: false },
+  { name: "SME Growth Forum", members: 2100, description: "Scaling strategies for mid-market firms. Practical discussions on operations, funding, talent, and technology for growing businesses.", url: "#", tags: ["SME", "Business development"], theme: "Business Growth", requiresApproval: false },
 ];
 
 type ChatStep = "topic" | "filters" | "searching" | "results";
