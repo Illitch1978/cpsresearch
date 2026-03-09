@@ -694,6 +694,8 @@ const Community = () => {
   const [adminShowInvited, setAdminShowInvited] = useState(true);
   const [adminShowRequested, setAdminShowRequested] = useState(true);
   const [adminShowBlocked, setAdminShowBlocked] = useState(true);
+  const [adminShowProspects, setAdminShowProspects] = useState(true);
+  const [prospectContacts, setProspectContacts] = useState<(Member & { _source?: string })[]>([]);
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
