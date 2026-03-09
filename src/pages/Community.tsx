@@ -2392,8 +2392,27 @@ const Community = () => {
                           <p className="text-[10px] text-muted-foreground">Fields marked with * are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
                             <button onClick={() => { setShowAddContact(false); setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                            <button disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
-                              Add & Invite
+                            <button
+                              disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
+                              onClick={() => {
+                                const newProspect: Member & { _source?: string } = {
+                                  id: `prospect-${Date.now()}`,
+                                  name: `${newContactFirstName.trim()} ${newContactLastName.trim()}`,
+                                  role: newContactJobTitle.trim(),
+                                  firm: newContactFirm.trim(),
+                                  joinedDate: `Added ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
+                                  expertise: [],
+                                  email: newContactEmail.trim(),
+                                  location: `${newContactCity.trim()}, ${newContactCountry.trim()}`,
+                                  _source: "prospect",
+                                };
+                                setProspectContacts(prev => [newProspect, ...prev]);
+                                setShowAddContact(false);
+                                setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
+                              }}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                            >
+                              Add Contact
                             </button>
                           </div>
                         </div>
