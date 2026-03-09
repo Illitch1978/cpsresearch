@@ -2804,7 +2804,7 @@ const Community = () => {
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {(m as any)._source === "prospect" ? "Shortlisted" :
+                                  {(m as any)._source === "prospect" ? "Prospect" :
                                    (m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
                                    (m as any)._source === "requested" ? "Requested" :
                                    (m as any)._source === "blocked" ? "Blocked" :
