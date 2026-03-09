@@ -614,7 +614,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 <h3 className="font-medium text-sm">{previewCommunity.name}</h3>
                 <div className="flex items-center gap-2 mt-0.5">
                   {previewCommunity.requiresApproval ? (
-                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                      <FontAwesomeIcon icon={faUserShield} className="text-[7px]" /> Approval required
+                    </span>
                   ) : (
                     <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
                       <FontAwesomeIcon icon={faLockOpen} className="text-[7px]" /> Open community
