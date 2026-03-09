@@ -694,6 +694,9 @@ const Community = () => {
   const [adminShowInvited, setAdminShowInvited] = useState(true);
   const [adminShowRequested, setAdminShowRequested] = useState(true);
   const [adminShowBlocked, setAdminShowBlocked] = useState(true);
+  const [adminShowProspects, setAdminShowProspects] = useState(true);
+  const [bulkUploadCount, setBulkUploadCount] = useState(0);
+  const [prospectContacts, setProspectContacts] = useState<(Member & { _source?: string })[]>([]);
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
@@ -764,6 +767,11 @@ const Community = () => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
       });
     }
+    if (adminShowProspects) {
+      prospectContacts.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "prospect" }); }
+      });
+    }
     if (false) { // Requested contacts hidden — reserved for future use
       mockRequested.forEach(m => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
@@ -775,7 +783,7 @@ const Community = () => {
       });
     }
     return combined;
-  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
+  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowProspects, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked, prospectContacts]);
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
@@ -827,7 +835,7 @@ const Community = () => {
       return next;
     });
   };
-  const invitedOnPage = paginatedAdminMembers.filter(m => (m as any)._source === "invited");
+  const invitedOnPage = paginatedAdminMembers.filter(m => (m as any)._source === "invited" || (m as any)._source === "prospect");
   const toggleSelectAll = () => {
     if (adminSelected.size === invitedOnPage.length && invitedOnPage.length > 0) {
       setAdminSelected(new Set());
@@ -2344,21 +2352,21 @@ const Community = () => {
               {isAdmin && (
                 <TabsContent value="admin">
                   <div className="space-y-6">
-                    {/* Invite Members Card */}
+                    {/* Add Contacts Card */}
                     <div className="bg-background border border-border rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
-                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
+                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Add Contacts
                           </h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Invite individually, in bulk, or share an invite link.</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Add contacts individually or upload in bulk. They'll appear as prospects until you choose to invite them.</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => { setShowBulkInvite(!showBulkInvite); setShowAddContact(false); }}
                             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showBulkInvite ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
                           >
-                            <FontAwesomeIcon icon={faUsers} className="text-[10px]" /> Bulk Invite
+                            <FontAwesomeIcon icon={faUsers} className="text-[10px]" /> Bulk Upload
                           </button>
                           <button
                             onClick={() => { setShowAddContact(!showAddContact); setShowBulkInvite(false); }}
@@ -2385,18 +2393,37 @@ const Community = () => {
                           <p className="text-[10px] text-muted-foreground">Fields marked with * are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
                             <button onClick={() => { setShowAddContact(false); setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                            <button disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
-                              Add & Invite
+                            <button
+                              disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
+                              onClick={() => {
+                                const newProspect: Member & { _source?: string } = {
+                                  id: `prospect-${Date.now()}`,
+                                  name: `${newContactFirstName.trim()} ${newContactLastName.trim()}`,
+                                  role: newContactJobTitle.trim(),
+                                  firm: newContactFirm.trim(),
+                                  joinedDate: `Added ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
+                                  expertise: [],
+                                  email: newContactEmail.trim(),
+                                  location: `${newContactCity.trim()}, ${newContactCountry.trim()}`,
+                                  _source: "prospect",
+                                };
+                                setProspectContacts(prev => [newProspect, ...prev]);
+                                setShowAddContact(false);
+                                setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
+                              }}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                            >
+                              Add Contact
                             </button>
                           </div>
                         </div>
                       )}
 
-                      {/* Bulk Invite Panel */}
+                      {/* Bulk Upload Panel */}
                       {showBulkInvite && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-card-foreground">Bulk invite via CSV</h4>
+                            <h4 className="text-xs font-semibold text-card-foreground">Bulk upload contacts via CSV</h4>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => {
@@ -2406,7 +2433,7 @@ const Community = () => {
                                   const url = URL.createObjectURL(blob);
                                   const a = document.createElement("a");
                                   a.href = url;
-                                  a.download = "community-invite-template.csv";
+                                  a.download = "community-contacts-template.csv";
                                   a.click();
                                   URL.revokeObjectURL(url);
                                 }}
@@ -2416,43 +2443,56 @@ const Community = () => {
                               </button>
                               <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
                                 <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
-                                <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
+                                <input type="file" accept=".csv,.txt" onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const text = ev.target?.result as string;
+                                    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+                                    // Skip header if present
+                                    const startIdx = lines[0]?.toLowerCase().includes("name") && lines[0]?.toLowerCase().includes("email") ? 1 : 0;
+                                    const newProspects: (Member & { _source?: string })[] = [];
+                                    for (let i = startIdx; i < lines.length; i++) {
+                                      const parts = lines[i].split(",").map(p => p.trim().replace(/^"|"$/g, ""));
+                                      if (parts.length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parts[1])) {
+                                        newProspects.push({
+                                          id: `prospect-csv-${Date.now()}-${i}`,
+                                          name: parts[0] || "Unknown",
+                                          email: parts[1],
+                                          firm: parts[2] || "",
+                                          role: parts[3] || "",
+                                          location: [parts[4], parts[5]].filter(Boolean).join(", "),
+                                          joinedDate: `Added ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
+                                          expertise: [],
+                                          _source: "prospect",
+                                        });
+                                      }
+                                    }
+                                    if (newProspects.length > 0) {
+                                      setProspectContacts(prev => [...newProspects, ...prev]);
+                                      setBulkUploadCount(newProspects.length);
+                                      setTimeout(() => setBulkUploadCount(0), 3000);
+                                    }
+                                  };
+                                  reader.readAsText(file);
+                                  e.target.value = "";
+                                }} className="hidden" />
                               </label>
                             </div>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Upload a CSV with name, email, firm, job title, city and country. Firm is optional for independent members. Each invite notification will include a link personalised for the recipient's email address.</p>
-                          {parseBulkEmails(bulkEmails).length > 0 && (
-                            <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
-                              <p className="text-[11px] font-medium text-card-foreground">
-                                <FontAwesomeIcon icon={faCheck} className="text-primary mr-1" />
-                                {parseBulkEmails(bulkEmails).length} contact{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""} imported
+                          <p className="text-[10px] text-muted-foreground">Upload a CSV with name, email, firm, job title, city and country. Contacts will be added as prospects — you can then select and invite them from the member list below.</p>
+                          {bulkUploadCount > 0 && (
+                            <div className="bg-background border border-primary/20 rounded-lg p-3">
+                              <p className="text-[11px] font-medium text-primary flex items-center gap-1.5">
+                                <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                {bulkUploadCount} contact{bulkUploadCount !== 1 ? "s" : ""} added as prospects
                               </p>
-                              {parseBulkEmails(bulkEmails).slice(0, 3).map((email, i) => (
-                                <p key={i} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                                  <FontAwesomeIcon icon={faLink} className="text-[8px]" />
-                                  cpsr.uk/community/…/invite?email={encodeURIComponent(email)}&token=…
-                                </p>
-                              ))}
-                              {parseBulkEmails(bulkEmails).length > 3 && (
-                                <p className="text-[10px] text-muted-foreground">+ {parseBulkEmails(bulkEmails).length - 3} more personalised links</p>
-                              )}
+                              <p className="text-[10px] text-muted-foreground mt-1">Select them in the member list below and click "Send invites" when ready.</p>
                             </div>
                           )}
-                          <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => { setShowBulkInvite(false); setBulkEmails(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                            <button
-                              onClick={handleBulkInvite}
-                              disabled={parseBulkEmails(bulkEmails).length === 0 || bulkInviteSent}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                                bulkInviteSent ? "bg-emerald-500 text-white" :
-                                parseBulkEmails(bulkEmails).length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {bulkInviteSent
-                                ? <><FontAwesomeIcon icon={faCheck} /> Invites sent!</>
-                                : <><FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send {parseBulkEmails(bulkEmails).length} invite{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""}</>
-                              }
-                            </button>
+                          <div className="flex items-center justify-end">
+                            <button onClick={() => { setShowBulkInvite(false); setBulkUploadCount(0); }} className="text-xs text-muted-foreground px-3 py-1.5">Close</button>
                           </div>
                         </div>
                       )}
@@ -2652,6 +2692,7 @@ const Community = () => {
                           {([
                             { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
+                            { key: "prospects", label: "Prospects", checked: adminShowProspects, toggle: () => setAdminShowProspects(v => !v), count: prospectContacts.length },
                             { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
                             { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
                           ]).map(tab => (
@@ -2670,8 +2711,8 @@ const Community = () => {
                           ))}
                         </div>
                         <div className="flex items-center gap-3 mb-4">
-                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
-                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowProspects(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowProspects(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
@@ -2775,7 +2816,7 @@ const Community = () => {
                           {paginatedAdminMembers.map(m => (
                             <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
                               <div className="flex items-center justify-center">
-                                {(m as any)._source === "invited" ? (
+                                {((m as any)._source === "invited" || (m as any)._source === "prospect") ? (
                                   <button
                                     onClick={() => toggleAdminSelect(m.id)}
                                     className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
@@ -2800,12 +2841,14 @@ const Community = () => {
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                   (m as any)._source === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
+                                  (m as any)._source === "prospect" ? "bg-violet-50 text-violet-700 border border-violet-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {(m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
+                                  {(m as any)._source === "prospect" ? "Prospect" :
+                                   (m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
                                    (m as any)._source === "requested" ? "Requested" :
                                    (m as any)._source === "blocked" ? "Blocked" :
                                    memberRoles[m.id] === "founder" ? "Owner" :
