@@ -642,6 +642,8 @@ const Community = () => {
   const [newContactFirm, setNewContactFirm] = useState("");
   const [showExpiredInvites, setShowExpiredInvites] = useState(false);
   const [showAddedByManagement, setShowAddedByManagement] = useState(false);
+  const [showResearchPanelMembers, setShowResearchPanelMembers] = useState(false);
+  const [researchPanelMemberIds, setResearchPanelMemberIds] = useState<Set<string>>(new Set(["1", "3", "5"]));
   // Multiple status tabs selected (checkboxes)
   const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
 
