@@ -668,6 +668,18 @@ const Community = () => {
   const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
   const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
 
+  // Discussion sort/search state
+  const [discussionSearch, setDiscussionSearch] = useState("");
+  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author">("date");
+  const [discussionSortDir, setDiscussionSortDir] = useState<"asc" | "desc">("desc");
+  const [pinnedDiscussions, setPinnedDiscussions] = useState<Set<string>>(new Set(mockDiscussions.filter(d => d.pinned).map(d => d.id)));
+
+  // Resource sort/search/pin state
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author">("date");
+  const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
+  const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
+
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
   const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
