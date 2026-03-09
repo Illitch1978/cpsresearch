@@ -2496,49 +2496,6 @@ const Community = () => {
                           </div>
                         </div>
                       )}
-                      {/* Quick invite by email - hidden during bulk invite */}
-                      {!showBulkInvite && (
-                        <>
-                          <div className="flex items-center gap-2 mb-3">
-                            <input
-                              type="email"
-                              value={inviteEmail}
-                              onChange={e => setInviteEmail(e.target.value)}
-                              onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
-                              placeholder="Enter email address…"
-                              className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                            />
-                            <button
-                              onClick={handleInvite}
-                              disabled={!inviteEmail.trim() || inviteSent}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
-                            >
-                              {inviteSent ? <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span> : <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>}
-                            </button>
-                          </div>
-
-                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border">
-                            <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
-                            <span className="text-xs text-muted-foreground truncate flex-1">
-                              {inviteEmail.trim()
-                                ? `cpsr.uk/community/prof-services-research/invite?email=${encodeURIComponent(inviteEmail.trim())}&token=abc123`
-                                : "cpsr.uk/community/prof-services-research/invite?token=abc123"}
-                            </span>
-                            <button
-                              onClick={handleCopyLink}
-                              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
-                            >
-                              <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
-                              {linkCopied ? "Copied!" : "Copy link"}
-                            </button>
-                          </div>
-                          {inviteEmail.trim() && (
-                            <p className="text-[10px] text-muted-foreground mt-1">
-                              Link personalised for {inviteEmail.trim()}
-                            </p>
-                          )}
-                        </>
-                      )}
                     </div>
 
                     {/* Event Management Card */}
