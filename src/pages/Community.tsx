@@ -2753,12 +2753,14 @@ const Community = () => {
                       <div className="border-t border-border">
                         <div className="grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-2.5 bg-muted/30 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                           <div className="flex items-center justify-center">
-                            <button
-                              onClick={toggleSelectAll}
-                              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
-                            >
-                              {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                            </button>
+                            {invitedOnPage.length > 0 ? (
+                              <button
+                                onClick={toggleSelectAll}
+                                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === invitedOnPage.length && invitedOnPage.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
+                              >
+                                {adminSelected.size === invitedOnPage.length && invitedOnPage.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                              </button>
+                            ) : <div className="w-4 h-4" />}
                           </div>
                           <span>Name & Position</span>
                           <span>Involvement</span>
