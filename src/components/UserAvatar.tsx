@@ -24,7 +24,7 @@ const UserAvatar = () => {
     { label: "Welcome message", icon: faMessage, action: () => {} },
     { label: "Profile photo", icon: faCamera, action: () => {} },
     { label: "Contact details", icon: faAddressBook, action: () => {} },
-    { label: "My Communities", icon: faUsers, action: () => navigate("/my-communities") },
+    { label: "All Communities", icon: faUsers, action: () => navigate("/my-communities") },
     { label: "Bookmarks & past searches", icon: faBookmark, action: () => navigate("/bookmarks") },
     { label: "Log out", icon: faRightFromBracket, action: () => {}, divider: true },
   ];
