@@ -654,6 +654,18 @@ const Community = () => {
   // Multiple status tabs selected (checkboxes)
   const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
 
+  // Add Event state
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDate, setNewEventDate] = useState("");
+  const [newEventTime, setNewEventTime] = useState("");
+  const [newEventType, setNewEventType] = useState<Event["type"]>("webinar");
+  const [newEventDescription, setNewEventDescription] = useState("");
+  const [newEventSpeaker, setNewEventSpeaker] = useState("");
+  const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
+  const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
+  const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
+
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
   const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
