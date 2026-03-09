@@ -224,7 +224,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 <FontAwesomeIcon icon={faUsers} className="text-xs" />
               </div>
               <div className="bg-white border border-gray-100 p-3 rounded-lg rounded-tl-none text-sm text-slate-700 shadow-sm">
-                <p>Hello. I can help you identify free-to-join online communities where you can collaborate with peers on topics of mutual interest.</p>
+                <p>Hello. I can help you identify free-to-join open communities where you can collaborate with peers on topics of mutual interest.</p>
               </div>
             </div>
 
