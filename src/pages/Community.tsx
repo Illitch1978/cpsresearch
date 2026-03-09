@@ -1170,6 +1170,17 @@ const Community = () => {
                   </div>
 
                   <button
+                    onClick={() => setIsInResearchPanel(!isInResearchPanel)}
+                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-primary hover:text-primary/70" : "text-muted-foreground hover:text-primary"}`}
+                  >
+                    <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
+                  </button>
+                  {isInResearchPanel && (
+                    <span className="mt-1 text-[10px] text-primary bg-primary/5 border border-primary/15 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1">
+                      <FontAwesomeIcon icon={faVials} className="text-[8px]" /> Research panel member
+                    </span>
+                  )}
+                  <button
                     onClick={() => setShowLeaveConfirm(true)}
                     className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
                   >
