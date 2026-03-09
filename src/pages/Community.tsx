@@ -2027,7 +2027,7 @@ const Community = () => {
                               </label>
                             </div>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members.</p>
+                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members. Each invite link will be personalised to the recipient's email.</p>
                           <textarea
                             value={bulkEmails}
                             onChange={e => setBulkEmails(e.target.value)}
