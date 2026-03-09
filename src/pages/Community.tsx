@@ -432,6 +432,19 @@ const communityData = {
     location: "Global",
     founded: "January 2025",
     website: "cpsr.uk",
+    governance: {
+      membership: "approval" as const,
+      postReview: "criteria" as const,
+      contentReview: "all" as const,
+      inviteExpiry: 90,
+    },
+    rules: [
+      { title: "Original research only.", detail: "All shared papers and reports must be original work or have proper permissions from the rights holder." },
+      { title: "No promotional content.", detail: "Posts advertising products, services, or events without prior manager approval will be removed." },
+      { title: "Cite your sources.", detail: "When referencing external data, always include a link or full citation so others can verify." },
+      { title: "Peer review encouraged.", detail: "Members are encouraged to offer constructive feedback on draft papers shared in the Resources tab." },
+      { title: "Chatham House Rule applies.", detail: "Participants may use information received, but the identity of the speaker may not be revealed outside the community." },
+    ],
   },
 };
 
