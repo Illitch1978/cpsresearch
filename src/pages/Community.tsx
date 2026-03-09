@@ -55,6 +55,8 @@ import {
   faVials,
   faUserMinus,
   faFileExport,
+  faHome,
+  faCalendar as faCalendarSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -421,6 +423,7 @@ const communityData = {
     researchPanelMembers: 42,
     discussions: 89,
     resources: 34,
+    events: 5,
     tags: ["Research", "Professional Services", "Methods", "Governance"],
     location: "Global",
     founded: "January 2025",
@@ -650,6 +653,18 @@ const Community = () => {
   const [researchPanelMemberIds, setResearchPanelMemberIds] = useState<Set<string>>(new Set(["1", "3", "5"]));
   // Multiple status tabs selected (checkboxes)
   const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
+
+  // Add Event state
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDate, setNewEventDate] = useState("");
+  const [newEventTime, setNewEventTime] = useState("");
+  const [newEventType, setNewEventType] = useState<Event["type"]>("webinar");
+  const [newEventDescription, setNewEventDescription] = useState("");
+  const [newEventSpeaker, setNewEventSpeaker] = useState("");
+  const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
+  const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
+  const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
 
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
@@ -883,7 +898,7 @@ const Community = () => {
                 onClick={() => navigate("/")}
                 className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
               >
-                <span className="hidden sm:inline">Back to Centre</span>
+                <FontAwesomeIcon icon={faHome} className="text-base" />
               </button>
               <div className="h-5 w-px bg-gray-200" />
               <div className="flex items-center gap-2.5">
@@ -1154,6 +1169,10 @@ const Community = () => {
                     <div>
                       <div className="text-xl font-semibold text-card-foreground">{community.resources}</div>
                       <div className="text-xs text-muted-foreground">Resources</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.events}</div>
+                      <div className="text-xs text-muted-foreground">Events</div>
                     </div>
                   </div>
 
@@ -1818,7 +1837,7 @@ const Community = () => {
               {/* ─── EVENTS TAB ─── */}
               <TabsContent value="events">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {mockEvents.map(e => (
+                  {communityEvents.map(e => (
                     <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-gray-200"}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -1850,7 +1869,20 @@ const Community = () => {
                           </div>
                         </div>
                       )}
-                      <button className="mt-4 text-xs font-medium text-primary hover:underline">Register →</button>
+                      {eventRegistrations.has(e.id) ? (
+                        <span className="mt-4 text-xs font-medium text-emerald-600 flex items-center gap-1">
+                          <FontAwesomeIcon icon={faCheck} className="text-[10px]" /> Registered
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setEventRegistrations(prev => new Set([...prev, e.id]));
+                          }}
+                          className="mt-4 text-xs font-medium text-primary hover:underline"
+                        >
+                          Register →
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -2103,6 +2135,138 @@ const Community = () => {
                           )}
                         </>
                       )}
+                    </div>
+
+                    {/* Event Management Card */}
+                    <div className="bg-background border border-border rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faCalendarSolid} className="text-primary text-sm" /> Manage Events
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">Create and manage community events.</p>
+                        </div>
+                        <button
+                          onClick={() => setShowAddEvent(!showAddEvent)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showAddEvent ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
+                        >
+                          <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Event
+                        </button>
+                      </div>
+
+                      {showAddEvent && (
+                        <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
+                          <h4 className="text-xs font-semibold text-card-foreground">Create new event</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={newEventTitle}
+                              onChange={e => setNewEventTitle(e.target.value)}
+                              placeholder="Event title *"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <select
+                              value={newEventType}
+                              onChange={e => setNewEventType(e.target.value as Event["type"])}
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            >
+                              <option value="webinar">Webinar</option>
+                              <option value="meetup">Meetup</option>
+                              <option value="conference">Conference</option>
+                              <option value="workshop">Workshop</option>
+                            </select>
+                            <input
+                              type="date"
+                              value={newEventDate}
+                              onChange={e => setNewEventDate(e.target.value)}
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <input
+                              type="time"
+                              value={newEventTime}
+                              onChange={e => setNewEventTime(e.target.value)}
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <input
+                              type="text"
+                              value={newEventSpeaker}
+                              onChange={e => setNewEventSpeaker(e.target.value)}
+                              placeholder="Speaker (optional)"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <select
+                              value={newEventRecurring}
+                              onChange={e => setNewEventRecurring(e.target.value as "" | "weekly" | "biweekly" | "monthly")}
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            >
+                              <option value="">Not recurring</option>
+                              <option value="weekly">Weekly</option>
+                              <option value="biweekly">Fortnightly</option>
+                              <option value="monthly">Monthly</option>
+                            </select>
+                          </div>
+                          <textarea
+                            value={newEventDescription}
+                            onChange={e => setNewEventDescription(e.target.value.slice(0, 500))}
+                            placeholder="Event description *"
+                            rows={3}
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setShowAddEvent(false);
+                                setNewEventTitle("");
+                                setNewEventDate("");
+                                setNewEventTime("");
+                                setNewEventType("webinar");
+                                setNewEventDescription("");
+                                setNewEventSpeaker("");
+                                setNewEventRecurring("");
+                              }}
+                              className="text-xs text-muted-foreground px-3 py-1.5"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              disabled={!newEventTitle.trim() || !newEventDate || !newEventTime || !newEventDescription.trim()}
+                              onClick={() => {
+                                const newEvent: Event = {
+                                  id: `event-${Date.now()}`,
+                                  title: newEventTitle.trim(),
+                                  date: new Date(newEventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                                  time: newEventTime,
+                                  type: newEventType,
+                                  attendees: 0,
+                                  description: newEventDescription.trim(),
+                                  speaker: newEventSpeaker.trim() || undefined,
+                                  recurring: newEventRecurring || undefined,
+                                };
+                                setCommunityEvents(prev => [newEvent, ...prev]);
+                                setShowAddEvent(false);
+                                setNewEventTitle("");
+                                setNewEventDate("");
+                                setNewEventTime("");
+                                setNewEventType("webinar");
+                                setNewEventDescription("");
+                                setNewEventSpeaker("");
+                                setNewEventRecurring("");
+                              }}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                newEventTitle.trim() && newEventDate && newEventTime && newEventDescription.trim()
+                                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              Create Event
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-medium text-card-foreground">{communityEvents.length}</span> events scheduled
+                      </div>
                     </div>
 
                     {/* Member Management Card */}

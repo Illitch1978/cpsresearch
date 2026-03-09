@@ -33,6 +33,7 @@ import {
   faEnvelope,
   faTrophy,
   faPen,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import Navigation from "@/components/Navigation";
@@ -482,7 +483,7 @@ const MyCommunities = () => {
             onClick={() => navigate("/")}
             className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2 mb-4 transition-colors"
           >
-            <FontAwesomeIcon icon={faArrowLeft} className="text-xs" /> Back to home
+            <FontAwesomeIcon icon={faHome} className="text-sm" />
           </button>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
