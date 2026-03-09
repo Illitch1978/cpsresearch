@@ -1869,12 +1869,20 @@ const Community = () => {
                           </div>
                         </div>
                       )}
-                      <button
-                        onClick={() => alert(`Registered for "${e.title}"! A confirmation email has been sent.`)}
-                        className="mt-4 text-xs font-medium text-primary hover:underline"
-                      >
-                        Register →
-                      </button>
+                      {eventRegistrations.has(e.id) ? (
+                        <span className="mt-4 text-xs font-medium text-emerald-600 flex items-center gap-1">
+                          <FontAwesomeIcon icon={faCheck} className="text-[10px]" /> Registered
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setEventRegistrations(prev => new Set([...prev, e.id]));
+                          }}
+                          className="mt-4 text-xs font-medium text-primary hover:underline"
+                        >
+                          Register →
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
