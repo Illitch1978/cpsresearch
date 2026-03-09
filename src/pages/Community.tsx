@@ -2649,7 +2649,7 @@ const Community = () => {
                           {([
                             { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
-                            { key: "prospects", label: "Shortlisted", checked: adminShowProspects, toggle: () => setAdminShowProspects(v => !v), count: prospectContacts.length },
+                            { key: "prospects", label: "Prospect", checked: adminShowProspects, toggle: () => setAdminShowProspects(v => !v), count: prospectContacts.length },
                             { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
                             { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
                           ]).map(tab => (
@@ -2804,7 +2804,7 @@ const Community = () => {
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {(m as any)._source === "prospect" ? "Shortlisted" :
+                                  {(m as any)._source === "prospect" ? "Prospect" :
                                    (m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
                                    (m as any)._source === "requested" ? "Requested" :
                                    (m as any)._source === "blocked" ? "Blocked" :
