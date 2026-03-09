@@ -885,7 +885,7 @@ const Community = () => {
                 onClick={() => navigate("/")}
                 className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
               >
-                <span className="hidden sm:inline">Back to Centre</span>
+                <FontAwesomeIcon icon={faHome} className="text-base" />
               </button>
               <div className="h-5 w-px bg-gray-200" />
               <div className="flex items-center gap-2.5">
