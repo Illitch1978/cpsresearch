@@ -1708,9 +1708,15 @@ const Community = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Select resources to include</label>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-xs font-medium text-card-foreground">Select resources to include</label>
+                            <div className="flex items-center gap-3">
+                              <button onClick={() => setNewPlaylistItems(communityResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
+                              <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
+                            </div>
+                          </div>
                           <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                            {mockResources.map(r => (
+                            {communityResources.map(r => (
                               <label key={r.id} className="flex items-center gap-2.5 cursor-pointer p-1.5 rounded-md hover:bg-muted/50 transition-colors">
                                 <span
                                   onClick={() => setNewPlaylistItems(prev => prev.includes(r.id) ? prev.filter(i => i !== r.id) : [...prev, r.id])}
