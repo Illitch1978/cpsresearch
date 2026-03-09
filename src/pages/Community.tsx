@@ -2673,7 +2673,7 @@ const Community = () => {
 
                         <div className="flex items-center gap-3 pt-2 border-t border-amber-200">
                           <span className="text-[10px] text-amber-600 font-medium">AUDIT:</span>
-                          <span className="text-[10px] text-amber-700">All God-level actions are logged with timestamp and operator ID.</span>
+                          <span className="text-[10px] text-amber-700">All HQ-level actions are logged with timestamp and operator ID.</span>
                         </div>
                       </div>
                     )}
