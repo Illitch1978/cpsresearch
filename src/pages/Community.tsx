@@ -2392,7 +2392,7 @@ const Community = () => {
                           </div>
                           <p className="text-[10px] text-muted-foreground">Fields marked with * are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => { setShowAddContact(false); setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                            <button onClick={() => { setShowAddContact(false); setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle(""); }} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 transition-colors">Cancel</button>
                             <button
                               disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
                               onClick={() => {
@@ -2411,9 +2411,35 @@ const Community = () => {
                                 setShowAddContact(false);
                                 setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
                               }}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all border ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "border-primary/30 text-primary hover:bg-primary/5" : "border-border text-muted-foreground"}`}
+                            >
+                              Add
+                            </button>
+                            <button
+                              disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()}
+                              onClick={() => {
+                                const newInvited: Member & { _source?: string; expired?: boolean } = {
+                                  id: `inv-${Date.now()}`,
+                                  name: `${newContactFirstName.trim()} ${newContactLastName.trim()}`,
+                                  role: newContactJobTitle.trim(),
+                                  firm: newContactFirm.trim(),
+                                  joinedDate: `Invited ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
+                                  expertise: [],
+                                  email: newContactEmail.trim(),
+                                  location: `${newContactCity.trim()}, ${newContactCountry.trim()}`,
+                                  _source: "invited",
+                                  expired: false,
+                                };
+                                // For now just add as prospect with invited source for visual feedback
+                                setProspectContacts(prev => [{ ...newInvited, _source: "prospect" }, ...prev]);
+                                setShowAddContact(false);
+                                setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle("");
+                                setInviteSent(true);
+                                setTimeout(() => setInviteSent(false), 3000);
+                              }}
                               className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
-                              Add Contact
+                              <FontAwesomeIcon icon={faPaperPlane} className="mr-1 text-[10px]" /> Add & Invite
                             </button>
                           </div>
                         </div>
@@ -2495,49 +2521,6 @@ const Community = () => {
                             <button onClick={() => { setShowBulkInvite(false); setBulkUploadCount(0); }} className="text-xs text-muted-foreground px-3 py-1.5">Close</button>
                           </div>
                         </div>
-                      )}
-                      {/* Quick invite by email - hidden during bulk invite */}
-                      {!showBulkInvite && (
-                        <>
-                          <div className="flex items-center gap-2 mb-3">
-                            <input
-                              type="email"
-                              value={inviteEmail}
-                              onChange={e => setInviteEmail(e.target.value)}
-                              onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
-                              placeholder="Enter email address…"
-                              className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                            />
-                            <button
-                              onClick={handleInvite}
-                              disabled={!inviteEmail.trim() || inviteSent}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
-                            >
-                              {inviteSent ? <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span> : <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>}
-                            </button>
-                          </div>
-
-                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border">
-                            <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
-                            <span className="text-xs text-muted-foreground truncate flex-1">
-                              {inviteEmail.trim()
-                                ? `cpsr.uk/community/prof-services-research/invite?email=${encodeURIComponent(inviteEmail.trim())}&token=abc123`
-                                : "cpsr.uk/community/prof-services-research/invite?token=abc123"}
-                            </span>
-                            <button
-                              onClick={handleCopyLink}
-                              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
-                            >
-                              <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
-                              {linkCopied ? "Copied!" : "Copy link"}
-                            </button>
-                          </div>
-                          {inviteEmail.trim() && (
-                            <p className="text-[10px] text-muted-foreground mt-1">
-                              Link personalised for {inviteEmail.trim()}
-                            </p>
-                          )}
-                        </>
                       )}
                     </div>
 
