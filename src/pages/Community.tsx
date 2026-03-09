@@ -1222,7 +1222,7 @@ const Community = () => {
               {([
                 { key: "member" as ViewRole, label: "Member", icon: faUsers, color: "bg-muted text-muted-foreground" },
                 { key: "manager" as ViewRole, label: "Owner / Manager", icon: faShieldHalved, color: "bg-blue-50 text-blue-700 border-blue-200" },
-                { key: "god" as ViewRole, label: "God", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
+                { key: "hq" as ViewRole, label: "HQ", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
               ]).map(r => (
                 <button
                   key={r.key}
