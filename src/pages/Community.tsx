@@ -2631,7 +2631,6 @@ const Community = () => {
                             { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
                             { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
                             { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
-                            { key: "requested", label: "Requested", checked: adminShowRequested, toggle: () => setAdminShowRequested(v => !v), count: mockRequested.length },
                             { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
                           ]).map(tab => (
                             <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
@@ -2649,8 +2648,8 @@ const Community = () => {
                           ))}
                         </div>
                         <div className="flex items-center gap-3 mb-4">
-                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowRequested(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
-                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowRequested(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
