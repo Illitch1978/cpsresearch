@@ -2418,11 +2418,11 @@ const Community = () => {
                         </div>
                       )}
 
-                      {/* Bulk Invite Panel */}
+                      {/* Bulk Upload Panel */}
                       {showBulkInvite && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-card-foreground">Bulk invite via CSV</h4>
+                            <h4 className="text-xs font-semibold text-card-foreground">Bulk upload contacts via CSV</h4>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => {
@@ -2432,7 +2432,7 @@ const Community = () => {
                                   const url = URL.createObjectURL(blob);
                                   const a = document.createElement("a");
                                   a.href = url;
-                                  a.download = "community-invite-template.csv";
+                                  a.download = "community-contacts-template.csv";
                                   a.click();
                                   URL.revokeObjectURL(url);
                                 }}
@@ -2442,43 +2442,56 @@ const Community = () => {
                               </button>
                               <label className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-background cursor-pointer transition-colors">
                                 <FontAwesomeIcon icon={faFileAlt} className="text-[10px]" /> Import CSV
-                                <input type="file" accept=".csv,.txt" onChange={handleCsvUpload} className="hidden" />
+                                <input type="file" accept=".csv,.txt" onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const text = ev.target?.result as string;
+                                    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+                                    // Skip header if present
+                                    const startIdx = lines[0]?.toLowerCase().includes("name") && lines[0]?.toLowerCase().includes("email") ? 1 : 0;
+                                    const newProspects: (Member & { _source?: string })[] = [];
+                                    for (let i = startIdx; i < lines.length; i++) {
+                                      const parts = lines[i].split(",").map(p => p.trim().replace(/^"|"$/g, ""));
+                                      if (parts.length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parts[1])) {
+                                        newProspects.push({
+                                          id: `prospect-csv-${Date.now()}-${i}`,
+                                          name: parts[0] || "Unknown",
+                                          email: parts[1],
+                                          firm: parts[2] || "",
+                                          role: parts[3] || "",
+                                          location: [parts[4], parts[5]].filter(Boolean).join(", "),
+                                          joinedDate: `Added ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`,
+                                          expertise: [],
+                                          _source: "prospect",
+                                        });
+                                      }
+                                    }
+                                    if (newProspects.length > 0) {
+                                      setProspectContacts(prev => [...newProspects, ...prev]);
+                                      setBulkUploadCount(newProspects.length);
+                                      setTimeout(() => setBulkUploadCount(0), 3000);
+                                    }
+                                  };
+                                  reader.readAsText(file);
+                                  e.target.value = "";
+                                }} className="hidden" />
                               </label>
                             </div>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Upload a CSV with name, email, firm, job title, city and country. Firm is optional for independent members. Each invite notification will include a link personalised for the recipient's email address.</p>
-                          {parseBulkEmails(bulkEmails).length > 0 && (
-                            <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
-                              <p className="text-[11px] font-medium text-card-foreground">
-                                <FontAwesomeIcon icon={faCheck} className="text-primary mr-1" />
-                                {parseBulkEmails(bulkEmails).length} contact{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""} imported
+                          <p className="text-[10px] text-muted-foreground">Upload a CSV with name, email, firm, job title, city and country. Contacts will be added as prospects — you can then select and invite them from the member list below.</p>
+                          {bulkUploadCount > 0 && (
+                            <div className="bg-background border border-primary/20 rounded-lg p-3">
+                              <p className="text-[11px] font-medium text-primary flex items-center gap-1.5">
+                                <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                {bulkUploadCount} contact{bulkUploadCount !== 1 ? "s" : ""} added as prospects
                               </p>
-                              {parseBulkEmails(bulkEmails).slice(0, 3).map((email, i) => (
-                                <p key={i} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                                  <FontAwesomeIcon icon={faLink} className="text-[8px]" />
-                                  cpsr.uk/community/…/invite?email={encodeURIComponent(email)}&token=…
-                                </p>
-                              ))}
-                              {parseBulkEmails(bulkEmails).length > 3 && (
-                                <p className="text-[10px] text-muted-foreground">+ {parseBulkEmails(bulkEmails).length - 3} more personalised links</p>
-                              )}
+                              <p className="text-[10px] text-muted-foreground mt-1">Select them in the member list below and click "Send invites" when ready.</p>
                             </div>
                           )}
-                          <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => { setShowBulkInvite(false); setBulkEmails(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                            <button
-                              onClick={handleBulkInvite}
-                              disabled={parseBulkEmails(bulkEmails).length === 0 || bulkInviteSent}
-                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                                bulkInviteSent ? "bg-emerald-500 text-white" :
-                                parseBulkEmails(bulkEmails).length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {bulkInviteSent
-                                ? <><FontAwesomeIcon icon={faCheck} /> Invites sent!</>
-                                : <><FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send {parseBulkEmails(bulkEmails).length} invite{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""}</>
-                              }
-                            </button>
+                          <div className="flex items-center justify-end">
+                            <button onClick={() => { setShowBulkInvite(false); setBulkUploadCount(0); }} className="text-xs text-muted-foreground px-3 py-1.5">Close</button>
                           </div>
                         </div>
                       )}
