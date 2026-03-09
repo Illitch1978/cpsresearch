@@ -731,20 +731,56 @@ const Community = () => {
     { id: "blk1", name: "Spam Account", role: "Unknown", firm: "N/A", joinedDate: "Blocked 20 Feb 2026", location: "Unknown", expertise: [], email: "spam@example.com" },
   ] as Member[], []);
 
+  // Mock Marketplace Management playlists
+  const mockMMPlaylists = useMemo(() => [
+    { id: "mm1", name: "Professional Services Strategy Toolkit", items: [
+      { id: "mm-r1", title: "Strategy Frameworks for PS Firms", type: "paper" as const, author: "CPSR HQ", date: "Jan 2026", description: "Core strategy frameworks." },
+      { id: "mm-r2", title: "Client Relationship Management Guide", type: "report" as const, author: "CPSR HQ", date: "Feb 2026", description: "Best practices for managing client relationships." },
+    ]},
+    { id: "mm2", name: "Research Methods Collection", items: [
+      { id: "mm-r3", title: "Qualitative Research in Professional Services", type: "paper" as const, author: "Prof. Sarah Mitchell", date: "Dec 2025", description: "Guide to qualitative methods." },
+      { id: "mm-r4", title: "Survey Design for PS Research", type: "report" as const, author: "Dr. Claire Dubois", date: "Nov 2025", description: "Practical survey design." },
+    ]},
+    { id: "mm3", name: "Governance & Compliance Pack", items: [
+      { id: "mm-r5", title: "FRC Governance Standards 2026", type: "link" as const, author: "Financial Reporting Council", date: "Mar 2026", description: "Latest FRC governance standards." },
+    ]},
+  ], []);
+
   const adminStatusMembers = useMemo(() => {
-    if (adminStatusTab === "invited") return mockInvited;
-    if (adminStatusTab === "requested") return mockRequested;
-    if (adminStatusTab === "blocked") return mockBlocked;
-    if (adminStatusTab === "management") {
-      return mockMembers.filter(m => !removedMembers.has(m.id) && (memberRoles[m.id] === "founder" || memberRoles[m.id] === "moderator"));
+    const combined: (Member & { _source?: string })[] = [];
+    const seenIds = new Set<string>();
+    if (adminShowMembers) {
+      mockMembers.filter(m => !removedMembers.has(m.id)).forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "members" }); }
+      });
     }
-    return mockMembers.filter(m => !removedMembers.has(m.id));
-  }, [adminStatusTab, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
+    if (adminShowManagement) {
+      mockMembers.filter(m => !removedMembers.has(m.id) && (memberRoles[m.id] === "founder" || memberRoles[m.id] === "moderator")).forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "management" }); }
+      });
+    }
+    if (adminShowInvited) {
+      mockInvited.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
+      });
+    }
+    if (adminShowRequested) {
+      mockRequested.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
+      });
+    }
+    if (adminShowBlocked) {
+      mockBlocked.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "blocked" }); }
+      });
+    }
+    return combined;
+  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
       // Hide expired invites unless "Show expired invites" is checked
-      if (adminStatusTab === "invited" && !showExpiredInvites && (m as any).expired) return false;
+      if ((m as any)._source === "invited" && !showExpiredInvites && (m as any).expired) return false;
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
@@ -756,7 +792,30 @@ const Community = () => {
       const matchesResearchPanel = !showResearchPanelMembers || researchPanelMemberIds.has(m.id);
       return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise && matchesResearchPanel;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, adminStatusTab, showResearchPanelMembers, researchPanelMemberIds]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, showResearchPanelMembers, researchPanelMemberIds]);
+
+  // Sorted members for Members tab
+  const sortedMembers = useMemo(() => {
+    let list = [...mockMembers];
+    if (memberSearch.trim()) {
+      const q = memberSearch.toLowerCase();
+      list = list.filter(m => m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q));
+    }
+    const sortFn = (a: Member, b: Member) => {
+      let cmp = 0;
+      if (memberSort === "name") {
+        const aLast = a.name.split(" ").slice(-1)[0];
+        const bLast = b.name.split(" ").slice(-1)[0];
+        cmp = aLast.localeCompare(bLast);
+      } else if (memberSort === "firm") cmp = a.firm.localeCompare(b.firm);
+      else if (memberSort === "role") cmp = a.role.localeCompare(b.role);
+      else if (memberSort === "joined") cmp = a.joinedDate.localeCompare(b.joinedDate);
+      else if (memberSort === "posts") cmp = (a.publications || 0) - (b.publications || 0);
+      return memberSortDir === "asc" ? cmp : -cmp;
+    };
+    list.sort(sortFn);
+    return list;
+  }, [memberSearch, memberSort, memberSortDir]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
