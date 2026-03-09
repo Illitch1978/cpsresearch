@@ -835,7 +835,7 @@ const Community = () => {
       return next;
     });
   };
-  const invitedOnPage = paginatedAdminMembers.filter(m => (m as any)._source === "invited");
+  const invitedOnPage = paginatedAdminMembers.filter(m => (m as any)._source === "invited" || (m as any)._source === "prospect");
   const toggleSelectAll = () => {
     if (adminSelected.size === invitedOnPage.length && invitedOnPage.length > 0) {
       setAdminSelected(new Set());
