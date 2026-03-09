@@ -432,6 +432,19 @@ const communityData = {
     location: "Global",
     founded: "January 2025",
     website: "cpsr.uk",
+    governance: {
+      membership: "approval",
+      postReview: "criteria",
+      contentReview: "all",
+      inviteExpiry: 90,
+    } as { membership: string; postReview: string; contentReview: string; inviteExpiry: number },
+    rules: [
+      { title: "Original research only.", detail: "All shared papers and reports must be original work or have proper permissions from the rights holder." },
+      { title: "No promotional content.", detail: "Posts advertising products, services, or events without prior manager approval will be removed." },
+      { title: "Cite your sources.", detail: "When referencing external data, always include a link or full citation so others can verify." },
+      { title: "Peer review encouraged.", detail: "Members are encouraged to offer constructive feedback on draft papers shared in the Resources tab." },
+      { title: "Chatham House Rule applies.", detail: "Participants may use information received, but the identity of the speaker may not be revealed outside the community." },
+    ],
   },
 };
 
@@ -3135,8 +3148,53 @@ const Community = () => {
                         <p>Members benefit from access to shared resources, peer review of working papers, networking with leading scholars and practitioners, and early access to CPSR events and publications.</p>
                       </div>
                     </div>
+                    {/* Community-Specific Rules */}
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-lg font-serif font-semibold text-card-foreground mb-4">Community Rules</h3>
+                      <div className="flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faShieldHalved} className="text-primary text-sm" />
+                        <h3 className="text-lg font-serif font-semibold text-card-foreground">{community.name} Rules</h3>
+                      </div>
+
+                      {/* Governance summary */}
+                      <div className="grid grid-cols-2 gap-3 mb-5">
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Membership</div>
+                          <div className="text-xs font-medium text-slate-700">
+                            {community.governance.membership === "anyone" ? "Open to anyone" : community.governance.membership === "criteria" ? "Criteria-based" : "Requires approval"}
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Post review</div>
+                          <div className="text-xs font-medium text-slate-700">
+                            {community.governance.postReview === "none" ? "No review" : community.governance.postReview === "criteria" ? "Criteria-based" : "All posts reviewed"}
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Content review</div>
+                          <div className="text-xs font-medium text-slate-700">
+                            {community.governance.contentReview === "none" ? "No review" : community.governance.contentReview === "criteria" ? "Criteria-based" : "All content reviewed"}
+                          </div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3">
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Invite expiry</div>
+                          <div className="text-xs font-medium text-slate-700">{community.governance.inviteExpiry} days</div>
+                        </div>
+                      </div>
+
+                      <ol className="space-y-3 text-sm text-muted-foreground list-decimal list-inside">
+                        {community.rules.map((rule, i) => (
+                          <li key={i}><span className="font-medium text-slate-700">{rule.title}</span> {rule.detail}</li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* Platform-Wide Rules */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faGlobe} className="text-muted-foreground text-sm" />
+                        <h3 className="text-lg font-serif font-semibold text-card-foreground">Platform Rules</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-4">These rules apply to all communities on the platform.</p>
                       <ol className="space-y-3 text-sm text-muted-foreground list-decimal list-inside">
                         <li><span className="font-medium text-slate-700">Evidence first.</span> Support claims with citations, data, or clearly-labelled professional experience.</li>
                         <li><span className="font-medium text-slate-700">Respect methodological diversity.</span> Quantitative, qualitative, and mixed-methods approaches are all welcome.</li>
