@@ -163,9 +163,19 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   };
 
   const handleConfirmJoin = () => {
-    if (joinContributions.length === 0) return;
-    window.open('/community/prof-services-research', '_blank');
+    if (joinContributions.length === 0 || !joiningCommunity) return;
+    if (isAtMax) {
+      // At max — set as pending
+      setPendingCommunities(prev => [...prev, joiningCommunity.name]);
+    } else if (joiningCommunity.requiresApproval) {
+      // Requires approval — set as pending
+      setPendingCommunities(prev => [...prev, joiningCommunity.name]);
+    } else {
+      // Open and under limit — join immediately
+      setJoinedCommunities(prev => [...prev, joiningCommunity.name]);
+    }
     setJoiningCommunity(null);
+    setPreviewCommunity(null);
     setJoinContributions([]);
   };
 
