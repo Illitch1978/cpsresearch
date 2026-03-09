@@ -1747,7 +1747,7 @@ const Community = () => {
                                 name: newPlaylistName.trim(),
                                 description: newPlaylistDesc.trim(),
                                 author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
-                                items: mockResources.filter(r => newPlaylistItems.includes(r.id)),
+                                items: communityResources.filter(r => newPlaylistItems.includes(r.id)),
                                 shared: true,
                                 createdDate: "Mar 2026",
                                 likes: 0,
