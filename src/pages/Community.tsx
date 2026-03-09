@@ -1134,10 +1134,14 @@ const Community = () => {
                   </div>
                 </div>
                 <div className="flex flex-row md:flex-col gap-3 md:items-end shrink-0">
-                  <div className="grid grid-cols-3 md:grid-cols-1 gap-3 text-center md:text-right">
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-3 text-center md:text-right">
                     <div>
                       <div className="text-xl font-semibold text-card-foreground">{community.members}</div>
                       <div className="text-xs text-muted-foreground">Members</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.researchPanelMembers}</div>
+                      <div className="text-xs text-muted-foreground flex items-center justify-center md:justify-end gap-1"><FontAwesomeIcon icon={faVials} className="text-[10px]" /> Research panel</div>
                     </div>
                     <div>
                       <div className="text-xl font-semibold text-card-foreground">{community.discussions}</div>
