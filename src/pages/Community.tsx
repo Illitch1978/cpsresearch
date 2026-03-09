@@ -2780,69 +2780,77 @@ const Community = () => {
                               </div>
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                                  adminStatusTab === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
+                                  (m as any)._source === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {adminStatusTab === "invited" ? ((m as any).expired ? "Expired" : "Invited") : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
+                                  {(m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
+                                   (m as any)._source === "requested" ? "Requested" :
+                                   (m as any)._source === "blocked" ? "Blocked" :
+                                   memberRoles[m.id] === "founder" ? "Owner" :
+                                   memberRoles[m.id] === "moderator" ? "Manager" :
+                                   (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
                                 </span>
                               </div>
                               <span className="text-[11px] text-muted-foreground">{m.joinedDate}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.firm || <span className="italic text-muted-foreground/50">Independent</span>}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.location || "—"}</span>
                               <div className="flex items-center justify-end gap-1.5">
-                                {adminStatusTab === "members" && (
+                                {/* Role change button */}
+                                {(m as any)._source !== "invited" && (m as any)._source !== "requested" && (m as any)._source !== "blocked" && memberRoles[m.id] !== "founder" && (
                                   <div className="relative" ref={roleDropdownOpen === m.id ? roleDropdownRef : undefined}>
                                     <button
                                       onClick={() => setRoleDropdownOpen(roleDropdownOpen === m.id ? null : m.id)}
                                       className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium"
                                     >
-                                      {memberRoles[m.id] === "founder" ? "Make manager" : memberRoles[m.id] === "moderator" ? "Demote" : "Make manager"}
+                                      {memberRoles[m.id] === "moderator" ? "Change role" : "Make manager"}
                                     </button>
                                     {roleDropdownOpen === m.id && (
-                                      <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
-                                        {["founder", "moderator", "contributor", "member"].map(role => (
-                                          <button
-                                            key={role}
-                                            onClick={() => handleChangeRole(m.id, role)}
-                                            className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors capitalize flex items-center justify-between ${memberRoles[m.id] === role ? "text-primary font-medium" : "text-muted-foreground"}`}
-                                          >
-                                            {role}
-                                            {memberRoles[m.id] === role && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
-                                          </button>
-                                        ))}
+                                      <div className="absolute right-0 mt-1 w-44 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
+                                        {/* Make owner option — transfers ownership */}
+                                        <button
+                                          onClick={() => {
+                                            // Find current owner and demote to manager
+                                            const currentOwner = Object.entries(memberRoles).find(([, r]) => r === "founder");
+                                            if (currentOwner) handleChangeRole(currentOwner[0], "moderator");
+                                            handleChangeRole(m.id, "founder");
+                                          }}
+                                          className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between text-muted-foreground`}
+                                        >
+                                          <span><FontAwesomeIcon icon={faCrown} className="text-amber-500 text-[9px] mr-1.5" />Make owner</span>
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "moderator")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "moderator" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Manager {memberRoles[m.id] === "moderator" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "contributor")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "contributor" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Contributor {memberRoles[m.id] === "contributor" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "member")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "member" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Member {memberRoles[m.id] === "member" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
                                       </div>
                                     )}
                                   </div>
                                 )}
-                                {adminStatusTab === "invited" && (
-                                  <button
-                                    onClick={() => {/* re-send invite mock */}}
-                                    className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1"
-                                  >
+                                {/* Owner badge — no role change allowed */}
+                                {memberRoles[m.id] === "founder" && (m as any)._source !== "invited" && (
+                                  <span className="text-[10px] text-amber-600 font-medium flex items-center gap-1"><FontAwesomeIcon icon={faCrown} className="text-[9px]" /> Owner</span>
+                                )}
+                                {(m as any)._source === "invited" && (
+                                  <button onClick={() => {}} className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1">
                                     <FontAwesomeIcon icon={faRepeat} className="text-[9px]" /> Re-send
                                   </button>
                                 )}
-                                {adminStatusTab === "requested" && (
-                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
-                                    Approve
-                                  </button>
+                                {(m as any)._source === "requested" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">Approve</button>
                                 )}
-                                {adminStatusTab === "blocked" && (
-                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
-                                    Unblock
-                                  </button>
+                                {(m as any)._source === "blocked" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">Unblock</button>
                                 )}
-                                <button
-                                  onClick={() => setConfirmRemove(m)}
-                                  className="text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/5"
-                                  title="Remove"
-                                >
-                                  <FontAwesomeIcon icon={faBan} className="text-xs" />
-                                </button>
-                                {/* Hamburger menu */}
+                                {/* Hamburger menu — hidden for owners */}
+                                {memberRoles[m.id] !== "founder" && (
                                 <div className="relative">
                                   <button
                                     onClick={() => setMemberMenuOpen(memberMenuOpen === m.id ? null : m.id)}
@@ -2853,6 +2861,16 @@ const Community = () => {
                                   </button>
                                   {memberMenuOpen === m.id && (
                                     <div className="absolute right-0 mt-1 w-52 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
+                                      {/* Make into member (for managers) */}
+                                      {memberRoles[m.id] === "moderator" && (
+                                        <button
+                                          onClick={() => { handleChangeRole(m.id, "member"); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faUsers} className="text-[10px] text-primary" /> Make member
+                                        </button>
+                                      )}
+                                      {/* Research panel */}
                                       {!researchPanelMemberIds.has(m.id) ? (
                                         <button
                                           onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.add(m.id); return n; }); setMemberMenuOpen(null); }}
@@ -2868,15 +2886,25 @@ const Community = () => {
                                           <FontAwesomeIcon icon={faUserMinus} className="text-[10px] text-amber-600" /> Remove from research panel
                                         </button>
                                       )}
+                                      <div className="my-1 border-t border-border" />
+                                      {/* Remove */}
                                       <button
-                                        onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                        onClick={() => { setConfirmRemove(m); setMemberMenuOpen(null); }}
                                         className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
                                       >
-                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block from research panel
+                                        <FontAwesomeIcon icon={faTrashAlt} className="text-[10px]" /> Remove from community
+                                      </button>
+                                      {/* Block */}
+                                      <button
+                                        onClick={() => { setMemberMenuOpen(null); }}
+                                        className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
+                                      >
+                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block member
                                       </button>
                                     </div>
                                   )}
                                 </div>
+                                )}
                               </div>
                             </div>
                           ))}
