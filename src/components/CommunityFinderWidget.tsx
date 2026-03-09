@@ -563,7 +563,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <span className="text-[10px] text-emerald-600 font-medium">✓ Joined</span>
                           ) : isPending ? (
                             <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
-                              <FontAwesomeIcon icon={faClock} className="text-[8px]" /> Pending
+                              <FontAwesomeIcon icon={faClock} className="text-[8px]" /> Pending approval
                             </span>
                           ) : (
                             <span className="text-[10px] text-slate-400">Click to view & join →</span>
