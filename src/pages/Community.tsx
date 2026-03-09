@@ -433,11 +433,11 @@ const communityData = {
     founded: "January 2025",
     website: "cpsr.uk",
     governance: {
-      membership: "approval" as const,
-      postReview: "criteria" as const,
-      contentReview: "all" as const,
+      membership: "approval",
+      postReview: "criteria",
+      contentReview: "all",
       inviteExpiry: 90,
-    },
+    } as { membership: string; postReview: string; contentReview: string; inviteExpiry: number },
     rules: [
       { title: "Original research only.", detail: "All shared papers and reports must be original work or have proper permissions from the rights holder." },
       { title: "No promotional content.", detail: "Posts advertising products, services, or events without prior manager approval will be removed." },
