@@ -121,6 +121,7 @@ interface Resource {
   date: string;
   downloads?: number;
   description: string;
+  url?: string;
 }
 
 interface Event {
