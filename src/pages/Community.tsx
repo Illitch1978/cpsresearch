@@ -423,6 +423,7 @@ const communityData = {
     researchPanelMembers: 42,
     discussions: 89,
     resources: 34,
+    events: 5,
     tags: ["Research", "Professional Services", "Methods", "Governance"],
     location: "Global",
     founded: "January 2025",
