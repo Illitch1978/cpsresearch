@@ -452,11 +452,12 @@ const MyCommunities = () => {
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
           <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
           {[
-            { label: "Open", state: filterOpen, setter: setFilterOpen },
+          { label: "Open", state: filterOpen, setter: setFilterOpen },
             { label: "Private", state: filterPrivate, setter: setFilterPrivate },
             { label: "Favourites", state: filterFavourites, setter: setFilterFavourites },
             { label: "Official", state: filterOfficial, setter: setFilterOfficial },
             { label: "Recently visited", state: filterRecentlyVisited, setter: setFilterRecentlyVisited },
+            { label: "Research panels", state: filterResearchPanels, setter: setFilterResearchPanels },
           ].map(f => (
             <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
               <input
