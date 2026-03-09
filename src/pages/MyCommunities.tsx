@@ -59,6 +59,7 @@ interface CommunityItem {
   isFavourite?: boolean;
   isOfficial?: boolean;
   lastVisited?: string;
+  isResearchPanel?: boolean;
 }
 
 const initialCommunities: CommunityItem[] = [
@@ -77,6 +78,7 @@ const initialCommunities: CommunityItem[] = [
     isFavourite: true,
     isOfficial: true,
     lastVisited: "2 hours ago",
+    isResearchPanel: true,
   },
   {
     id: "legal-market-intel",
@@ -167,6 +169,7 @@ const MyCommunities = () => {
   const [filterFavourites, setFilterFavourites] = useState(false);
   const [filterOfficial, setFilterOfficial] = useState(false);
   const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
+  const [filterResearchPanels, setFilterResearchPanels] = useState(false);
 
   const activeCommunities = communities.filter(c => {
     if (c.archived) return false;
@@ -175,6 +178,7 @@ const MyCommunities = () => {
     if (filterFavourites && !c.isFavourite) return false;
     if (filterOfficial && !c.isOfficial) return false;
     if (filterRecentlyVisited && !c.lastVisited) return false;
+    if (filterResearchPanels && !c.isResearchPanel) return false;
     return true;
   });
   const archivedCommunities = communities.filter(c => c.archived);
@@ -448,11 +452,12 @@ const MyCommunities = () => {
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
           <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
           {[
-            { label: "Open", state: filterOpen, setter: setFilterOpen },
+          { label: "Open", state: filterOpen, setter: setFilterOpen },
             { label: "Private", state: filterPrivate, setter: setFilterPrivate },
             { label: "Favourites", state: filterFavourites, setter: setFilterFavourites },
             { label: "Official", state: filterOfficial, setter: setFilterOfficial },
             { label: "Recently visited", state: filterRecentlyVisited, setter: setFilterRecentlyVisited },
+            { label: "Research panels", state: filterResearchPanels, setter: setFilterResearchPanels },
           ].map(f => (
             <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
               <input

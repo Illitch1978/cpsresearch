@@ -52,6 +52,9 @@ import {
   faShareAlt,
   faHeart,
   faEye,
+  faVials,
+  faUserMinus,
+  faFileExport,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -118,6 +121,7 @@ interface Resource {
   date: string;
   downloads?: number;
   description: string;
+  url?: string;
 }
 
 interface Event {
@@ -414,6 +418,7 @@ const communityData = {
     name: "Professional Services Research",
     description: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector. We bring together academics, practitioners, and policymakers to champion transparency, methodological excellence, and impactful collaboration.",
     members: 247,
+    researchPanelMembers: 42,
     discussions: 89,
     resources: 34,
     tags: ["Research", "Professional Services", "Methods", "Governance"],
@@ -586,6 +591,21 @@ const Community = () => {
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
   const [newPlaylistItems, setNewPlaylistItems] = useState<string[]>([]);
+  const [viewPlaylistId, setViewPlaylistId] = useState<string | null>(null);
+  // Research panel state
+  const [isInResearchPanel, setIsInResearchPanel] = useState(false);
+  // Resource state
+  const [communityResources, setCommunityResources] = useState<Resource[]>(mockResources);
+  const [showAddResource, setShowAddResource] = useState(false);
+  const [playlistEnabledResources, setPlaylistEnabledResources] = useState<Set<string>>(new Set());
+  const [newResourceTitle, setNewResourceTitle] = useState("");
+  const [newResourceType, setNewResourceType] = useState<Resource["type"]>("link");
+  const [newResourceUrl, setNewResourceUrl] = useState("");
+  const [newResourceAuthor, setNewResourceAuthor] = useState("");
+  const [newResourceDate, setNewResourceDate] = useState("");
+  const [newResourceDesc, setNewResourceDesc] = useState("");
+  // Member action menu in admin
+  const [memberMenuOpen, setMemberMenuOpen] = useState<string | null>(null);
 
   type ViewRole = "member" | "manager" | "god";
   const [viewRole, setViewRole] = useState<ViewRole>("god");
@@ -622,6 +642,8 @@ const Community = () => {
   const [newContactFirm, setNewContactFirm] = useState("");
   const [showExpiredInvites, setShowExpiredInvites] = useState(false);
   const [showAddedByManagement, setShowAddedByManagement] = useState(false);
+  const [showResearchPanelMembers, setShowResearchPanelMembers] = useState(false);
+  const [researchPanelMemberIds, setResearchPanelMemberIds] = useState<Set<string>>(new Set(["1", "3", "5"]));
   // Multiple status tabs selected (checkboxes)
   const [adminStatusChecked, setAdminStatusChecked] = useState<Set<string>>(new Set(["members"]));
 
@@ -673,6 +695,8 @@ const Community = () => {
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
+      // Hide expired invites unless "Show expired invites" is checked
+      if (adminStatusTab === "invited" && !showExpiredInvites && (m as any).expired) return false;
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
@@ -681,9 +705,10 @@ const Community = () => {
       const matchesCity = adminFilterCity === "all" || (m.location && m.location.startsWith(adminFilterCity));
       const matchesLocation = matchesCountry && matchesCity;
       const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
-      return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise;
+      const matchesResearchPanel = !showResearchPanelMembers || researchPanelMemberIds.has(m.id);
+      return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise && matchesResearchPanel;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, adminStatusTab, showResearchPanelMembers, researchPanelMemberIds]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
@@ -1109,10 +1134,14 @@ const Community = () => {
                   </div>
                 </div>
                 <div className="flex flex-row md:flex-col gap-3 md:items-end shrink-0">
-                  <div className="grid grid-cols-3 md:grid-cols-1 gap-3 text-center md:text-right">
+                  <div className="grid grid-cols-2 md:grid-cols-1 gap-3 text-center md:text-right">
                     <div>
                       <div className="text-xl font-semibold text-card-foreground">{community.members}</div>
                       <div className="text-xs text-muted-foreground">Members</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.researchPanelMembers}</div>
+                      <div className="text-xs text-muted-foreground flex items-center justify-center md:justify-end gap-1"><FontAwesomeIcon icon={faVials} className="text-[10px]" /> Research panel</div>
                     </div>
                     <div>
                       <div className="text-xl font-semibold text-card-foreground">{community.discussions}</div>
@@ -1140,6 +1169,17 @@ const Community = () => {
                     </button>
                   </div>
 
+                  <button
+                    onClick={() => setIsInResearchPanel(!isInResearchPanel)}
+                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-primary hover:text-primary/70" : "text-muted-foreground hover:text-primary"}`}
+                  >
+                    <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
+                  </button>
+                  {isInResearchPanel && (
+                    <span className="mt-1 text-[10px] text-primary bg-primary/5 border border-primary/15 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1">
+                      <FontAwesomeIcon icon={faVials} className="text-[8px]" /> Research panel member
+                    </span>
+                  )}
                   <button
                     onClick={() => setShowLeaveConfirm(true)}
                     className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
@@ -1518,16 +1558,97 @@ const Community = () => {
 
               {/* ─── RESOURCES TAB ─── */}
               <TabsContent value="resources">
-                <div className="space-y-3">
-                  {mockResources.map(r => (
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">{communityResources.length} resources shared in this community</p>
+                    <button
+                      onClick={() => setShowAddResource(!showAddResource)}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Resource
+                    </button>
+                  </div>
+
+                  {/* Add Resource Form */}
+                  {showAddResource && (
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-3">
+                      <h3 className="text-sm font-semibold text-card-foreground">Add a resource</h3>
+                      <p className="text-[11px] text-muted-foreground">The item URL must have public access. Once processed, items may surface in the 'Find an Expert' interface.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Title <span className="text-destructive">*</span></label>
+                          <input type="text" value={newResourceTitle} onChange={e => setNewResourceTitle(e.target.value)} placeholder="Resource title…" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Type <span className="text-destructive">*</span></label>
+                          <select value={newResourceType} onChange={e => setNewResourceType(e.target.value as Resource["type"])} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="paper">Paper</option>
+                            <option value="report">Report</option>
+                            <option value="presentation">Presentation</option>
+                            <option value="video">Video</option>
+                            <option value="link">Link</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">URL <span className="text-destructive">*</span></label>
+                          <input type="url" value={newResourceUrl} onChange={e => setNewResourceUrl(e.target.value)} placeholder="https://… (must be publicly accessible)" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Author <span className="text-destructive">*</span></label>
+                          <input type="text" value={newResourceAuthor} onChange={e => setNewResourceAuthor(e.target.value)} placeholder="Author name…" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Date</label>
+                          <input type="text" value={newResourceDate} onChange={e => setNewResourceDate(e.target.value)} placeholder="e.g. Mar 2026" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all" />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Description</label>
+                          <textarea value={newResourceDesc} onChange={e => setNewResourceDesc(e.target.value)} placeholder="Brief description…" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 pt-2">
+                        <button onClick={() => { setShowAddResource(false); setNewResourceTitle(""); setNewResourceType("link"); setNewResourceUrl(""); setNewResourceAuthor(""); setNewResourceDate(""); setNewResourceDesc(""); }} className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5">Cancel</button>
+                        <button
+                          disabled={!newResourceTitle.trim() || !newResourceUrl.trim() || !newResourceAuthor.trim()}
+                          onClick={() => {
+                            const nr: Resource = { id: `r-${Date.now()}`, title: newResourceTitle.trim(), type: newResourceType, author: newResourceAuthor.trim(), date: newResourceDate.trim() || "Mar 2026", description: newResourceDesc.trim(), url: newResourceUrl.trim() };
+                            setCommunityResources(prev => [nr, ...prev]);
+                            setShowAddResource(false); setNewResourceTitle(""); setNewResourceType("link"); setNewResourceUrl(""); setNewResourceAuthor(""); setNewResourceDate(""); setNewResourceDesc("");
+                          }}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newResourceTitle.trim() && newResourceUrl.trim() && newResourceAuthor.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                        >
+                          Add Resource
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Resource List */}
+                  {communityResources.map(r => (
                     <div key={r.id} className="bg-white border border-gray-200 rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
-                      <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                        <ResourceIcon type={r.type} />
+                      <div className="flex items-center gap-3 shrink-0">
+                        <label className="flex items-center cursor-pointer" title="Make available for playlists">
+                          <input
+                            type="checkbox"
+                            checked={playlistEnabledResources.has(r.id)}
+                            onChange={() => setPlaylistEnabledResources(prev => { const next = new Set(prev); if (next.has(r.id)) next.delete(r.id); else next.add(r.id); return next; })}
+                            className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
+                          />
+                        </label>
+                        <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                          <ResourceIcon type={r.type} />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
                         <p className="text-xs text-muted-foreground mt-1">{r.author} · {r.date}</p>
                         <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{r.description}</p>
+                        {playlistEnabledResources.has(r.id) && (
+                          <span className="inline-flex items-center gap-1 mt-2 text-[10px] text-primary bg-primary/5 border border-primary/15 rounded-full px-2 py-0.5">
+                            <FontAwesomeIcon icon={faListAlt} className="text-[8px]" /> Available for playlists
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {r.downloads && (
@@ -1587,9 +1708,15 @@ const Community = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Select resources to include</label>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-xs font-medium text-card-foreground">Select resources to include</label>
+                            <div className="flex items-center gap-3">
+                              <button onClick={() => setNewPlaylistItems(communityResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
+                              <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
+                            </div>
+                          </div>
                           <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                            {mockResources.map(r => (
+                            {communityResources.map(r => (
                               <label key={r.id} className="flex items-center gap-2.5 cursor-pointer p-1.5 rounded-md hover:bg-muted/50 transition-colors">
                                 <span
                                   onClick={() => setNewPlaylistItems(prev => prev.includes(r.id) ? prev.filter(i => i !== r.id) : [...prev, r.id])}
@@ -1620,7 +1747,7 @@ const Community = () => {
                                 name: newPlaylistName.trim(),
                                 description: newPlaylistDesc.trim(),
                                 author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
-                                items: mockResources.filter(r => newPlaylistItems.includes(r.id)),
+                                items: communityResources.filter(r => newPlaylistItems.includes(r.id)),
                                 shared: true,
                                 createdDate: "Mar 2026",
                                 likes: 0,
@@ -1675,7 +1802,7 @@ const Community = () => {
                           </div>
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
                             <span className="text-[10px] text-muted-foreground">{pl.items.length} items</span>
-                            <button className="text-xs font-medium text-primary hover:underline">View playlist →</button>
+                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close playlist ↑" : "View playlist →"}</button>
                           </div>
                         </div>
                       ))}
@@ -2044,6 +2171,24 @@ const Community = () => {
                             <input type="checkbox" checked={showAddedByManagement} onChange={() => setShowAddedByManagement(!showAddedByManagement)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
                             Contacts added by community management
                           </label>
+                          <label className="flex items-center gap-1.5 text-[11px] text-card-foreground cursor-pointer select-none">
+                            <input type="checkbox" checked={showResearchPanelMembers} onChange={() => setShowResearchPanelMembers(!showResearchPanelMembers)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                            Show research panel members
+                          </label>
+                          <button
+                            onClick={() => {
+                              const panelMembers = mockMembers.filter(m => researchPanelMemberIds.has(m.id));
+                              const csv = "Name,Email,Firm,Role,Location\n" + panelMembers.map(m => `"${m.name}","${m.email || ""}","${m.firm}","${m.role}","${m.location || ""}"`).join("\n");
+                              const blob = new Blob([csv], { type: "text/csv" });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url; a.download = "research-panel-members.csv"; a.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                            className="flex items-center gap-1.5 text-[11px] text-primary font-medium hover:underline cursor-pointer"
+                          >
+                            <FontAwesomeIcon icon={faFileExport} className="text-[10px]" /> Export research panel
+                          </button>
                           <div className="ml-auto flex items-center gap-1.5">
                             <span className="text-[11px] text-muted-foreground">Show:</span>
                             <select value={adminPerPage} onChange={e => { setAdminPerPage(e.target.value === "all" ? 9999 : Number(e.target.value)); setAdminPage(1); }} className="text-[11px] border border-border rounded-md px-2 py-1 bg-background focus:outline-none text-muted-foreground">
@@ -2061,12 +2206,14 @@ const Community = () => {
                       <div className="border-t border-border">
                         <div className="grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-2.5 bg-muted/30 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                           <div className="flex items-center justify-center">
-                            <button
-                              onClick={toggleSelectAll}
-                              className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
-                            >
-                              {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                            </button>
+                            {(adminStatusTab === "invited" || adminStatusTab === "requested" || adminStatusTab === "blocked") ? (
+                              <button
+                                onClick={toggleSelectAll}
+                                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}
+                              >
+                                {adminSelected.size === paginatedAdminMembers.length && paginatedAdminMembers.length > 0 && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                              </button>
+                            ) : <span />}
                           </div>
                           <span>Name & Position</span>
                           <span>Involvement</span>
@@ -2081,12 +2228,14 @@ const Community = () => {
                           {paginatedAdminMembers.map(m => (
                             <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
                               <div className="flex items-center justify-center">
-                                <button
-                                  onClick={() => toggleAdminSelect(m.id)}
-                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
-                                >
-                                  {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                                </button>
+                                {(adminStatusTab === "invited" || adminStatusTab === "requested" || adminStatusTab === "blocked") ? (
+                                  <button
+                                    onClick={() => toggleAdminSelect(m.id)}
+                                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
+                                  >
+                                    {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                                  </button>
+                                ) : <span />}
                               </div>
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <button onClick={() => setSelectedMember(m)} className="shrink-0">
@@ -2165,6 +2314,41 @@ const Community = () => {
                                 >
                                   <FontAwesomeIcon icon={faBan} className="text-xs" />
                                 </button>
+                                {/* Hamburger menu */}
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setMemberMenuOpen(memberMenuOpen === m.id ? null : m.id)}
+                                    className="text-muted-foreground/40 hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                                    title="More actions"
+                                  >
+                                    <FontAwesomeIcon icon={faEllipsisH} className="text-xs" />
+                                  </button>
+                                  {memberMenuOpen === m.id && (
+                                    <div className="absolute right-0 mt-1 w-52 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
+                                      {!researchPanelMemberIds.has(m.id) ? (
+                                        <button
+                                          onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.add(m.id); return n; }); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faVials} className="text-[10px] text-primary" /> Add to research panel
+                                        </button>
+                                      ) : (
+                                        <button
+                                          onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faUserMinus} className="text-[10px] text-amber-600" /> Remove from research panel
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                        className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
+                                      >
+                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block from research panel
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))}
