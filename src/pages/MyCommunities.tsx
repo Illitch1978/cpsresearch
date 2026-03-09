@@ -169,6 +169,7 @@ const MyCommunities = () => {
   const [filterFavourites, setFilterFavourites] = useState(false);
   const [filterOfficial, setFilterOfficial] = useState(false);
   const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
+  const [filterResearchPanels, setFilterResearchPanels] = useState(false);
 
   const activeCommunities = communities.filter(c => {
     if (c.archived) return false;
@@ -177,6 +178,7 @@ const MyCommunities = () => {
     if (filterFavourites && !c.isFavourite) return false;
     if (filterOfficial && !c.isOfficial) return false;
     if (filterRecentlyVisited && !c.lastVisited) return false;
+    if (filterResearchPanels && !c.isResearchPanel) return false;
     return true;
   });
   const archivedCommunities = communities.filter(c => c.archived);
