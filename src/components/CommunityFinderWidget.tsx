@@ -529,8 +529,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     return (
                       <div
                         key={index}
-                        className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors cursor-pointer"
-                        onClick={() => setPreviewCommunity(community)}
+                        className={`bg-white border rounded-md p-3 shadow-sm transition-colors ${isPending ? "border-amber-200 bg-amber-50/30 cursor-default" : "border-slate-200 hover:border-brand-red cursor-pointer"}`}
+                        onClick={() => !isPending && setPreviewCommunity(community)}
                       >
                         <div className="flex justify-between items-start mb-1">
                           <div className="flex-1">
@@ -563,7 +563,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <span className="text-[10px] text-emerald-600 font-medium">✓ Joined</span>
                           ) : isPending ? (
                             <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
-                              <FontAwesomeIcon icon={faClock} className="text-[8px]" /> Pending
+                              <FontAwesomeIcon icon={faClock} className="text-[8px]" /> Pending approval
                             </span>
                           ) : (
                             <span className="text-[10px] text-slate-400">Click to view & join →</span>

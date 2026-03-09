@@ -588,6 +588,12 @@ const MyCommunities = () => {
               )}
             </div>
             <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{community.description}</p>
+            {isPending(community) && (
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
+                <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
+                <p className="text-[10px] text-amber-700">Your application is pending approval by the community manager. You'll be notified once a decision is made.</p>
+              </div>
+            )}
 
             {/* Theme */}
             {community.theme && (
