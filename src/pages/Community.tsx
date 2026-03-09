@@ -695,6 +695,8 @@ const Community = () => {
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
+      // Hide expired invites unless "Show expired invites" is checked
+      if (adminStatusTab === "invited" && !showExpiredInvites && (m as any).expired) return false;
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
@@ -703,9 +705,10 @@ const Community = () => {
       const matchesCity = adminFilterCity === "all" || (m.location && m.location.startsWith(adminFilterCity));
       const matchesLocation = matchesCountry && matchesCity;
       const matchesExpertise = adminFilterExpertise === "all" || m.expertise.includes(adminFilterExpertise);
-      return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise;
+      const matchesResearchPanel = !showResearchPanelMembers || researchPanelMemberIds.has(m.id);
+      return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise && matchesResearchPanel;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, adminStatusTab, showResearchPanelMembers, researchPanelMemberIds]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
