@@ -1339,6 +1339,43 @@ const Community = () => {
                       <FontAwesomeIcon icon={faPaperPlane} className="ml-auto text-muted-foreground text-sm" />
                     </div>
 
+                    {/* Approval Notice */}
+                    <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                      <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 mt-0.5" />
+                      <span>New discussions are subject to review by the community management team or HQ before appearing publicly. See <button onClick={() => setActiveTab("about")} className="text-primary underline font-medium">Rules</button> for details.</span>
+                    </div>
+
+                    {/* Search & Sort Controls */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative flex-1 min-w-[160px]">
+                        <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                        <input
+                          type="text"
+                          value={discussionSearch}
+                          onChange={e => setDiscussionSearch(e.target.value)}
+                          placeholder="Search discussions…"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                        <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                        {(["date", "name", "author"] as const).map(s => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              if (discussionSort === s) setDiscussionSortDir(d => d === "asc" ? "desc" : "asc");
+                              else { setDiscussionSort(s); setDiscussionSortDir(s === "date" ? "desc" : "asc"); }
+                            }}
+                            className={`text-xs px-2 py-1 rounded-md transition-colors ${discussionSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                          >
+                            {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                            {discussionSort === s && <span className="ml-0.5">{discussionSortDir === "asc" ? "↑" : "↓"}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Tag Filter Bar */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -1363,7 +1400,7 @@ const Community = () => {
 
                     {/* Discussion List */}
                     {filteredDiscussions.map(d => (
-                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${d.pinned ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             <button onClick={() => setSelectedMember(d.author)} className="shrink-0">
@@ -1375,7 +1412,7 @@ const Community = () => {
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                {d.pinned && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0">Pinned</Badge>}
+                                {pinnedDiscussions.has(d.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                                 {d.repliesDisabled && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30 flex items-center gap-1"><FontAwesomeIcon icon={faLock} className="text-[8px]" />Replies closed</Badge>}
                                 <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
                               </div>
@@ -1397,12 +1434,27 @@ const Community = () => {
                               </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => toggleBookmark(d.id)}
-                            className="text-slate-300 hover:text-primary transition-colors mt-1 shrink-0"
-                          >
-                            <FontAwesomeIcon icon={bookmarkedDiscussions.includes(d.id) ? faBookmarkSolid : faBookmarkRegular} />
-                          </button>
+                          <div className="flex flex-col items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => toggleBookmark(d.id)}
+                              className="text-slate-300 hover:text-primary transition-colors mt-1"
+                            >
+                              <FontAwesomeIcon icon={bookmarkedDiscussions.includes(d.id) ? faBookmarkSolid : faBookmarkRegular} />
+                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => setPinnedDiscussions(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(d.id)) next.delete(d.id); else next.add(d.id);
+                                  return next;
+                                })}
+                                className={`text-xs transition-colors ${pinnedDiscussions.has(d.id) ? "text-primary" : "text-slate-300 hover:text-primary"}`}
+                                title={pinnedDiscussions.has(d.id) ? "Unpin discussion" : "Pin discussion"}
+                              >
+                                <FontAwesomeIcon icon={faThumbtack} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-50 text-xs text-muted-foreground">
                           <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
