@@ -2010,9 +2010,42 @@ const Community = () => {
                             className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none"
                           />
                         </div>
+
+                        {/* Import from Marketplace Management */}
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Import from Marketplace Management Toolkit</label>
+                          <select
+                            value={selectedMMPlaylist}
+                            onChange={e => {
+                              setSelectedMMPlaylist(e.target.value);
+                              if (e.target.value) {
+                                const mmPl = mockMMPlaylists.find(p => p.id === e.target.value);
+                                if (mmPl) {
+                                  const newIds = mmPl.items.map(item => item.id);
+                                  setCommunityResources(prev => {
+                                    const existingIds = new Set(prev.map(r => r.id));
+                                    const toAdd = mmPl.items.filter(item => !existingIds.has(item.id)).map(item => ({
+                                      ...item, downloads: 0, url: "#",
+                                    }));
+                                    return [...toAdd, ...prev];
+                                  });
+                                  setNewPlaylistItems(prev => [...new Set([...prev, ...newIds])]);
+                                }
+                              }
+                            }}
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
+                          >
+                            <option value="">Select a toolkit playlist…</option>
+                            {mockMMPlaylists.map(p => (
+                              <option key={p.id} value={p.id}>{p.name} ({p.items.length} items)</option>
+                            ))}
+                          </select>
+                          <p className="text-[10px] text-muted-foreground mt-1">Importing will auto-add resources and invite their authors as community members.</p>
+                        </div>
+
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs font-medium text-card-foreground">Select resources to include</label>
+                            <label className="text-xs font-medium text-card-foreground">Available resources ({communityResources.length})</label>
                             <div className="flex items-center gap-3">
                               <button onClick={() => setNewPlaylistItems(communityResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
                               <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
@@ -2027,17 +2060,18 @@ const Community = () => {
                                 >
                                   {newPlaylistItems.includes(r.id) && <FontAwesomeIcon icon={faCheck} className="text-[8px]" />}
                                 </span>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                   <span className="text-xs font-medium text-card-foreground block truncate">{r.title}</span>
-                                  <span className="text-[10px] text-muted-foreground">{r.author}</span>
+                                  <span className="text-[10px] text-muted-foreground">{r.author} · {r.date}</span>
                                 </div>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">{r.type}</span>
                               </label>
                             ))}
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-2 pt-2">
                           <button
-                            onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); }}
+                            onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); setSelectedMMPlaylist(""); }}
                             className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5"
                           >
                             Cancel
@@ -2060,6 +2094,7 @@ const Community = () => {
                               setNewPlaylistName("");
                               setNewPlaylistDesc("");
                               setNewPlaylistItems([]);
+                              setSelectedMMPlaylist("");
                             }}
                             className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newPlaylistName.trim() && newPlaylistItems.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                           >
@@ -2095,17 +2130,44 @@ const Community = () => {
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed mb-3">{pl.description}</p>
-                          <div className="space-y-1.5">
-                            {pl.items.map((item, i) => (
-                              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-md px-2.5 py-1.5">
-                                <ResourceIcon type={item.type} />
-                                <span className="truncate flex-1">{item.title}</span>
-                              </div>
-                            ))}
-                          </div>
+
+                          {/* Collapsed view */}
+                          {viewPlaylistId !== pl.id && (
+                            <div className="space-y-1.5">
+                              {pl.items.slice(0, 3).map((item, i) => (
+                                <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-md px-2.5 py-1.5">
+                                  <ResourceIcon type={item.type} />
+                                  <span className="truncate flex-1">{item.title}</span>
+                                </div>
+                              ))}
+                              {pl.items.length > 3 && (
+                                <p className="text-[10px] text-muted-foreground px-2.5">+ {pl.items.length - 3} more</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Expanded: full resource details */}
+                          {viewPlaylistId === pl.id && (
+                            <div className="space-y-2">
+                              {pl.items.map((item, i) => (
+                                <div key={i} className="flex items-start gap-3 bg-muted/30 rounded-lg p-3 border border-border/50">
+                                  <div className="w-8 h-8 rounded-md bg-background border border-border flex items-center justify-center text-muted-foreground shrink-0 text-xs">
+                                    <ResourceIcon type={item.type} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className="text-xs font-semibold text-card-foreground">{item.title}</h5>
+                                    <p className="text-[10px] text-muted-foreground mt-0.5">{item.author} · {item.date}</p>
+                                    {item.description && <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{item.description}</p>}
+                                  </div>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize shrink-0">{item.type}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                            <span className="text-[10px] text-muted-foreground">{pl.items.length} items</span>
-                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close playlist ↑" : "View playlist →"}</button>
+                            <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
                           </div>
                         </div>
                       ))}
