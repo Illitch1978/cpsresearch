@@ -55,6 +55,8 @@ import {
   faVials,
   faUserMinus,
   faFileExport,
+  faHome,
+  faCalendar as faCalendarSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
