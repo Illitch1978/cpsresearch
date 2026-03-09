@@ -2798,13 +2798,13 @@ const Community = () => {
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                   (m as any)._source === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
-                                  (m as any)._source === "prospect" ? "bg-violet-50 text-violet-700 border border-violet-200" :
+                                  (m as any)._source === "prospect" ? "bg-slate-50 text-slate-600 border border-slate-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {(m as any)._source === "prospect" ? "Prospect" :
+                                  {(m as any)._source === "prospect" ? "Shortlisted" :
                                    (m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
                                    (m as any)._source === "requested" ? "Requested" :
                                    (m as any)._source === "blocked" ? "Blocked" :
