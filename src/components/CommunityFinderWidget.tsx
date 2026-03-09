@@ -491,6 +491,23 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   </div>
                 </div>
 
+                {/* Results info bar */}
+                <div className="pl-11 mt-2 animate-fade-in">
+                  <div className="bg-slate-100 border border-slate-200 rounded-md p-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                      <FontAwesomeIcon icon={faLockOpen} className="text-emerald-500 text-[9px]" />
+                      All communities listed are <span className="font-semibold">open to join</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-medium">{joinedCount + joinedCommunities.length}/{MAX_COMMUNITIES} joined</span>
+                  </div>
+                  {isAtMax && (
+                    <div className="mt-1.5 bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-1.5">
+                      <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 text-[10px] mt-0.5" />
+                      <p className="text-[10px] text-amber-700">You've reached the maximum of {MAX_COMMUNITIES} communities. New requests will be set as <strong>pending</strong>.</p>
+                    </div>
+                  )}
+                </div>
+
                 {/* Active Criteria Recap */}
                 <div className="pl-11 mt-2 animate-fade-in">
                   <div className="bg-brand-red/10 border border-brand-red/20 rounded-md p-3">
@@ -506,44 +523,55 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 {/* Communities Section */}
                 <div className="flex flex-col gap-3 pl-11 mt-2 animate-fade-in pb-4">
                   <p className="text-[10px] uppercase font-bold text-slate-400">Communities</p>
-                  {communities.map((community, index) => (
-                    <div key={index} className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors">
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800">{community.name}</p>
-                          <p className="text-[10px] text-slate-500">{community.description}</p>
-                          <div className="flex flex-col gap-1.5 mt-1.5">
-                            {community.theme && (
-                              <span className="inline-block w-fit px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">{community.theme}</span>
-                            )}
-                            {community.tags && community.tags.length > 0 && (
-                              <div className="flex gap-1">
-                                {community.tags.slice(0, 2).map((tag, j) => (
-                                  <span key={j} className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-[10px] rounded">{tag}</span>
-                                ))}
-                              </div>
-                            )}
+                  {communities.map((community, index) => {
+                    const isJoined = joinedCommunities.includes(community.name);
+                    const isPending = pendingCommunities.includes(community.name);
+                    return (
+                      <div
+                        key={index}
+                        className="bg-white border border-slate-200 rounded-md p-3 shadow-sm hover:border-brand-red transition-colors cursor-pointer"
+                        onClick={() => setPreviewCommunity(community)}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-medium text-slate-800">{community.name}</p>
+                              {community.requiresApproval ? (
+                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                              ) : (
+                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">Open</span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 line-clamp-1">{community.description.split('.')[0]}.</p>
+                            <div className="flex flex-col gap-1.5 mt-1.5">
+                              {community.theme && (
+                                <span className="inline-block w-fit px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">{community.theme}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                            <FontAwesomeIcon icon={faUsers} className="text-[9px]" />
+                            {community.members.toLocaleString()}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                          <FontAwesomeIcon icon={faUsers} className="text-[9px]" />
-                          {community.members.toLocaleString()}
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
+                          <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+                            <Checkbox id={`bookmark-community-${community.name}`} checked={bookmarkedCommunities.includes(community.name)} onCheckedChange={() => handleCommunityBookmark(community.name)} />
+                            <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
+                          </div>
+                          {isJoined ? (
+                            <span className="text-[10px] text-emerald-600 font-medium">✓ Joined</span>
+                          ) : isPending ? (
+                            <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                              <FontAwesomeIcon icon={faClock} className="text-[8px]" /> Pending
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">Click to view & join →</span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
-                        <div className="flex items-center space-x-1.5">
-                          <Checkbox id={`bookmark-community-${community.name}`} checked={bookmarkedCommunities.includes(community.name)} onCheckedChange={() => handleCommunityBookmark(community.name)} />
-                          <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
-                        </div>
-                        <button
-                          onClick={() => { setJoiningCommunity(community); setJoinContributions([]); }}
-                          className="flex items-center gap-1.5 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
-                        >
-                          Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   {/* Create Community Button */}
                   <div className="mt-4 pt-3 border-t border-slate-200">
