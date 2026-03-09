@@ -2630,13 +2630,13 @@ const Community = () => {
                       </div>
                     </div>
 
-                    {/* God-level: Cross-community controls */}
-                    {isGod && (
+                    {/* HQ-level: Cross-community controls */}
+                    {isHQ && (
                       <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6 space-y-4">
                         <h3 className="text-base font-serif font-semibold text-amber-900 flex items-center gap-2">
-                          <FontAwesomeIcon icon={faCrown} className="text-amber-600 text-sm" /> God Mode — Platform Controls
+                          <FontAwesomeIcon icon={faCrown} className="text-amber-600 text-sm" /> HQ — Platform Controls
                         </h3>
-                        <p className="text-xs text-amber-700">You have cross-community super admin access. Changes here affect all communities on the platform.</p>
+                        <p className="text-xs text-amber-700">You have cross-community HQ admin access. Changes here affect all communities on the platform.</p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div className="bg-background border border-border rounded-lg p-4 space-y-2">
