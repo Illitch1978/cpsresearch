@@ -1837,7 +1837,7 @@ const Community = () => {
               {/* ─── EVENTS TAB ─── */}
               <TabsContent value="events">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {mockEvents.map(e => (
+                  {communityEvents.map(e => (
                     <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-gray-200"}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
