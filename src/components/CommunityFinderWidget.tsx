@@ -604,16 +604,109 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
         </div>
       )}
 
+      {/* Community Preview Popup */}
+      {previewCommunity && !joiningCommunity && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setPreviewCommunity(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100vw-3rem)] sm:w-[420px] max-w-[420px] bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-sm">{previewCommunity.name}</h3>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {previewCommunity.requiresApproval ? (
+                    <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                  ) : (
+                    <span className="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                      <FontAwesomeIcon icon={faLockOpen} className="text-[7px]" /> Open community
+                    </span>
+                  )}
+                  <span className="text-[9px] text-slate-400 flex items-center gap-1">
+                    <FontAwesomeIcon icon={faUsers} className="text-[8px]" /> {previewCommunity.members.toLocaleString()} members
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setPreviewCommunity(null)} className="text-slate-400 hover:text-white transition-colors">
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="p-4 max-h-[40vh] overflow-y-auto">
+              <p className="text-xs text-slate-700 leading-relaxed mb-3">{previewCommunity.description}</p>
+              {previewCommunity.theme && (
+                <div className="mb-3">
+                  <span className="text-[10px] font-medium text-slate-500">Theme:</span>
+                  <span className="ml-1.5 px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">{previewCommunity.theme}</span>
+                </div>
+              )}
+              {previewCommunity.tags && previewCommunity.tags.length > 0 && (
+                <div className="mb-3">
+                  <span className="text-[10px] font-medium text-slate-500">Tags:</span>
+                  <div className="flex gap-1 mt-1">
+                    {previewCommunity.tags.map((tag, j) => (
+                      <span key={j} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {previewCommunity.requiresApproval && (
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                  <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 text-[10px] mt-0.5" />
+                  <p className="text-[10px] text-amber-700">Joining this community requires approval by the owner or manager. Your request will be reviewed.</p>
+                </div>
+              )}
+              {!previewCommunity.requiresApproval && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                  <FontAwesomeIcon icon={faLockOpen} className="text-emerald-500 text-[10px] mt-0.5" />
+                  <p className="text-[10px] text-emerald-700">This is an open community — you can join immediately without approval.</p>
+                </div>
+              )}
+              {isAtMax && !joinedCommunities.includes(previewCommunity.name) && !pendingCommunities.includes(previewCommunity.name) && (
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                  <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
+                  <p className="text-[10px] text-amber-700">You've reached {MAX_COMMUNITIES}/{MAX_COMMUNITIES} communities. This request will be set as <strong>pending</strong> until a spot opens.</p>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+              <button onClick={() => setPreviewCommunity(null)} className="text-xs text-slate-500 px-3 py-1.5 hover:text-slate-700">Close</button>
+              {joinedCommunities.includes(previewCommunity.name) ? (
+                <span className="text-xs text-emerald-600 font-medium px-3 py-1.5">✓ Joined</span>
+              ) : pendingCommunities.includes(previewCommunity.name) ? (
+                <span className="flex items-center gap-1 text-xs text-amber-600 font-medium px-3 py-1.5">
+                  <FontAwesomeIcon icon={faClock} className="text-[10px]" /> Pending
+                </span>
+              ) : (
+                <button
+                  onClick={() => { setJoiningCommunity(previewCommunity); setJoinContributions([]); }}
+                  className="flex items-center gap-1.5 bg-slate-900 text-white text-[11px] font-bold px-4 py-2 rounded hover:bg-brand-red transition-colors"
+                >
+                  {isAtMax ? "Request to Join" : previewCommunity.requiresApproval ? "Request to Join" : "Join Community"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Join Community Modal - Contribution Selection */}
       {joiningCommunity && (
         <>
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setJoiningCommunity(null)} />
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100vw-3rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden">
             <div className="bg-slate-800 text-white px-4 py-3">
-              <h3 className="font-medium text-sm">Join {joiningCommunity.name}</h3>
+              <h3 className="font-medium text-sm">{isAtMax || joiningCommunity.requiresApproval ? "Request to join" : "Join"} {joiningCommunity.name}</h3>
               <p className="text-xs text-slate-400 mt-0.5">Select your anticipated contributions</p>
             </div>
             <div className="p-4 max-h-[50vh] overflow-y-auto">
+              {(isAtMax || joiningCommunity.requiresApproval) && (
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-2 flex items-start gap-1.5 mb-3">
+                  <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500 text-[10px] mt-0.5" />
+                  <p className="text-[10px] text-amber-700">
+                    {isAtMax
+                      ? `You've reached the maximum of ${MAX_COMMUNITIES} communities. This will be added as a pending request.`
+                      : "This community requires approval. Your request will be reviewed by the owner/manager."}
+                  </p>
+                </div>
+              )}
               <p className="text-xs font-medium text-slate-700 mb-3">What will you contribute to this community? <span className="text-destructive">*</span></p>
               <div className="space-y-2">
                 {contributionsList.map((contribution) => (
@@ -640,7 +733,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   joinContributions.length === 0 ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-brand-red"
                 }`}
               >
-                Confirm & Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                {isAtMax || joiningCommunity.requiresApproval ? "Submit Request" : "Confirm & Join"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
               </button>
             </div>
           </div>
