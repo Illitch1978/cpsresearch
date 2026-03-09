@@ -637,9 +637,13 @@ const Community = () => {
   const [adminPerPage, setAdminPerPage] = useState(10);
   const [adminSelected, setAdminSelected] = useState<Set<string>>(new Set());
   const [showAddContact, setShowAddContact] = useState(false);
-  const [newContactName, setNewContactName] = useState("");
+  const [newContactFirstName, setNewContactFirstName] = useState("");
+  const [newContactLastName, setNewContactLastName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
   const [newContactFirm, setNewContactFirm] = useState("");
+  const [newContactCity, setNewContactCity] = useState("");
+  const [newContactCountry, setNewContactCountry] = useState("");
+  const [newContactJobTitle, setNewContactJobTitle] = useState("");
   const [showExpiredInvites, setShowExpiredInvites] = useState(false);
   const [showAddedByManagement, setShowAddedByManagement] = useState(false);
   const [showResearchPanelMembers, setShowResearchPanelMembers] = useState(false);
@@ -1972,21 +1976,22 @@ const Community = () => {
                       </div>
 
                       {/* Add Contact Form */}
-                      {showAddContact && (
+                      {showAddContact && !showBulkInvite && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <h4 className="text-xs font-semibold text-card-foreground">Add a new contact</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" value={newContactName} onChange={e => setNewContactName(e.target.value)} placeholder="Full name…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="email" value={newContactEmail} onChange={e => setNewContactEmail(e.target.value)} placeholder="Email…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactFirstName} onChange={e => setNewContactFirstName(e.target.value)} placeholder="First name *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactLastName} onChange={e => setNewContactLastName(e.target.value)} placeholder="Last name *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="email" value={newContactEmail} onChange={e => setNewContactEmail(e.target.value)} placeholder="Email *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                             <input type="text" value={newContactFirm} onChange={e => setNewContactFirm(e.target.value)} placeholder="Firm / Organisation (optional)…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="text" placeholder="Job title / Role…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="text" placeholder="City…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                            <input type="text" placeholder="Country…" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactJobTitle} onChange={e => setNewContactJobTitle(e.target.value)} placeholder="Job title / Role *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactCity} onChange={e => setNewContactCity(e.target.value)} placeholder="City *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <input type="text" value={newContactCountry} onChange={e => setNewContactCountry(e.target.value)} placeholder="Country *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Only name and email are required. Organisation is optional for independent consultants.</p>
+                          <p className="text-[10px] text-muted-foreground">Fields marked with * are required. Organisation is optional for independent consultants.</p>
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => { setShowAddContact(false); setNewContactName(""); setNewContactEmail(""); setNewContactFirm(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                            <button disabled={!newContactName.trim() || !newContactEmail.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactName.trim() && newContactEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
+                            <button onClick={() => { setShowAddContact(false); setNewContactFirstName(""); setNewContactLastName(""); setNewContactEmail(""); setNewContactFirm(""); setNewContactCity(""); setNewContactCountry(""); setNewContactJobTitle(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                            <button disabled={!newContactFirstName.trim() || !newContactLastName.trim() || !newContactEmail.trim() || !newContactCity.trim() || !newContactCountry.trim() || !newContactJobTitle.trim()} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newContactFirstName.trim() && newContactLastName.trim() && newContactEmail.trim() && newContactCity.trim() && newContactCountry.trim() && newContactJobTitle.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>
                               Add & Invite
                             </button>
                           </div>
@@ -2022,7 +2027,7 @@ const Community = () => {
                               </label>
                             </div>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members.</p>
+                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members. Each invite link will be personalised to the recipient's email.</p>
                           <textarea
                             value={bulkEmails}
                             onChange={e => setBulkEmails(e.target.value)}
@@ -2055,36 +2060,49 @@ const Community = () => {
                           </div>
                         </div>
                       )}
-                      
-                      <div className="flex items-center gap-2 mb-3">
-                        <input
-                          type="email"
-                          value={inviteEmail}
-                          onChange={e => setInviteEmail(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
-                          placeholder="Enter email address…"
-                          className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
-                        />
-                        <button
-                          onClick={handleInvite}
-                          disabled={!inviteEmail.trim() || inviteSent}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
-                        >
-                          {inviteSent ? <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span> : <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>}
-                        </button>
-                      </div>
+                      {/* Quick invite by email - hidden during bulk invite */}
+                      {!showBulkInvite && (
+                        <>
+                          <div className="flex items-center gap-2 mb-3">
+                            <input
+                              type="email"
+                              value={inviteEmail}
+                              onChange={e => setInviteEmail(e.target.value)}
+                              onKeyDown={e => { if (e.key === "Enter") handleInvite(); }}
+                              placeholder="Enter email address…"
+                              className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                            />
+                            <button
+                              onClick={handleInvite}
+                              disabled={!inviteEmail.trim() || inviteSent}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${inviteSent ? "bg-emerald-500 text-white" : inviteEmail.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                            >
+                              {inviteSent ? <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCheck} /> Sent!</span> : <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faPaperPlane} /> Send</span>}
+                            </button>
+                          </div>
 
-                      <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border">
-                        <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
-                        <span className="text-xs text-muted-foreground truncate flex-1">cpsr.uk/community/prof-services-research/invite?token=abc123</span>
-                        <button
-                          onClick={handleCopyLink}
-                          className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
-                        >
-                          <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
-                          {linkCopied ? "Copied!" : "Copy link"}
-                        </button>
-                      </div>
+                          <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border">
+                            <FontAwesomeIcon icon={faLink} className="text-muted-foreground text-xs" />
+                            <span className="text-xs text-muted-foreground truncate flex-1">
+                              {inviteEmail.trim()
+                                ? `cpsr.uk/community/prof-services-research/invite?email=${encodeURIComponent(inviteEmail.trim())}&token=abc123`
+                                : "cpsr.uk/community/prof-services-research/invite?token=abc123"}
+                            </span>
+                            <button
+                              onClick={handleCopyLink}
+                              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all ${linkCopied ? "text-emerald-600 bg-emerald-50" : "text-primary hover:bg-primary/5"}`}
+                            >
+                              <FontAwesomeIcon icon={linkCopied ? faCheck : faCopy} className="mr-1" />
+                              {linkCopied ? "Copied!" : "Copy link"}
+                            </button>
+                          </div>
+                          {inviteEmail.trim() && (
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              Link personalised for {inviteEmail.trim()}
+                            </p>
+                          )}
+                        </>
+                      )}
                     </div>
 
                     {/* Member Management Card */}
