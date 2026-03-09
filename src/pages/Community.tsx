@@ -857,9 +857,49 @@ const Community = () => {
   }, []);
 
   const filteredDiscussions = useMemo(() => {
-    if (!selectedTag) return mockDiscussions;
-    return mockDiscussions.filter(d => d.tags.includes(selectedTag));
-  }, [selectedTag]);
+    let list = [...mockDiscussions];
+    // Tag filter
+    if (selectedTag) list = list.filter(d => d.tags.includes(selectedTag));
+    // Search filter
+    if (discussionSearch.trim()) {
+      const q = discussionSearch.toLowerCase();
+      list = list.filter(d => d.title.toLowerCase().includes(q) || d.author.name.toLowerCase().includes(q) || d.date.toLowerCase().includes(q));
+    }
+    // Sort: pinned always first
+    const pinned = list.filter(d => pinnedDiscussions.has(d.id));
+    const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
+    const sortFn = (a: Discussion, b: Discussion) => {
+      let cmp = 0;
+      if (discussionSort === "name") cmp = a.title.localeCompare(b.title);
+      else if (discussionSort === "author") cmp = a.author.name.localeCompare(b.author.name);
+      else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
+      return discussionSortDir === "asc" ? -cmp : cmp;
+    };
+    pinned.sort(sortFn);
+    unpinned.sort(sortFn);
+    return [...pinned, ...unpinned];
+  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions]);
+
+  // Sorted/filtered resources
+  const sortedResources = useMemo(() => {
+    let list = [...communityResources];
+    if (resourceSearch.trim()) {
+      const q = resourceSearch.toLowerCase();
+      list = list.filter(r => r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.date.toLowerCase().includes(q));
+    }
+    const pinned = list.filter(r => pinnedResources.has(r.id));
+    const unpinned = list.filter(r => !pinnedResources.has(r.id));
+    const sortFn = (a: Resource, b: Resource) => {
+      let cmp = 0;
+      if (resourceSort === "name") cmp = a.title.localeCompare(b.title);
+      else if (resourceSort === "author") cmp = a.author.localeCompare(b.author);
+      else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
+      return resourceSortDir === "asc" ? -cmp : cmp;
+    };
+    pinned.sort(sortFn);
+    unpinned.sort(sortFn);
+    return [...pinned, ...unpinned];
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources]);
 
   const community = communityData["prof-services-research"];
 
