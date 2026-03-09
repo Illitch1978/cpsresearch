@@ -2626,27 +2626,31 @@ const Community = () => {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
                           {([
-                            { key: "members", label: "Group members", count: mockMembers.length - removedMembers.size },
-                            { key: "management", label: "Management", count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
-                            { key: "invited", label: "Invited", count: mockInvited.length },
-                            { key: "requested", label: "Requested", count: mockRequested.length },
-                            { key: "blocked", label: "Blocked", count: mockBlocked.length },
-                          ] as const).map(tab => (
+                            { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
+                            { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
+                            { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
+                            { key: "requested", label: "Requested", checked: adminShowRequested, toggle: () => setAdminShowRequested(v => !v), count: mockRequested.length },
+                            { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
+                          ]).map(tab => (
                             <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
                               <input
                                 type="checkbox"
-                                checked={adminStatusTab === tab.key}
-                                onChange={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
+                                checked={tab.checked}
+                                onChange={() => { tab.toggle(); setAdminPage(1); }}
                                 className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
                               />
-                              <span className={`font-medium ${adminStatusTab === tab.key ? "text-primary" : "text-muted-foreground"}`}>
+                              <span className={`font-medium ${tab.checked ? "text-primary" : "text-muted-foreground"}`}>
                                 {tab.label}
                               </span>
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab.checked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
                             </label>
                           ))}
+                        </div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowRequested(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowRequested(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
