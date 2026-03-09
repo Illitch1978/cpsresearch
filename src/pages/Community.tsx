@@ -680,6 +680,21 @@ const Community = () => {
   const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
 
+  // Members tab sort/search state
+  const [memberSearch, setMemberSearch] = useState("");
+  const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
+  const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
+
+  // MM playlist import state
+  const [selectedMMPlaylist, setSelectedMMPlaylist] = useState("");
+
+  // Admin independent checkboxes
+  const [adminShowMembers, setAdminShowMembers] = useState(true);
+  const [adminShowManagement, setAdminShowManagement] = useState(true);
+  const [adminShowInvited, setAdminShowInvited] = useState(true);
+  const [adminShowRequested, setAdminShowRequested] = useState(true);
+  const [adminShowBlocked, setAdminShowBlocked] = useState(true);
+
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
   const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
@@ -716,20 +731,56 @@ const Community = () => {
     { id: "blk1", name: "Spam Account", role: "Unknown", firm: "N/A", joinedDate: "Blocked 20 Feb 2026", location: "Unknown", expertise: [], email: "spam@example.com" },
   ] as Member[], []);
 
+  // Mock Marketplace Management playlists
+  const mockMMPlaylists = useMemo(() => [
+    { id: "mm1", name: "Professional Services Strategy Toolkit", items: [
+      { id: "mm-r1", title: "Strategy Frameworks for PS Firms", type: "paper" as const, author: "CPSR HQ", date: "Jan 2026", description: "Core strategy frameworks." },
+      { id: "mm-r2", title: "Client Relationship Management Guide", type: "report" as const, author: "CPSR HQ", date: "Feb 2026", description: "Best practices for managing client relationships." },
+    ]},
+    { id: "mm2", name: "Research Methods Collection", items: [
+      { id: "mm-r3", title: "Qualitative Research in Professional Services", type: "paper" as const, author: "Prof. Sarah Mitchell", date: "Dec 2025", description: "Guide to qualitative methods." },
+      { id: "mm-r4", title: "Survey Design for PS Research", type: "report" as const, author: "Dr. Claire Dubois", date: "Nov 2025", description: "Practical survey design." },
+    ]},
+    { id: "mm3", name: "Governance & Compliance Pack", items: [
+      { id: "mm-r5", title: "FRC Governance Standards 2026", type: "link" as const, author: "Financial Reporting Council", date: "Mar 2026", description: "Latest FRC governance standards." },
+    ]},
+  ], []);
+
   const adminStatusMembers = useMemo(() => {
-    if (adminStatusTab === "invited") return mockInvited;
-    if (adminStatusTab === "requested") return mockRequested;
-    if (adminStatusTab === "blocked") return mockBlocked;
-    if (adminStatusTab === "management") {
-      return mockMembers.filter(m => !removedMembers.has(m.id) && (memberRoles[m.id] === "founder" || memberRoles[m.id] === "moderator"));
+    const combined: (Member & { _source?: string })[] = [];
+    const seenIds = new Set<string>();
+    if (adminShowMembers) {
+      mockMembers.filter(m => !removedMembers.has(m.id)).forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "members" }); }
+      });
     }
-    return mockMembers.filter(m => !removedMembers.has(m.id));
-  }, [adminStatusTab, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
+    if (adminShowManagement) {
+      mockMembers.filter(m => !removedMembers.has(m.id) && (memberRoles[m.id] === "founder" || memberRoles[m.id] === "moderator")).forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "management" }); }
+      });
+    }
+    if (adminShowInvited) {
+      mockInvited.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
+      });
+    }
+    if (adminShowRequested) {
+      mockRequested.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
+      });
+    }
+    if (adminShowBlocked) {
+      mockBlocked.forEach(m => {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "blocked" }); }
+      });
+    }
+    return combined;
+  }, [adminShowMembers, adminShowManagement, adminShowInvited, adminShowRequested, adminShowBlocked, removedMembers, memberRoles, mockInvited, mockRequested, mockBlocked]);
 
   const filteredAdminMembers = useMemo(() => {
     return adminStatusMembers.filter(m => {
       // Hide expired invites unless "Show expired invites" is checked
-      if (adminStatusTab === "invited" && !showExpiredInvites && (m as any).expired) return false;
+      if ((m as any)._source === "invited" && !showExpiredInvites && (m as any).expired) return false;
       const q = adminSearchQuery.toLowerCase();
       const matchesSearch = !q || m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q) || m.email?.toLowerCase().includes(q);
       const matchesRole = adminFilterRole === "all" || memberRoles[m.id] === adminFilterRole;
@@ -741,7 +792,30 @@ const Community = () => {
       const matchesResearchPanel = !showResearchPanelMembers || researchPanelMemberIds.has(m.id);
       return matchesSearch && matchesRole && matchesFirm && matchesLocation && matchesExpertise && matchesResearchPanel;
     });
-  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, adminStatusTab, showResearchPanelMembers, researchPanelMemberIds]);
+  }, [adminSearchQuery, adminFilterRole, adminFilterExpertise, adminFilterFirm, adminFilterCountry, adminFilterCity, adminStatusMembers, memberRoles, showExpiredInvites, showResearchPanelMembers, researchPanelMemberIds]);
+
+  // Sorted members for Members tab
+  const sortedMembers = useMemo(() => {
+    let list = [...mockMembers];
+    if (memberSearch.trim()) {
+      const q = memberSearch.toLowerCase();
+      list = list.filter(m => m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q));
+    }
+    const sortFn = (a: Member, b: Member) => {
+      let cmp = 0;
+      if (memberSort === "name") {
+        const aLast = a.name.split(" ").slice(-1)[0];
+        const bLast = b.name.split(" ").slice(-1)[0];
+        cmp = aLast.localeCompare(bLast);
+      } else if (memberSort === "firm") cmp = a.firm.localeCompare(b.firm);
+      else if (memberSort === "role") cmp = a.role.localeCompare(b.role);
+      else if (memberSort === "joined") cmp = a.joinedDate.localeCompare(b.joinedDate);
+      else if (memberSort === "posts") cmp = (a.publications || 0) - (b.publications || 0);
+      return memberSortDir === "asc" ? cmp : -cmp;
+    };
+    list.sort(sortFn);
+    return list;
+  }, [memberSearch, memberSort, memberSortDir]);
 
   const adminTotalPages = Math.max(1, Math.ceil(filteredAdminMembers.length / adminPerPage));
   const paginatedAdminMembers = filteredAdminMembers.slice((adminPage - 1) * adminPerPage, adminPage * adminPerPage);
@@ -1650,38 +1724,83 @@ const Community = () => {
 
               {/* ─── MEMBERS TAB ─── */}
               <TabsContent value="members">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {mockMembers.map(m => (
-                    <button
-                      key={m.id}
-                      onClick={() => setSelectedMember(m)}
-                      className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-primary/20 transition-all group"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <Avatar className="h-11 w-11">
-                          <AvatarFallback className="bg-slate-100 text-slate-600 text-sm font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                            {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <div className="flex items-center">
-                            <span className="text-sm font-semibold text-card-foreground truncate group-hover:text-primary transition-colors">{m.name}</span>
-                            <BadgeIcon badge={m.badge} />
+                <div className="space-y-4">
+                  {/* Search & Sort */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input
+                        type="text"
+                        value={memberSearch}
+                        onChange={e => setMemberSearch(e.target.value)}
+                        placeholder="Search by name or organisation…"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                      <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                      {([
+                        { key: "name" as const, label: "Last name" },
+                        { key: "firm" as const, label: "Organisation" },
+                        { key: "posts" as const, label: "Posts" },
+                        { key: "role" as const, label: "Job title" },
+                        { key: "joined" as const, label: "Date joined" },
+                      ]).map(s => (
+                        <button
+                          key={s.key}
+                          onClick={() => {
+                            if (memberSort === s.key) setMemberSortDir(d => d === "asc" ? "desc" : "asc");
+                            else { setMemberSort(s.key); setMemberSortDir("asc"); }
+                          }}
+                          className={`text-xs px-2 py-1 rounded-md transition-colors ${memberSort === s.key ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                        >
+                          {s.label}
+                          {memberSort === s.key && <span className="ml-0.5">{memberSortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {sortedMembers.map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => setSelectedMember(m)}
+                        className="text-left bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-primary/20 transition-all group"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <Avatar className="h-11 w-11">
+                            <AvatarFallback className="bg-slate-100 text-slate-600 text-sm font-medium group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                              {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <div className="flex items-center">
+                              <span className="text-sm font-semibold text-card-foreground truncate group-hover:text-primary transition-colors">{m.name}</span>
+                              <BadgeIcon badge={m.badge} />
+                            </div>
+                            <span className="text-xs text-muted-foreground">{m.role}</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{m.role}</span>
                         </div>
+                        <p className="text-xs text-muted-foreground mb-3">{m.firm}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.expertise.map(e => (
+                            <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
+                          ))}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
+                          Member since {m.joinedDate}
+                        </div>
+                      </button>
+                    ))}
+                    {sortedMembers.length === 0 && (
+                      <div className="col-span-full text-center py-10">
+                        <FontAwesomeIcon icon={faSearch} className="text-2xl text-muted-foreground/30 mb-2" />
+                        <p className="text-sm text-muted-foreground">No members match your search.</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mb-3">{m.firm}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {m.expertise.map(e => (
-                          <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
-                        ))}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
-                        Member since {m.joinedDate}
-                      </div>
-                    </button>
-                  ))}
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1891,9 +2010,42 @@ const Community = () => {
                             className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none"
                           />
                         </div>
+
+                        {/* Import from Marketplace Management */}
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1 block">Import from Marketplace Management Toolkit</label>
+                          <select
+                            value={selectedMMPlaylist}
+                            onChange={e => {
+                              setSelectedMMPlaylist(e.target.value);
+                              if (e.target.value) {
+                                const mmPl = mockMMPlaylists.find(p => p.id === e.target.value);
+                                if (mmPl) {
+                                  const newIds = mmPl.items.map(item => item.id);
+                                  setCommunityResources(prev => {
+                                    const existingIds = new Set(prev.map(r => r.id));
+                                    const toAdd = mmPl.items.filter(item => !existingIds.has(item.id)).map(item => ({
+                                      ...item, downloads: 0, url: "#",
+                                    }));
+                                    return [...toAdd, ...prev];
+                                  });
+                                  setNewPlaylistItems(prev => [...new Set([...prev, ...newIds])]);
+                                }
+                              }
+                            }}
+                            className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground"
+                          >
+                            <option value="">Select a toolkit playlist…</option>
+                            {mockMMPlaylists.map(p => (
+                              <option key={p.id} value={p.id}>{p.name} ({p.items.length} items)</option>
+                            ))}
+                          </select>
+                          <p className="text-[10px] text-muted-foreground mt-1">Importing will auto-add resources and invite their authors as community members.</p>
+                        </div>
+
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs font-medium text-card-foreground">Select resources to include</label>
+                            <label className="text-xs font-medium text-card-foreground">Available resources ({communityResources.length})</label>
                             <div className="flex items-center gap-3">
                               <button onClick={() => setNewPlaylistItems(communityResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
                               <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
@@ -1908,17 +2060,18 @@ const Community = () => {
                                 >
                                   {newPlaylistItems.includes(r.id) && <FontAwesomeIcon icon={faCheck} className="text-[8px]" />}
                                 </span>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                   <span className="text-xs font-medium text-card-foreground block truncate">{r.title}</span>
-                                  <span className="text-[10px] text-muted-foreground">{r.author}</span>
+                                  <span className="text-[10px] text-muted-foreground">{r.author} · {r.date}</span>
                                 </div>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">{r.type}</span>
                               </label>
                             ))}
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-2 pt-2">
                           <button
-                            onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); }}
+                            onClick={() => { setShowCreatePlaylist(false); setNewPlaylistName(""); setNewPlaylistDesc(""); setNewPlaylistItems([]); setSelectedMMPlaylist(""); }}
                             className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5"
                           >
                             Cancel
@@ -1941,6 +2094,7 @@ const Community = () => {
                               setNewPlaylistName("");
                               setNewPlaylistDesc("");
                               setNewPlaylistItems([]);
+                              setSelectedMMPlaylist("");
                             }}
                             className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newPlaylistName.trim() && newPlaylistItems.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                           >
@@ -1976,17 +2130,44 @@ const Community = () => {
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed mb-3">{pl.description}</p>
-                          <div className="space-y-1.5">
-                            {pl.items.map((item, i) => (
-                              <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-md px-2.5 py-1.5">
-                                <ResourceIcon type={item.type} />
-                                <span className="truncate flex-1">{item.title}</span>
-                              </div>
-                            ))}
-                          </div>
+
+                          {/* Collapsed view */}
+                          {viewPlaylistId !== pl.id && (
+                            <div className="space-y-1.5">
+                              {pl.items.slice(0, 3).map((item, i) => (
+                                <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-md px-2.5 py-1.5">
+                                  <ResourceIcon type={item.type} />
+                                  <span className="truncate flex-1">{item.title}</span>
+                                </div>
+                              ))}
+                              {pl.items.length > 3 && (
+                                <p className="text-[10px] text-muted-foreground px-2.5">+ {pl.items.length - 3} more</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Expanded: full resource details */}
+                          {viewPlaylistId === pl.id && (
+                            <div className="space-y-2">
+                              {pl.items.map((item, i) => (
+                                <div key={i} className="flex items-start gap-3 bg-muted/30 rounded-lg p-3 border border-border/50">
+                                  <div className="w-8 h-8 rounded-md bg-background border border-border flex items-center justify-center text-muted-foreground shrink-0 text-xs">
+                                    <ResourceIcon type={item.type} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className="text-xs font-semibold text-card-foreground">{item.title}</h5>
+                                    <p className="text-[10px] text-muted-foreground mt-0.5">{item.author} · {item.date}</p>
+                                    {item.description && <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{item.description}</p>}
+                                  </div>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize shrink-0">{item.type}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                            <span className="text-[10px] text-muted-foreground">{pl.items.length} items</span>
-                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close playlist ↑" : "View playlist →"}</button>
+                            <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
                           </div>
                         </div>
                       ))}
@@ -2445,27 +2626,31 @@ const Community = () => {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
                           {([
-                            { key: "members", label: "Group members", count: mockMembers.length - removedMembers.size },
-                            { key: "management", label: "Management", count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
-                            { key: "invited", label: "Invited", count: mockInvited.length },
-                            { key: "requested", label: "Requested", count: mockRequested.length },
-                            { key: "blocked", label: "Blocked", count: mockBlocked.length },
-                          ] as const).map(tab => (
+                            { key: "members", label: "Members", checked: adminShowMembers, toggle: () => setAdminShowMembers(v => !v), count: mockMembers.length - removedMembers.size },
+                            { key: "management", label: "Management", checked: adminShowManagement, toggle: () => setAdminShowManagement(v => !v), count: Object.entries(memberRoles).filter(([id, r]) => (r === "founder" || r === "moderator") && !removedMembers.has(id)).length },
+                            { key: "invited", label: "Invited", checked: adminShowInvited, toggle: () => setAdminShowInvited(v => !v), count: mockInvited.length },
+                            { key: "requested", label: "Requested", checked: adminShowRequested, toggle: () => setAdminShowRequested(v => !v), count: mockRequested.length },
+                            { key: "blocked", label: "Blocked", checked: adminShowBlocked, toggle: () => setAdminShowBlocked(v => !v), count: mockBlocked.length },
+                          ]).map(tab => (
                             <label key={tab.key} className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
                               <input
                                 type="checkbox"
-                                checked={adminStatusTab === tab.key}
-                                onChange={() => { setAdminStatusTab(tab.key as any); setAdminPage(1); setAdminSelected(new Set()); }}
+                                checked={tab.checked}
+                                onChange={() => { tab.toggle(); setAdminPage(1); }}
                                 className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer"
                               />
-                              <span className={`font-medium ${adminStatusTab === tab.key ? "text-primary" : "text-muted-foreground"}`}>
+                              <span className={`font-medium ${tab.checked ? "text-primary" : "text-muted-foreground"}`}>
                                 {tab.label}
                               </span>
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${adminStatusTab === tab.key ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab.checked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{tab.count}</span>
                             </label>
                           ))}
+                        </div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <button onClick={() => { setAdminShowMembers(true); setAdminShowManagement(true); setAdminShowInvited(true); setAdminShowRequested(true); setAdminShowBlocked(true); setAdminPage(1); }} className="text-[10px] text-primary hover:underline font-medium">Select all</button>
+                          <button onClick={() => { setAdminShowMembers(false); setAdminShowManagement(false); setAdminShowInvited(false); setAdminShowRequested(false); setAdminShowBlocked(false); setAdminPage(1); }} className="text-[10px] text-muted-foreground hover:underline font-medium">Select none</button>
                         </div>
                       </div>
 
@@ -2595,69 +2780,77 @@ const Community = () => {
                               </div>
                               <div>
                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                                  adminStatusTab === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
+                                  (m as any)._source === "invited" && (m as any).expired ? "bg-red-50 text-red-600 border border-red-200" :
                                   memberRoles[m.id] === "founder" ? "bg-amber-50 text-amber-700 border border-amber-200" :
                                   memberRoles[m.id] === "moderator" ? "bg-blue-50 text-blue-700 border border-blue-200" :
                                   memberRoles[m.id] === "contributor" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                                   "bg-muted text-muted-foreground border border-border"
                                 }`}>
-                                  {adminStatusTab === "invited" ? ((m as any).expired ? "Expired" : "Invited") : adminStatusTab === "requested" ? "Requested" : adminStatusTab === "blocked" ? "Blocked" : (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
+                                  {(m as any)._source === "invited" ? ((m as any).expired ? "Expired" : "Invited") :
+                                   (m as any)._source === "requested" ? "Requested" :
+                                   (m as any)._source === "blocked" ? "Blocked" :
+                                   memberRoles[m.id] === "founder" ? "Owner" :
+                                   memberRoles[m.id] === "moderator" ? "Manager" :
+                                   (memberRoles[m.id] || "member").charAt(0).toUpperCase() + (memberRoles[m.id] || "member").slice(1)}
                                 </span>
                               </div>
                               <span className="text-[11px] text-muted-foreground">{m.joinedDate}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.firm || <span className="italic text-muted-foreground/50">Independent</span>}</span>
                               <span className="text-[11px] text-muted-foreground truncate">{m.location || "—"}</span>
                               <div className="flex items-center justify-end gap-1.5">
-                                {adminStatusTab === "members" && (
+                                {/* Role change button */}
+                                {(m as any)._source !== "invited" && (m as any)._source !== "requested" && (m as any)._source !== "blocked" && memberRoles[m.id] !== "founder" && (
                                   <div className="relative" ref={roleDropdownOpen === m.id ? roleDropdownRef : undefined}>
                                     <button
                                       onClick={() => setRoleDropdownOpen(roleDropdownOpen === m.id ? null : m.id)}
                                       className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium"
                                     >
-                                      {memberRoles[m.id] === "founder" ? "Make manager" : memberRoles[m.id] === "moderator" ? "Demote" : "Make manager"}
+                                      {memberRoles[m.id] === "moderator" ? "Change role" : "Make manager"}
                                     </button>
                                     {roleDropdownOpen === m.id && (
-                                      <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
-                                        {["founder", "moderator", "contributor", "member"].map(role => (
-                                          <button
-                                            key={role}
-                                            onClick={() => handleChangeRole(m.id, role)}
-                                            className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors capitalize flex items-center justify-between ${memberRoles[m.id] === role ? "text-primary font-medium" : "text-muted-foreground"}`}
-                                          >
-                                            {role}
-                                            {memberRoles[m.id] === role && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
-                                          </button>
-                                        ))}
+                                      <div className="absolute right-0 mt-1 w-44 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
+                                        {/* Make owner option — transfers ownership */}
+                                        <button
+                                          onClick={() => {
+                                            // Find current owner and demote to manager
+                                            const currentOwner = Object.entries(memberRoles).find(([, r]) => r === "founder");
+                                            if (currentOwner) handleChangeRole(currentOwner[0], "moderator");
+                                            handleChangeRole(m.id, "founder");
+                                          }}
+                                          className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between text-muted-foreground`}
+                                        >
+                                          <span><FontAwesomeIcon icon={faCrown} className="text-amber-500 text-[9px] mr-1.5" />Make owner</span>
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "moderator")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "moderator" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Manager {memberRoles[m.id] === "moderator" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "contributor")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "contributor" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Contributor {memberRoles[m.id] === "contributor" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
+                                        <button onClick={() => handleChangeRole(m.id, "member")} className={`w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center justify-between ${memberRoles[m.id] === "member" ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                                          Member {memberRoles[m.id] === "member" && <FontAwesomeIcon icon={faCheck} className="text-[10px]" />}
+                                        </button>
                                       </div>
                                     )}
                                   </div>
                                 )}
-                                {adminStatusTab === "invited" && (
-                                  <button
-                                    onClick={() => {/* re-send invite mock */}}
-                                    className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1"
-                                  >
+                                {/* Owner badge — no role change allowed */}
+                                {memberRoles[m.id] === "founder" && (m as any)._source !== "invited" && (
+                                  <span className="text-[10px] text-amber-600 font-medium flex items-center gap-1"><FontAwesomeIcon icon={faCrown} className="text-[9px]" /> Owner</span>
+                                )}
+                                {(m as any)._source === "invited" && (
+                                  <button onClick={() => {}} className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium flex items-center gap-1">
                                     <FontAwesomeIcon icon={faRepeat} className="text-[9px]" /> Re-send
                                   </button>
                                 )}
-                                {adminStatusTab === "requested" && (
-                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
-                                    Approve
-                                  </button>
+                                {(m as any)._source === "requested" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">Approve</button>
                                 )}
-                                {adminStatusTab === "blocked" && (
-                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">
-                                    Unblock
-                                  </button>
+                                {(m as any)._source === "blocked" && (
+                                  <button className="text-[10px] border border-primary/30 text-primary rounded-md px-2 py-1 hover:bg-primary/5 transition-colors font-medium">Unblock</button>
                                 )}
-                                <button
-                                  onClick={() => setConfirmRemove(m)}
-                                  className="text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-md hover:bg-destructive/5"
-                                  title="Remove"
-                                >
-                                  <FontAwesomeIcon icon={faBan} className="text-xs" />
-                                </button>
-                                {/* Hamburger menu */}
+                                {/* Hamburger menu — hidden for owners */}
+                                {memberRoles[m.id] !== "founder" && (
                                 <div className="relative">
                                   <button
                                     onClick={() => setMemberMenuOpen(memberMenuOpen === m.id ? null : m.id)}
@@ -2668,6 +2861,16 @@ const Community = () => {
                                   </button>
                                   {memberMenuOpen === m.id && (
                                     <div className="absolute right-0 mt-1 w-52 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
+                                      {/* Make into member (for managers) */}
+                                      {memberRoles[m.id] === "moderator" && (
+                                        <button
+                                          onClick={() => { handleChangeRole(m.id, "member"); setMemberMenuOpen(null); }}
+                                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                                        >
+                                          <FontAwesomeIcon icon={faUsers} className="text-[10px] text-primary" /> Make member
+                                        </button>
+                                      )}
+                                      {/* Research panel */}
                                       {!researchPanelMemberIds.has(m.id) ? (
                                         <button
                                           onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.add(m.id); return n; }); setMemberMenuOpen(null); }}
@@ -2683,15 +2886,25 @@ const Community = () => {
                                           <FontAwesomeIcon icon={faUserMinus} className="text-[10px] text-amber-600" /> Remove from research panel
                                         </button>
                                       )}
+                                      <div className="my-1 border-t border-border" />
+                                      {/* Remove */}
                                       <button
-                                        onClick={() => { setResearchPanelMemberIds(prev => { const n = new Set(prev); n.delete(m.id); return n; }); setMemberMenuOpen(null); }}
+                                        onClick={() => { setConfirmRemove(m); setMemberMenuOpen(null); }}
                                         className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
                                       >
-                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block from research panel
+                                        <FontAwesomeIcon icon={faTrashAlt} className="text-[10px]" /> Remove from community
+                                      </button>
+                                      {/* Block */}
+                                      <button
+                                        onClick={() => { setMemberMenuOpen(null); }}
+                                        className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
+                                      >
+                                        <FontAwesomeIcon icon={faBan} className="text-[10px]" /> Block member
                                       </button>
                                     </div>
                                   )}
                                 </div>
+                                )}
                               </div>
                             </div>
                           ))}
