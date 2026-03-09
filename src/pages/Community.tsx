@@ -1802,7 +1802,7 @@ const Community = () => {
                           </div>
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
                             <span className="text-[10px] text-muted-foreground">{pl.items.length} items</span>
-                            <button className="text-xs font-medium text-primary hover:underline">View playlist →</button>
+                            <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close playlist ↑" : "View playlist →"}</button>
                           </div>
                         </div>
                       ))}
