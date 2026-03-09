@@ -2044,15 +2044,26 @@ const Community = () => {
                         </div>
 
                         <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs font-medium text-card-foreground">Available resources ({communityResources.length})</label>
-                            <div className="flex items-center gap-3">
-                              <button onClick={() => setNewPlaylistItems(communityResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
-                              <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
-                            </div>
-                          </div>
-                          <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                            {communityResources.map(r => (
+                          {(() => {
+                            const usedIds = new Set([
+                              ...userPlaylists.flatMap(pl => pl.items.map(i => i.id)),
+                              ...mockPlaylists.flatMap(pl => pl.items.map(i => i.id)),
+                            ]);
+                            const availableResources = communityResources.filter(r => !usedIds.has(r.id));
+                            return (
+                              <>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <label className="text-xs font-medium text-card-foreground">Available resources ({availableResources.length})</label>
+                                  <div className="flex items-center gap-3">
+                                    <button onClick={() => setNewPlaylistItems(availableResources.map(r => r.id))} className="text-[10px] text-primary hover:underline">Select all</button>
+                                    <button onClick={() => setNewPlaylistItems([])} className="text-[10px] text-muted-foreground hover:underline">Select none</button>
+                                  </div>
+                                </div>
+                                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                                  {availableResources.length === 0 && (
+                                    <p className="text-xs text-muted-foreground py-3 text-center">All resources are already in playlists.</p>
+                                  )}
+                                  {availableResources.map(r => (
                               <label key={r.id} className="flex items-center gap-2.5 cursor-pointer p-1.5 rounded-md hover:bg-muted/50 transition-colors">
                                 <span
                                   onClick={() => setNewPlaylistItems(prev => prev.includes(r.id) ? prev.filter(i => i !== r.id) : [...prev, r.id])}
