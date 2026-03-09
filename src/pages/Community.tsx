@@ -2351,21 +2351,21 @@ const Community = () => {
               {isAdmin && (
                 <TabsContent value="admin">
                   <div className="space-y-6">
-                    {/* Invite Members Card */}
+                    {/* Add Contacts Card */}
                     <div className="bg-background border border-border rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
-                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Invite Members
+                            <FontAwesomeIcon icon={faUserPlus} className="text-primary text-sm" /> Add Contacts
                           </h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Invite individually, in bulk, or share an invite link.</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Add contacts individually or upload in bulk. They'll appear as prospects until you choose to invite them.</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => { setShowBulkInvite(!showBulkInvite); setShowAddContact(false); }}
                             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showBulkInvite ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
                           >
-                            <FontAwesomeIcon icon={faUsers} className="text-[10px]" /> Bulk Invite
+                            <FontAwesomeIcon icon={faUsers} className="text-[10px]" /> Bulk Upload
                           </button>
                           <button
                             onClick={() => { setShowAddContact(!showAddContact); setShowBulkInvite(false); }}
