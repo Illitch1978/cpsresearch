@@ -610,10 +610,10 @@ const Community = () => {
   // Member action menu in admin
   const [memberMenuOpen, setMemberMenuOpen] = useState<string | null>(null);
 
-  type ViewRole = "member" | "manager" | "god";
-  const [viewRole, setViewRole] = useState<ViewRole>("god");
-  const isAdmin = viewRole === "manager" || viewRole === "god";
-  const isGod = viewRole === "god";
+  type ViewRole = "member" | "manager" | "hq";
+  const [viewRole, setViewRole] = useState<ViewRole>("hq");
+  const isAdmin = viewRole === "manager" || viewRole === "hq";
+  const isHQ = viewRole === "hq";
   const [inviteEmail, setInviteEmail] = useState("");
   const [bulkEmails, setBulkEmails] = useState("");
   const [showBulkInvite, setShowBulkInvite] = useState(false);
