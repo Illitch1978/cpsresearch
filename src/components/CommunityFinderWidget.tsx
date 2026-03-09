@@ -537,9 +537,9 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-medium text-slate-800">{community.name}</p>
                               {community.requiresApproval ? (
-                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">Approval required</span>
+                                <span className="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5"><FontAwesomeIcon icon={faUserShield} className="text-[7px]" /> Approval required</span>
                               ) : (
-                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">Open</span>
+                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5"><FontAwesomeIcon icon={faLockOpen} className="text-[7px]" /> Open</span>
                               )}
                             </div>
                             <p className="text-[10px] text-slate-500 line-clamp-1">{community.description.split('.')[0]}.</p>
