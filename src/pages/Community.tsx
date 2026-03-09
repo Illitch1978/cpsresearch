@@ -1281,18 +1281,18 @@ const Community = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${communityBannerDefault})` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/60 to-slate-900/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-transparent to-white/20" />
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-3">
                     {/* Community Icon — uploadable by owner/manager */}
                     <div className="relative group">
-                      <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden shadow-lg">
+                      <div className="w-14 h-14 rounded-xl bg-slate-700/80 backdrop-blur-sm border border-slate-600/30 flex items-center justify-center overflow-hidden shadow-lg">
                         {communityIcon ? (
                           <img src={communityIcon} alt="Community icon" className="w-full h-full object-cover" />
                         ) : (
-                          <FontAwesomeIcon icon={faHandshake} className="text-white/90 text-xl" />
+                          <FontAwesomeIcon icon={faHandshake} className="text-white text-xl" />
                         )}
                       </div>
                       {isAdmin && (
@@ -1315,79 +1315,79 @@ const Community = () => {
                       )}
                     </div>
                     <div>
-                      <h1 className="text-2xl md:text-3xl font-serif font-semibold text-white leading-tight drop-shadow-sm">{community.name}</h1>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-white/70">
+                      <h1 className="text-2xl md:text-3xl font-serif font-semibold text-card-foreground leading-tight">{community.name}</h1>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><FontAwesomeIcon icon={faGlobe} /> {community.location}</span>
                         <span>·</span>
                         <span>Founded {community.founded}</span>
                         <span>·</span>
-                        <a href={`https://${community.website}`} className="text-white/90 hover:text-white hover:underline flex items-center gap-1">
+                        <a href={`https://${community.website}`} className="text-primary hover:underline flex items-center gap-1">
                           <FontAwesomeIcon icon={faLink} className="text-[10px]" /> {community.website}
                         </a>
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm text-white/80 leading-relaxed max-w-2xl mt-3">{community.description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mt-3">{community.description}</p>
                   <div className="flex flex-wrap gap-2 mt-4">
                     {community.tags.map(tag => (
-                      <span key={tag} className="text-xs font-normal px-2.5 py-1 rounded-full bg-white/10 text-white/90 border border-white/15 backdrop-blur-sm">{tag}</span>
+                      <Badge key={tag} variant="secondary" className="text-xs font-normal">{tag}</Badge>
                     ))}
                   </div>
                 </div>
                 <div className="flex flex-row md:flex-col gap-3 md:items-end shrink-0">
                   <div className="grid grid-cols-2 md:grid-cols-1 gap-3 text-center md:text-right">
                     <div>
-                      <div className="text-xl font-semibold text-white">{community.members}</div>
-                      <div className="text-xs text-white/60">Members</div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.members}</div>
+                      <div className="text-xs text-muted-foreground">Members</div>
                     </div>
                     <div>
-                      <div className="text-xl font-semibold text-white">{community.researchPanelMembers}</div>
-                      <div className="text-xs text-white/60 flex items-center justify-center md:justify-end gap-1"><FontAwesomeIcon icon={faVials} className="text-[10px]" /> Research panel</div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.researchPanelMembers}</div>
+                      <div className="text-xs text-muted-foreground flex items-center justify-center md:justify-end gap-1"><FontAwesomeIcon icon={faVials} className="text-[10px]" /> Research panel</div>
                     </div>
                     <div>
-                      <div className="text-xl font-semibold text-white">{community.discussions}</div>
-                      <div className="text-xs text-white/60">Discussions</div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.discussions}</div>
+                      <div className="text-xs text-muted-foreground">Discussions</div>
                     </div>
                     <div>
-                      <div className="text-xl font-semibold text-white">{community.resources}</div>
-                      <div className="text-xs text-white/60">Resources</div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.resources}</div>
+                      <div className="text-xs text-muted-foreground">Resources</div>
                     </div>
                     <div>
-                      <div className="text-xl font-semibold text-white">{community.events}</div>
-                      <div className="text-xs text-white/60">Events</div>
+                      <div className="text-xl font-semibold text-card-foreground">{community.events}</div>
+                      <div className="text-xs text-muted-foreground">Events</div>
                     </div>
                   </div>
 
                   {/* Owner & Manager */}
-                  <div className="border-t border-white/15 pt-3 mt-1 space-y-2 md:text-right">
-                    <button onClick={() => setSelectedMember(mockMembers[0])} className="flex items-center gap-2 text-xs hover:text-white transition-colors md:ml-auto">
+                  <div className="border-t border-border pt-3 mt-1 space-y-2 md:text-right">
+                    <button onClick={() => setSelectedMember(mockMembers[0])} className="flex items-center gap-2 text-xs hover:text-primary transition-colors md:ml-auto">
                       <Avatar className="h-5 w-5">
                         <AvatarFallback className="bg-amber-50 text-amber-600 text-[8px] font-semibold">SM</AvatarFallback>
                       </Avatar>
-                      <span className="text-white/70"><FontAwesomeIcon icon={faCrown} className="text-amber-400 text-[9px] mr-1" />Owner: <span className="font-medium text-white">{mockMembers[0].name}</span></span>
+                      <span className="text-muted-foreground"><FontAwesomeIcon icon={faCrown} className="text-amber-500 text-[9px] mr-1" />Owner: <span className="font-medium text-card-foreground">{mockMembers[0].name}</span></span>
                     </button>
-                    <button onClick={() => setSelectedMember(mockMembers[1])} className="flex items-center gap-2 text-xs hover:text-white transition-colors md:ml-auto">
+                    <button onClick={() => setSelectedMember(mockMembers[1])} className="flex items-center gap-2 text-xs hover:text-primary transition-colors md:ml-auto">
                       <Avatar className="h-5 w-5">
                         <AvatarFallback className="bg-blue-50 text-blue-600 text-[8px] font-semibold">JH</AvatarFallback>
                       </Avatar>
-                      <span className="text-white/70"><FontAwesomeIcon icon={faShieldHalved} className="text-blue-400 text-[9px] mr-1" />Manager: <span className="font-medium text-white">{mockMembers[1].name}</span></span>
+                      <span className="text-muted-foreground"><FontAwesomeIcon icon={faShieldHalved} className="text-blue-500 text-[9px] mr-1" />Manager: <span className="font-medium text-card-foreground">{mockMembers[1].name}</span></span>
                     </button>
                   </div>
 
                   <button
                     onClick={() => setIsInResearchPanel(!isInResearchPanel)}
-                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-white hover:text-white/70" : "text-white/60 hover:text-white"}`}
+                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-primary hover:text-primary/70" : "text-muted-foreground hover:text-primary"}`}
                   >
                     <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
                   </button>
                   {isInResearchPanel && (
-                    <span className="mt-1 text-[10px] text-white bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 backdrop-blur-sm">
+                    <span className="mt-1 text-[10px] text-primary bg-primary/5 border border-primary/15 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1">
                       <FontAwesomeIcon icon={faVials} className="text-[8px]" /> Research panel member
                     </span>
                   )}
                   <button
                     onClick={() => setShowLeaveConfirm(true)}
-                    className="mt-3 flex items-center gap-1.5 text-xs text-white/50 hover:text-red-300 transition-colors"
+                    className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
                   >
                     <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
                   </button>
