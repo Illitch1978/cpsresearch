@@ -2376,11 +2376,10 @@ const Community = () => {
                       {showBulkInvite && (
                         <div className="mb-4 p-4 bg-muted/30 rounded-lg border border-border space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-card-foreground">Bulk invite by email</h4>
+                            <h4 className="text-xs font-semibold text-card-foreground">Bulk invite via CSV</h4>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => {
-                                  // Generate and download an Excel-compatible CSV template
                                   const header = "Name,Email,Firm,Job Title,City,Country";
                                   const example = "Jane Smith,jane@example.com,Deloitte,Senior Manager,London,UK\nJohn Doe,john@company.org,,Independent Consultant,New York,US";
                                   const blob = new Blob([header + "\n" + example], { type: "text/csv" });
@@ -2401,36 +2400,39 @@ const Community = () => {
                               </label>
                             </div>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">Use the template to include name, email, firm, job title, city and country. Firm is optional for independent members. Each invite link will be personalised to the recipient's email.</p>
-                          <textarea
-                            value={bulkEmails}
-                            onChange={e => setBulkEmails(e.target.value)}
-                            placeholder={"Paste email addresses (one per line, or comma/semicolon separated):\n\njane@example.com\njohn@company.org\nteam@firm.co"}
-                            rows={5}
-                            className="w-full text-sm border border-border rounded-lg px-3 py-2.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none font-mono"
-                          />
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-muted-foreground">
-                              {parseBulkEmails(bulkEmails).length > 0
-                                ? <span className="text-primary font-medium">{parseBulkEmails(bulkEmails).length} valid email{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""} detected</span>
-                                : "No valid emails yet"}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => { setShowBulkInvite(false); setBulkEmails(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
-                              <button
-                                onClick={handleBulkInvite}
-                                disabled={parseBulkEmails(bulkEmails).length === 0 || bulkInviteSent}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                                  bulkInviteSent ? "bg-emerald-500 text-white" :
-                                  parseBulkEmails(bulkEmails).length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
-                                }`}
-                              >
-                                {bulkInviteSent
-                                  ? <><FontAwesomeIcon icon={faCheck} /> Invites sent!</>
-                                  : <><FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send {parseBulkEmails(bulkEmails).length} invite{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""}</>
-                                }
-                              </button>
+                          <p className="text-[10px] text-muted-foreground">Upload a CSV with name, email, firm, job title, city and country. Firm is optional for independent members. Each invite notification will include a link personalised for the recipient's email address.</p>
+                          {parseBulkEmails(bulkEmails).length > 0 && (
+                            <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
+                              <p className="text-[11px] font-medium text-card-foreground">
+                                <FontAwesomeIcon icon={faCheck} className="text-primary mr-1" />
+                                {parseBulkEmails(bulkEmails).length} contact{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""} imported
+                              </p>
+                              {parseBulkEmails(bulkEmails).slice(0, 3).map((email, i) => (
+                                <p key={i} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                                  <FontAwesomeIcon icon={faLink} className="text-[8px]" />
+                                  cpsr.uk/community/…/invite?email={encodeURIComponent(email)}&token=…
+                                </p>
+                              ))}
+                              {parseBulkEmails(bulkEmails).length > 3 && (
+                                <p className="text-[10px] text-muted-foreground">+ {parseBulkEmails(bulkEmails).length - 3} more personalised links</p>
+                              )}
                             </div>
+                          )}
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => { setShowBulkInvite(false); setBulkEmails(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                            <button
+                              onClick={handleBulkInvite}
+                              disabled={parseBulkEmails(bulkEmails).length === 0 || bulkInviteSent}
+                              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                                bulkInviteSent ? "bg-emerald-500 text-white" :
+                                parseBulkEmails(bulkEmails).length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {bulkInviteSent
+                                ? <><FontAwesomeIcon icon={faCheck} /> Invites sent!</>
+                                : <><FontAwesomeIcon icon={faPaperPlane} className="text-[10px]" /> Send {parseBulkEmails(bulkEmails).length} invite{parseBulkEmails(bulkEmails).length !== 1 ? "s" : ""}</>
+                              }
+                            </button>
                           </div>
                         </div>
                       )}
