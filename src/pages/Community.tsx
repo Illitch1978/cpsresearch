@@ -1374,23 +1374,11 @@ const Community = () => {
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => setIsInResearchPanel(!isInResearchPanel)}
-                    className={`mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors ${isInResearchPanel ? "text-white hover:text-white/70" : "text-white/60 hover:text-white"}`}
-                  >
-                    <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
-                  </button>
                   {isInResearchPanel && (
-                    <span className="mt-1 text-[10px] text-white bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 backdrop-blur-sm">
+                    <span className="mt-2 text-[10px] text-white bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 inline-flex items-center gap-1 backdrop-blur-sm">
                       <FontAwesomeIcon icon={faVials} className="text-[8px]" /> Research panel member
                     </span>
                   )}
-                  <button
-                    onClick={() => setShowLeaveConfirm(true)}
-                    className="mt-3 flex items-center gap-1.5 text-xs text-white/50 hover:text-red-300 transition-colors"
-                  >
-                    <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
-                  </button>
                 </div>
               </div>
             </div>
@@ -1398,24 +1386,40 @@ const Community = () => {
 
           {/* Role Preview Switcher */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
-            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded-lg w-fit">
-              <FontAwesomeIcon icon={faEye} className="text-muted-foreground text-xs" />
-              <span className="text-[11px] font-medium text-muted-foreground mr-1">Viewing as:</span>
-              {([
-                { key: "member" as ViewRole, label: "Member", icon: faUsers, color: "bg-muted text-muted-foreground" },
-                { key: "manager" as ViewRole, label: "Owner / Manager", icon: faShieldHalved, color: "bg-blue-50 text-blue-700 border-blue-200" },
-                { key: "hq" as ViewRole, label: "HQ", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
-              ]).map(r => (
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded-lg w-fit">
+                <FontAwesomeIcon icon={faEye} className="text-muted-foreground text-xs" />
+                <span className="text-[11px] font-medium text-muted-foreground mr-1">Viewing as:</span>
+                {([
+                  { key: "member" as ViewRole, label: "Member", icon: faUsers, color: "bg-muted text-muted-foreground" },
+                  { key: "manager" as ViewRole, label: "Owner / Manager", icon: faShieldHalved, color: "bg-blue-50 text-blue-700 border-blue-200" },
+                  { key: "hq" as ViewRole, label: "HQ", icon: faCrown, color: "bg-amber-50 text-amber-700 border-amber-200" },
+                ]).map(r => (
+                  <button
+                    key={r.key}
+                    onClick={() => { setViewRole(r.key); if (r.key === "member" && activeTab === "admin") setActiveTab("discussions"); }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all border ${
+                      viewRole === r.key ? r.color + " shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={r.icon} className="text-[10px]" /> {r.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-4">
                 <button
-                  key={r.key}
-                  onClick={() => { setViewRole(r.key); if (r.key === "member" && activeTab === "admin") setActiveTab("discussions"); }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all border ${
-                    viewRole === r.key ? r.color + " shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted"
-                  }`}
+                  onClick={() => setIsInResearchPanel(!isInResearchPanel)}
+                  className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors ${isInResearchPanel ? "text-muted-foreground hover:text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground"}`}
                 >
-                  <FontAwesomeIcon icon={r.icon} className="text-[10px]" /> {r.label}
+                  <FontAwesomeIcon icon={faVials} className="text-[10px]" /> {isInResearchPanel ? "Leave research panel" : "Join research panel"}
                 </button>
-              ))}
+                <button
+                  onClick={() => setShowLeaveConfirm(true)}
+                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-destructive transition-colors"
+                >
+                  <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
+                </button>
+              </div>
             </div>
           </div>
 
