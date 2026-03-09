@@ -2775,12 +2775,14 @@ const Community = () => {
                           {paginatedAdminMembers.map(m => (
                             <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
                               <div className="flex items-center justify-center">
-                                <button
-                                  onClick={() => toggleAdminSelect(m.id)}
-                                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
-                                >
-                                  {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
-                                </button>
+                                {(m as any)._source === "invited" ? (
+                                  <button
+                                    onClick={() => toggleAdminSelect(m.id)}
+                                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
+                                  >
+                                    {adminSelected.has(m.id) && <FontAwesomeIcon icon={faCheck} className="text-[7px]" />}
+                                  </button>
+                                ) : <div className="w-4 h-4" />}
                               </div>
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <button onClick={() => setSelectedMember(m)} className="shrink-0">
