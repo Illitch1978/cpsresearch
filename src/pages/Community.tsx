@@ -764,7 +764,7 @@ const Community = () => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "invited" }); }
       });
     }
-    if (adminShowRequested) {
+    if (false) { // Requested contacts hidden — reserved for future use
       mockRequested.forEach(m => {
         if (!seenIds.has(m.id)) { seenIds.add(m.id); combined.push({ ...m, _source: "requested" }); }
       });
