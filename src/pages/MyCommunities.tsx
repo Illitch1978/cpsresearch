@@ -1,15 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUsers,
-  faArrowLeft,
   faComments,
   faFile,
   faCalendar,
   faPlus,
   faBoxArchive,
-  faRotateLeft,
   faEllipsisV,
   faTimes,
   faGlobe,
@@ -34,6 +32,12 @@ import {
   faTrophy,
   faPen,
   faHome,
+  faSearch,
+  faSort,
+  faSortUp,
+  faSortDown,
+  faTag,
+  faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import Navigation from "@/components/Navigation";
@@ -61,6 +65,8 @@ import {
   externalFactorsList,
 } from "@/lib/communityFilterData";
 
+type MembershipStatus = "member" | "invited" | "applied" | "managed" | "pending";
+
 interface CommunityItem {
   id: string;
   name: string;
@@ -78,7 +84,14 @@ interface CommunityItem {
   isOfficial?: boolean;
   lastVisited?: string;
   isResearchPanel?: boolean;
+  theme?: string;
+  owner?: string;
+  manager?: string;
+  membershipStatus?: MembershipStatus;
 }
+
+const MAX_COMMUNITIES = 20;
+const MAX_OWNED_OPEN = 10;
 
 const initialCommunities: CommunityItem[] = [
   {
@@ -97,6 +110,10 @@ const initialCommunities: CommunityItem[] = [
     isOfficial: true,
     lastVisited: "2 hours ago",
     isResearchPanel: true,
+    theme: "Market Intelligence",
+    owner: "Sarah Mitchell",
+    manager: "James Thornton",
+    membershipStatus: "member",
   },
   {
     id: "legal-market-intel",
@@ -113,6 +130,10 @@ const initialCommunities: CommunityItem[] = [
     isFavourite: false,
     isOfficial: false,
     lastVisited: "Yesterday",
+    theme: "Legal Services",
+    owner: "Richard Chaplin",
+    manager: "Anna Kowalski",
+    membershipStatus: "member",
   },
   {
     id: "consulting-trends",
@@ -122,13 +143,93 @@ const initialCommunities: CommunityItem[] = [
     discussions: 89,
     resources: 41,
     events: 5,
-    role: "Member",
+    role: "Owner",
     lastActive: "3 days ago",
     avatar: "MCT",
     isPrivate: false,
     isFavourite: true,
     isOfficial: true,
     lastVisited: undefined,
+    theme: "Consulting",
+    owner: "Richard Chaplin",
+    manager: "David Chen",
+    membershipStatus: "managed",
+  },
+  {
+    id: "sustainability-esg",
+    name: "Sustainability & ESG Forum",
+    description: "Collaborative space for sustainability officers sharing frameworks, case studies, and regulatory updates.",
+    members: 198,
+    discussions: 15,
+    resources: 9,
+    events: 0,
+    role: "Invited",
+    lastActive: "1 week ago",
+    avatar: "SEF",
+    isPrivate: false,
+    isFavourite: false,
+    isOfficial: false,
+    theme: "ESG & Sustainability",
+    owner: "Anna Kowalski",
+    manager: "Sarah Mitchell",
+    membershipStatus: "invited",
+  },
+  {
+    id: "fintech-innovation",
+    name: "FinTech Innovation Hub",
+    description: "Open community for financial technology professionals exploring disruptive solutions in banking and payments.",
+    members: 445,
+    discussions: 62,
+    resources: 33,
+    events: 2,
+    role: "Applied",
+    lastActive: "4 days ago",
+    avatar: "FIH",
+    isPrivate: false,
+    isFavourite: false,
+    isOfficial: false,
+    theme: "Financial Technology",
+    owner: "David Chen",
+    manager: "James Thornton",
+    membershipStatus: "applied",
+  },
+  {
+    id: "ceo-roundtable",
+    name: "CEO Roundtable UK",
+    description: "Strategic discussions for chief executives on leadership, growth, and board governance.",
+    members: 890,
+    discussions: 120,
+    resources: 55,
+    events: 4,
+    role: "Pending",
+    lastActive: "12 hours ago",
+    avatar: "CRU",
+    isPrivate: false,
+    isFavourite: false,
+    isOfficial: true,
+    theme: "Executive Leadership",
+    owner: "Sarah Mitchell",
+    manager: "Richard Chaplin",
+    membershipStatus: "pending",
+  },
+  {
+    id: "private-wealth",
+    name: "Private Wealth Advisory",
+    description: "Private network for wealth managers and family offices discussing investment strategies.",
+    members: 78,
+    discussions: 8,
+    resources: 12,
+    events: 1,
+    role: "Member",
+    lastActive: "5 days ago",
+    avatar: "PWA",
+    isPrivate: true,
+    isFavourite: false,
+    isOfficial: false,
+    theme: "Wealth Management",
+    owner: "James Thornton",
+    manager: "Anna Kowalski",
+    membershipStatus: "member",
   },
 ];
 
@@ -141,14 +242,44 @@ const ownerRankings = [
   { name: "David Chen", communities: 1, members: 156, resources: 24, conversations: 32 },
 ];
 
+const pluralize = (count: number, singular: string, plural?: string) => {
+  return `${count} ${count === 1 ? singular : (plural || singular + "s")}`;
+};
+
+type SortField = "name" | "members" | "discussions" | "resources";
+type SortDir = "asc" | "desc";
+
 const MyCommunities = () => {
   const navigate = useNavigate();
   const [communities, setCommunities] = useState<CommunityItem[]>(initialCommunities);
-  const [showArchived, setShowArchived] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [confirmLeave, setConfirmLeave] = useState<string | null>(null);
+
+  // HQ access (simulated)
+  const [isHQ] = useState(true);
+
+  // Search & Sort
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // Status filters
+  const [filterMember, setFilterMember] = useState(false);
+  const [filterInvited, setFilterInvited] = useState(false);
+  const [filterApplied, setFilterApplied] = useState(false);
+  const [filterManaged, setFilterManaged] = useState(false);
+  const [filterPending, setFilterPending] = useState(false);
+
+  // Filter state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterPrivate, setFilterPrivate] = useState(false);
+  const [filterFavourites, setFilterFavourites] = useState(false);
+  const [filterOfficial, setFilterOfficial] = useState(false);
+  const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
+  const [filterResearchPanels, setFilterResearchPanels] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Create form state
   const [formName, setFormName] = useState("");
@@ -160,7 +291,7 @@ const MyCommunities = () => {
   const [formThumbnail, setFormThumbnail] = useState<string | null>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
-  // Form filter states (matching Find a Community)
+  // Form filter states
   const [formLocationFilter, setFormLocationFilter] = useState("any");
   const [formSelectedContinents, setFormSelectedContinents] = useState<string[]>([]);
   const [formSelectedCountries, setFormSelectedCountries] = useState<string[]>([]);
@@ -182,7 +313,6 @@ const MyCommunities = () => {
   const [formInviteExpiry, setFormInviteExpiry] = useState("90");
   const [formCommunityRules, setFormCommunityRules] = useState("Open community with no pre-approval of posts and content items.");
   const [rulesExpanded, setRulesExpanded] = useState(false);
-  // Messages state
   const [messagesExpanded, setMessagesExpanded] = useState(false);
   const [activeMessageTemplate, setActiveMessageTemplate] = useState("welcome");
   const [messageTemplates, setMessageTemplates] = useState<Record<string, string>>({
@@ -207,6 +337,10 @@ const MyCommunities = () => {
   // Owner rankings visibility
   const [showOwnerRankings, setShowOwnerRankings] = useState(false);
 
+  // Join modal state
+  const [joiningCommunity, setJoiningCommunity] = useState<CommunityItem | null>(null);
+  const [joinContributions, setJoinContributions] = useState<string[]>([]);
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -217,41 +351,100 @@ const MyCommunities = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Filter state
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterPrivate, setFilterPrivate] = useState(false);
-  const [filterFavourites, setFilterFavourites] = useState(false);
-  const [filterOfficial, setFilterOfficial] = useState(false);
-  const [filterRecentlyVisited, setFilterRecentlyVisited] = useState(false);
-  const [filterResearchPanels, setFilterResearchPanels] = useState(false);
+  // Ownership tracking
+  const ownedOpenCount = useMemo(() => {
+    return communities.filter(c => !c.archived && !c.isPrivate && (c.role === "Owner" || c.role === "Founder")).length;
+  }, [communities]);
+  const isAtOwnershipLimit = ownedOpenCount >= MAX_OWNED_OPEN;
 
-  const activeCommunities = communities.filter(c => {
-    if (c.archived) return false;
-    if (filterOpen && c.isPrivate) return false;
-    if (filterPrivate && !c.isPrivate) return false;
-    if (filterFavourites && !c.isFavourite) return false;
-    if (filterOfficial && !c.isOfficial) return false;
-    if (filterRecentlyVisited && !c.lastVisited) return false;
-    if (filterResearchPanels && !c.isResearchPanel) return false;
-    return true;
-  });
-  const archivedCommunities = communities.filter(c => c.archived);
+  // Visibility: private communities only shown to members/invited/managed
+  const visibleCommunities = useMemo(() => {
+    return communities.filter(c => {
+      if (!c.isPrivate) return true;
+      // Private: only visible to member, invited, or managed
+      const status = c.membershipStatus;
+      return status === "member" || status === "invited" || status === "managed";
+    });
+  }, [communities]);
+
+  // Filtering
+  const filteredCommunities = useMemo(() => {
+    let result = visibleCommunities.filter(c => {
+      // Archived: only show if HQ + checkbox on
+      if (c.archived) return showArchived && isHQ;
+
+      if (filterOpen && c.isPrivate) return false;
+      if (filterPrivate && !c.isPrivate) return false;
+      if (filterFavourites && !c.isFavourite) return false;
+      if (filterOfficial && !c.isOfficial) return false;
+      if (filterRecentlyVisited && !c.lastVisited) return false;
+      if (filterResearchPanels && !c.isResearchPanel) return false;
+
+      // Status filters (OR logic)
+      const anyStatusFilter = filterMember || filterInvited || filterApplied || filterManaged || filterPending;
+      if (anyStatusFilter) {
+        const status = c.membershipStatus;
+        if (filterMember && status === "member") return true;
+        if (filterInvited && status === "invited") return true;
+        if (filterApplied && status === "applied") return true;
+        if (filterManaged && status === "managed") return true;
+        if (filterPending && status === "pending") return true;
+        return false;
+      }
+
+      return true;
+    });
+
+    // Search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.owner || "").toLowerCase().includes(q) ||
+        (c.manager || "").toLowerCase().includes(q) ||
+        (c.theme || "").toLowerCase().includes(q)
+      );
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let cmp = 0;
+      if (sortField === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortField === "members") cmp = a.members - b.members;
+      else if (sortField === "discussions") cmp = a.discussions - b.discussions;
+      else if (sortField === "resources") cmp = a.resources - b.resources;
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+
+    return result;
+  }, [visibleCommunities, showArchived, isHQ, filterOpen, filterPrivate, filterFavourites, filterOfficial, filterRecentlyVisited, filterResearchPanels, filterMember, filterInvited, filterApplied, filterManaged, filterPending, searchQuery, sortField, sortDir]);
 
   const toggleFavourite = (id: string) => {
     setCommunities(prev => prev.map(c => c.id === id ? { ...c, isFavourite: !c.isFavourite } : c));
   };
 
-  const toggleArchive = (id: string) => {
-    setCommunities(prev => prev.map(c => c.id === id ? { ...c, archived: !c.archived } : c));
-    setMenuOpen(null);
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
   };
 
-  const hasAnyFilterSelection = () => {
-    return formSelectedContributions.length > 0;
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return faSort;
+    return sortDir === "asc" ? faSortUp : faSortDown;
   };
+
+  const hasAnyFilterSelection = () => formSelectedContributions.length > 0;
 
   const handleCreate = () => {
     if (!formName.trim() || !formSummary.trim() || !hasAnyFilterSelection()) return;
+
+    // Enforce private if at ownership limit and not HQ
+    const effectiveAccess = (isAtOwnershipLimit && !isHQ && formAccess === "open") ? "private" : formAccess;
+
     setFormSaving(true);
     setTimeout(() => {
       const newId = formName.toLowerCase().replace(/\s+/g, "-").slice(0, 30) + "-" + Date.now();
@@ -266,6 +459,11 @@ const MyCommunities = () => {
         role: "Founder",
         lastActive: "Just now",
         avatar: formName.trim().split(" ").map(w => w[0]).join("").slice(0, 3).toUpperCase(),
+        isPrivate: effectiveAccess === "private",
+        owner: "Richard Chaplin",
+        manager: "Richard Chaplin",
+        membershipStatus: "managed",
+        theme: formSelectedSectors.length > 0 ? formSelectedSectors[0] : undefined,
       };
       setCommunities(prev => [newCommunity, ...prev]);
       setCommunityContributions(prev => ({ ...prev, [newId]: formSelectedContributions }));
@@ -309,19 +507,50 @@ const MyCommunities = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleConfirmJoin = () => {
+    if (joinContributions.length === 0 || !joiningCommunity) return;
+    const activeMemberCount = communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length;
+    const isAtMax = activeMemberCount >= MAX_COMMUNITIES;
+
+    setCommunities(prev => prev.map(c => {
+      if (c.id !== joiningCommunity.id) return c;
+      if (isAtMax) return { ...c, membershipStatus: "pending" as MembershipStatus, role: "Pending" };
+      return { ...c, membershipStatus: "member" as MembershipStatus, role: "Member" };
+    }));
+    setCommunityContributions(prev => ({ ...prev, [joiningCommunity.id]: joinContributions }));
+    setJoiningCommunity(null);
+    setJoinContributions([]);
+  };
+
+  const getStatusBadge = (status?: MembershipStatus) => {
+    switch (status) {
+      case "invited": return <Badge variant="outline" className="text-[10px] border-blue-300 text-blue-600">Invited</Badge>;
+      case "applied": return <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600">Applied</Badge>;
+      case "pending": return <Badge variant="outline" className="text-[10px] border-orange-300 text-orange-600">Pending</Badge>;
+      case "managed": return <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Managed</Badge>;
+      default: return null;
+    }
+  };
+
+  const isPending = (c: CommunityItem) => c.membershipStatus === "pending";
+  const canClickThrough = (c: CommunityItem) => !c.archived && !isPending(c) && c.membershipStatus !== "applied" && c.membershipStatus !== "invited";
+  const canJoin = (c: CommunityItem) => c.membershipStatus === "invited" || c.membershipStatus === "applied" || (!c.membershipStatus);
+
   const renderCommunityCard = (community: CommunityItem) => {
     const contributions = communityContributions[community.id] || [];
     const isEditingThis = editingContributions === community.id;
+    const clickable = canClickThrough(community);
 
     return (
       <div
         key={community.id}
-        className={`w-full text-left bg-card border border-border rounded-sm p-5 sm:p-6 transition-all ${community.archived ? "opacity-60" : "hover:border-primary/30 hover:shadow-md"}`}
+        className={`w-full text-left bg-card border border-border rounded-sm p-5 sm:p-6 transition-all ${community.archived ? "opacity-60" : isPending(community) ? "opacity-70" : "hover:border-primary/30 hover:shadow-md"}`}
       >
         <div className="flex items-start gap-4">
           <button
-            onClick={() => !community.archived && navigate(`/community/${community.id}`)}
-            className="w-12 h-12 rounded-sm bg-primary/10 text-primary font-serif font-semibold text-sm flex items-center justify-center flex-shrink-0"
+            onClick={() => clickable && navigate(`/community/${community.id}`)}
+            disabled={!clickable}
+            className={`w-12 h-12 rounded-sm bg-primary/10 text-primary font-serif font-semibold text-sm flex items-center justify-center flex-shrink-0 ${!clickable ? "cursor-default" : ""}`}
           >
             {community.avatar}
           </button>
@@ -329,14 +558,16 @@ const MyCommunities = () => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <button
-                onClick={() => !community.archived && navigate(`/community/${community.id}`)}
-                className="font-serif font-medium text-card-foreground text-base sm:text-lg hover:text-primary transition-colors text-left"
+                onClick={() => clickable && navigate(`/community/${community.id}`)}
+                disabled={!clickable}
+                className={`font-serif font-medium text-card-foreground text-base sm:text-lg text-left ${clickable ? "hover:text-primary transition-colors" : "cursor-default"}`}
               >
                 {community.name}
               </button>
               <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">
                 {community.role}
               </span>
+              {getStatusBadge(community.membershipStatus)}
               {community.isPrivate && (
                 <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <FontAwesomeIcon icon={faLock} className="text-[9px]" /> Private
@@ -358,18 +589,39 @@ const MyCommunities = () => {
             </div>
             <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{community.description}</p>
 
-            {/* Stats */}
+            {/* Theme */}
+            {community.theme && (
+              <div className="mt-1.5">
+                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-accent text-accent-foreground border border-border">
+                  <FontAwesomeIcon icon={faTag} className="text-[8px]" /> {community.theme}
+                </span>
+              </div>
+            )}
+
+            {/* Owner / Manager */}
+            {(community.owner || community.manager) && (
+              <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                {community.owner && (
+                  <span className="flex items-center gap-1"><FontAwesomeIcon icon={faCrown} className="text-[8px] text-amber-500" /> {community.owner}</span>
+                )}
+                {community.manager && community.manager !== community.owner && (
+                  <span className="flex items-center gap-1"><FontAwesomeIcon icon={faShieldHalved} className="text-[8px]" /> {community.manager}</span>
+                )}
+              </div>
+            )}
+
+            {/* Stats - pluralized */}
             <div className="flex items-center gap-5 mt-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faUsers} className="text-[10px]" />{community.members} members</span>
-              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faComments} className="text-[10px]" />{community.discussions} discussions</span>
-              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faFile} className="text-[10px]" />{community.resources} resources</span>
-              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCalendar} className="text-[10px]" />{community.events} events</span>
+              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faUsers} className="text-[10px]" />{pluralize(community.members, "member")}</span>
+              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faComments} className="text-[10px]" />{pluralize(community.discussions, "discussion")}</span>
+              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faFile} className="text-[10px]" />{pluralize(community.resources, "resource")}</span>
+              <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faCalendar} className="text-[10px]" />{pluralize(community.events, "event")}</span>
             </div>
 
             <p className="text-[11px] text-muted-foreground mt-2">Active {community.lastActive}</p>
 
-            {/* My contribution */}
-            {!community.archived && (
+            {/* My contribution - only for members/managed */}
+            {!community.archived && (community.membershipStatus === "member" || community.membershipStatus === "managed") && (
               <div className="mt-3 pt-3 border-t border-border">
                 {isEditingThis ? (
                   <div className="space-y-2">
@@ -424,15 +676,26 @@ const MyCommunities = () => {
             )}
           </div>
 
-          {/* Favourite + Actions */}
+          {/* Right side: Favourite + Actions + Join */}
           <div className="flex items-start gap-1">
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
-              className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
-              title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
-            >
-              <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
-            </button>
+            {/* Join button for non-members */}
+            {canJoin(community) && (
+              <button
+                onClick={() => { setJoiningCommunity(community); setJoinContributions([]); }}
+                className="text-[10px] font-medium px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Join
+              </button>
+            )}
+            {(community.membershipStatus === "member" || community.membershipStatus === "managed") && (
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
+                className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
+                title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
+              >
+                <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
+              </button>
+            )}
             <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
               <button
                 onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === community.id ? null : community.id); }}
@@ -444,7 +707,7 @@ const MyCommunities = () => {
                 <div className="absolute right-0 mt-1 w-44 bg-card rounded-lg shadow-xl border border-border z-50 py-1">
                   {!community.archived ? (
                     <>
-                      {community.role !== "Founder" && (
+                      {community.role !== "Founder" && community.role !== "Owner" && community.membershipStatus === "member" && (
                         <button
                           onClick={() => { setConfirmLeave(community.id); setMenuOpen(null); }}
                           className="w-full text-left px-3 py-2 text-xs hover:bg-destructive/5 transition-colors flex items-center gap-2 text-destructive"
@@ -452,11 +715,30 @@ const MyCommunities = () => {
                           <FontAwesomeIcon icon={faRightFromBracket} className="text-[10px]" /> Leave community
                         </button>
                       )}
+                      {isHQ && (
+                        <button
+                          onClick={() => {
+                            setCommunities(prev => prev.map(c => c.id === community.id ? { ...c, archived: true } : c));
+                            setMenuOpen(null);
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                        >
+                          <FontAwesomeIcon icon={faBoxArchive} className="text-[10px]" /> Archive
+                        </button>
+                      )}
                     </>
                   ) : (
-                    <span className="px-3 py-2 text-xs text-muted-foreground block">
-                      Contact HQ to restore
-                    </span>
+                    isHQ && (
+                      <button
+                        onClick={() => {
+                          setCommunities(prev => prev.map(c => c.id === community.id ? { ...c, archived: false } : c));
+                          setMenuOpen(null);
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2 text-muted-foreground"
+                      >
+                        <FontAwesomeIcon icon={faBoxArchive} className="text-[10px]" /> Unarchive
+                      </button>
+                    )
                   )}
                 </div>
               )}
@@ -487,8 +769,8 @@ const MyCommunities = () => {
           </button>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-card-foreground">My Communities</h1>
-              <p className="text-muted-foreground mt-2 text-sm">Communities you are a member of. Click to enter and participate.</p>
+              <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-card-foreground">All Communities</h1>
+              <p className="text-muted-foreground mt-2 text-sm">Browse, join, and manage communities across the platform.</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -543,24 +825,75 @@ const MyCommunities = () => {
           </div>
         )}
 
-        {/* Personal Involvement Rules */}
+        {/* Personal Involvement */}
         <div className="bg-card border border-border rounded-sm p-5 mb-6">
           <h2 className="text-sm font-semibold text-card-foreground mb-2">Personal involvement</h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            You may join up to <span className="font-semibold text-card-foreground">20</span> open Communities and an unlimited number of private Communities.
+            You may join up to <span className="font-semibold text-card-foreground">{MAX_COMMUNITIES}</span> open communities and an unlimited number of private communities.
+            You may own up to <span className="font-semibold text-card-foreground">{MAX_OWNED_OPEN}</span> open communities.
           </p>
-          <div className="flex items-center gap-3 mt-3">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="font-medium text-card-foreground">{activeCommunities.filter(c => c.role !== "Founder").length}</span> / 20 open communities joined
+          <div className="space-y-2 mt-3">
+            {/* Joined scale */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-52">
+                <span className="font-medium text-card-foreground">{communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length}</span> / {MAX_COMMUNITIES} open communities joined
+              </div>
+              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, (communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length / MAX_COMMUNITIES) * 100)}%` }} />
+              </div>
             </div>
-            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, (activeCommunities.filter(c => c.role !== "Founder").length / 20) * 100)}%` }} />
+            {/* Owned scale */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-52">
+                <span className="font-medium text-card-foreground">{ownedOpenCount}</span> / {MAX_OWNED_OPEN} open communities owned
+              </div>
+              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${isAtOwnershipLimit ? "bg-destructive" : "bg-primary"}`} style={{ width: `${Math.min(100, (ownedOpenCount / MAX_OWNED_OPEN) * 100)}%` }} />
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by name, owner, manager, or theme…"
+              className="w-full text-sm border border-border rounded-lg pl-9 pr-3 py-2.5 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <FontAwesomeIcon icon={faTimes} className="text-xs" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Sort buttons */}
+        <div className="flex items-center gap-1 mb-4 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Sort:</span>
+          {([
+            { field: "name" as SortField, label: "Name" },
+            { field: "members" as SortField, label: "Members" },
+            { field: "discussions" as SortField, label: "Discussions" },
+            { field: "resources" as SortField, label: "Resources" },
+          ]).map(s => (
+            <button
+              key={s.field}
+              onClick={() => toggleSort(s.field)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded transition-colors ${sortField === s.field ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+            >
+              {s.label} <FontAwesomeIcon icon={getSortIcon(s.field)} className="text-[9px]" />
+            </button>
+          ))}
+        </div>
+
         {/* Filter Checkboxes */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-3">
           <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
           {[
             { label: "Open", state: filterOpen, setter: setFilterOpen },
@@ -577,30 +910,40 @@ const MyCommunities = () => {
           ))}
         </div>
 
-        {/* Active Communities */}
+        {/* Status Checkboxes */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
+          {[
+            { label: "Member", state: filterMember, setter: setFilterMember },
+            { label: "Invited", state: filterInvited, setter: setFilterInvited },
+            { label: "Applied", state: filterApplied, setter: setFilterApplied },
+            { label: "Managed", state: filterManaged, setter: setFilterManaged },
+            { label: "Pending", state: filterPending, setter: setFilterPending },
+          ].map(f => (
+            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
+              <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+              {f.label}
+            </label>
+          ))}
+          {isHQ && (
+            <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none ml-3 pl-3 border-l border-border">
+              <input type="checkbox" checked={showArchived} onChange={() => setShowArchived(!showArchived)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+              Archived (HQ)
+            </label>
+          )}
+        </div>
+
+        {/* Communities List */}
         <div className="space-y-4">
-          {activeCommunities.map(renderCommunityCard)}
-          {activeCommunities.length === 0 && (
+          {filteredCommunities.map(renderCommunityCard)}
+          {filteredCommunities.length === 0 && (
             <div className="text-center py-12 bg-card border border-border rounded-sm">
               <FontAwesomeIcon icon={faUsers} className="text-3xl text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">No active communities.</p>
+              <p className="text-sm text-muted-foreground">No communities match your filters.</p>
               <button onClick={() => { resetForm(); setCreateOpen(true); }} className="text-sm text-primary font-medium hover:underline mt-2">Create your first community →</button>
             </div>
           )}
         </div>
-
-        {/* Archived Section */}
-        {archivedCommunities.length > 0 && (
-          <div className="mt-8">
-            <button onClick={() => setShowArchived(!showArchived)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
-              <FontAwesomeIcon icon={faBoxArchive} className="text-xs" /> Archived ({archivedCommunities.length})
-              <span className="text-[10px]">{showArchived ? "▲" : "▼"}</span>
-            </button>
-            {showArchived && (
-              <div className="space-y-4">{archivedCommunities.map(renderCommunityCard)}</div>
-            )}
-          </div>
-        )}
       </main>
 
       {/* Create Community Dialog */}
@@ -626,14 +969,32 @@ const MyCommunities = () => {
             {/* Access */}
             <div>
               <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access <span className="text-destructive">*</span></label>
-              <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
-                <button onClick={() => setFormAccess("open")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${formAccess === "open" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}>
-                  <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
-                </button>
-                <button onClick={() => setFormAccess("private")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${formAccess === "private" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}>
-                  <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
-                </button>
-              </div>
+              {isAtOwnershipLimit && !isHQ ? (
+                <div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg border border-border">
+                    <FontAwesomeIcon icon={faLock} className="text-[10px] text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Private only — you have reached the open community ownership limit ({MAX_OWNED_OPEN})</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
+                  <button onClick={() => setFormAccess("open")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${formAccess === "open" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}>
+                    <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
+                  </button>
+                  <button onClick={() => setFormAccess("private")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${formAccess === "private" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}>
+                    <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Official status - HQ only text */}
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border">
+              <FontAwesomeIcon icon={faShieldHalved} className="text-[10px] text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                To request official status,{" "}
+                <a href="mailto:hq@cpsr.uk?subject=Request%20for%20Official%20Community%20Status" className="text-primary hover:underline font-medium">email HQ</a>.
+              </span>
             </div>
 
             {/* Thumbnail */}
@@ -675,31 +1036,36 @@ const MyCommunities = () => {
             {/* Description */}
             <div>
               <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
-              <div className="relative">
-                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value.slice(0, 1000))} placeholder="Detailed description of the community's purpose and goals…" rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
-                <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{formDescription.length}/1000</span>
+              <div className="border border-border rounded-lg overflow-hidden">
+                <div className="flex items-center gap-0.5 bg-muted/30 px-2 py-1.5 border-b border-border">
+                  {[{ icon: faBold, title: "Bold" }, { icon: faItalic, title: "Italic" }].map(btn => (
+                    <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                  ))}
+                  <div className="w-px h-4 bg-border mx-1" />
+                  {[{ icon: faAlignLeft, title: "Left" }, { icon: faAlignCenter, title: "Centre" }, { icon: faAlignRight, title: "Right" }, { icon: faAlignJustify, title: "Justify" }].map(btn => (
+                    <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                  ))}
+                  <div className="w-px h-4 bg-border mx-1" />
+                  {[{ icon: faListUl, title: "Bullets" }, { icon: faListOl, title: "Numbered" }].map(btn => (
+                    <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                  ))}
+                  <div className="w-px h-4 bg-border mx-1" />
+                  <button title="Link" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faLinkIcon} className="text-xs" /></button>
+                  <button title="Image" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faImageIcon} className="text-xs" /></button>
+                </div>
+                <div className="relative">
+                  <textarea value={formDescription} onChange={e => setFormDescription(e.target.value.slice(0, 2000))} placeholder="Full description…" rows={4} className="w-full text-sm px-3 py-2 bg-background focus:outline-none resize-none" />
+                  <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{formDescription.length}/2000</span>
+                </div>
               </div>
             </div>
 
-            {/* Official Community - HQ only */}
-            <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <p className="text-xs font-medium text-card-foreground mb-1">Official Community Status</p>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Official status can only be granted by HQ. To request official status for your community, please{" "}
-                <a href="mailto:hq@cpsr.uk?subject=Request%20Official%20Community%20Status" className="text-primary font-medium hover:underline">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-[10px] mr-0.5" />email HQ
-                </a>.
-              </p>
-            </div>
-
-            {/* ─── Community Filters (matching Find a Community) ─── */}
+            {/* ─── Filter criteria (matching Find a Community) ─── */}
             <div className="border border-border rounded-lg overflow-hidden">
               <div className="px-4 py-3 bg-muted/30">
-                <span className="text-xs font-semibold text-card-foreground">Community Criteria</span>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Select at least one contribution. Filters match the Community Finder.</p>
+                <span className="text-xs font-semibold text-card-foreground">Community criteria</span>
               </div>
               <div className="px-4 py-4 space-y-5 border-t border-border">
-
                 {/* Location */}
                 <div>
                   <p className="text-xs font-medium text-card-foreground mb-2">Location</p>
@@ -871,53 +1237,45 @@ const MyCommunities = () => {
               {rulesExpanded && (
                 <div className="px-4 py-4 space-y-5 border-t border-border">
                   <p className="text-[11px] text-muted-foreground leading-relaxed">The default settings are 'Anyone can join' and 'No review required'. If alternative settings are adopted, please update the guidance in the 'Community rules' box.</p>
-
-                  {/* Membership rules */}
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for approval of membership applications <span className="text-destructive">*</span></label>
                     <div className="space-y-2">
                       {([["anyone", "Anyone can join"], ["criteria", "Anyone meeting criteria"], ["approval", "Approval required"]] as const).map(([value, label]) => (
                         <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                          <span onClick={() => setFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formMembershipRule === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}>
-                            {formMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          <span onClick={() => setFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formMembershipRule === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                            {formMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                           </span>
                           <span className="text-xs text-card-foreground font-medium" onClick={() => setFormMembershipRule(value)}>{label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-
-                  {/* Post review */}
                   <div>
-                    <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts added by members <span className="text-destructive">*</span></label>
+                    <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
                     <div className="space-y-2">
                       {([["none", "No review required"], ["criteria", "Posts that meet criteria require review"], ["all", "Review required for all posts"]] as const).map(([value, label]) => (
                         <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                          <span onClick={() => setFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formPostReview === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}>
-                            {formPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          <span onClick={() => setFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formPostReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                            {formPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                           </span>
                           <span className="text-xs text-card-foreground font-medium" onClick={() => setFormPostReview(value)}>{label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-
-                  {/* Content review */}
                   <div>
-                    <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items added by members <span className="text-destructive">*</span></label>
+                    <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
                     <div className="space-y-2">
                       {([["none", "No review required"], ["criteria", "Content items that meet criteria require review"], ["all", "Review required for all content items"]] as const).map(([value, label]) => (
                         <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                          <span onClick={() => setFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formContentReview === value ? "border-primary bg-primary" : "border-slate-300 group-hover:border-slate-400"}`}>
-                            {formContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          <span onClick={() => setFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${formContentReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                            {formContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                           </span>
                           <span className="text-xs text-card-foreground font-medium" onClick={() => setFormContentReview(value)}>{label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
-
-                  {/* Invite expiry */}
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
                     <div className="flex items-center gap-2">
@@ -927,12 +1285,10 @@ const MyCommunities = () => {
                       <span className="text-xs text-muted-foreground">days after being sent.</span>
                     </div>
                   </div>
-
-                  {/* Community rules */}
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-1.5 block">Community rules <span className="text-destructive">*</span></label>
                     <div className="relative">
-                      <textarea value={formCommunityRules} onChange={e => setFormCommunityRules(e.target.value.slice(0, 500))} placeholder="Describe the community rules and guidelines…" rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
+                      <textarea value={formCommunityRules} onChange={e => setFormCommunityRules(e.target.value.slice(0, 500))} placeholder="Describe the community rules…" rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
                       <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{formCommunityRules.length}/500</span>
                     </div>
                   </div>
@@ -963,21 +1319,15 @@ const MyCommunities = () => {
                   <div className="px-4 pb-4">
                     <div className="flex items-center gap-0.5 border border-border border-b-0 rounded-t-lg bg-muted/30 px-2 py-1.5">
                       {[{ icon: faBold, title: "Bold" }, { icon: faItalic, title: "Italic" }].map(btn => (
-                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
-                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
-                        </button>
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
                       ))}
                       <div className="w-px h-4 bg-border mx-1" />
                       {[{ icon: faAlignLeft, title: "Align left" }, { icon: faAlignCenter, title: "Align centre" }, { icon: faAlignRight, title: "Align right" }, { icon: faAlignJustify, title: "Justify" }].map(btn => (
-                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
-                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
-                        </button>
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
                       ))}
                       <div className="w-px h-4 bg-border mx-1" />
                       {[{ icon: faListUl, title: "Bullet list" }, { icon: faListOl, title: "Numbered list" }].map(btn => (
-                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors">
-                          <FontAwesomeIcon icon={btn.icon} className="text-xs" />
-                        </button>
+                        <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
                       ))}
                       <div className="w-px h-4 bg-border mx-1" />
                       <button title="Insert link" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faLinkIcon} className="text-xs" /></button>
@@ -1009,6 +1359,45 @@ const MyCommunities = () => {
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${formName.trim() && formSummary.trim() && formSelectedContributions.length > 0 && !formSaving ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
               >
                 {formSaving ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Community Modal */}
+      <Dialog open={!!joiningCommunity} onOpenChange={(open) => { if (!open) { setJoiningCommunity(null); setJoinContributions([]); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-serif">Join {joiningCommunity?.name}</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Select your anticipated contributions to this community. At least one is required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="space-y-1.5">
+              {contributionsList.map(c => (
+                <div key={c.singular} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`join-contrib-${c.singular}`}
+                    checked={joinContributions.includes(c.singular)}
+                    onCheckedChange={() => setJoinContributions(prev => prev.includes(c.singular) ? prev.filter(x => x !== c.singular) : [...prev, c.singular])}
+                  />
+                  <Label htmlFor={`join-contrib-${c.singular}`} className="text-xs text-card-foreground cursor-pointer">{c.singular}</Label>
+                </div>
+              ))}
+            </div>
+            {joinContributions.length === 0 && (
+              <p className="text-[10px] text-destructive">Please select at least one contribution</p>
+            )}
+            <div className="flex items-center gap-3 pt-2">
+              <button onClick={() => { setJoiningCommunity(null); setJoinContributions([]); }} className="flex-1 text-sm font-medium border border-border rounded-lg py-2 hover:bg-muted transition-colors">Cancel</button>
+              <button
+                onClick={handleConfirmJoin}
+                disabled={joinContributions.length === 0}
+                className={`flex-1 text-sm font-medium rounded-lg py-2 transition-colors ${joinContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+              >
+                Join
               </button>
             </div>
           </div>
