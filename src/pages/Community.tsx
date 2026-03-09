@@ -2678,15 +2678,13 @@ const Community = () => {
                             <option value="all">All cities</option>
                             {allCities.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
-                          {adminStatusTab === "members" && (
-                            <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
-                              <option value="all">All roles</option>
-                              <option value="founder">Founder</option>
-                              <option value="moderator">Moderator</option>
-                              <option value="contributor">Contributor</option>
-                              <option value="member">Member</option>
-                            </select>
-                          )}
+                          <select value={adminFilterRole} onChange={e => { setAdminFilterRole(e.target.value); setAdminPage(1); }} className="text-xs border border-border rounded-lg px-2.5 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-muted-foreground">
+                            <option value="all">All roles</option>
+                            <option value="founder">Owner</option>
+                            <option value="moderator">Manager</option>
+                            <option value="contributor">Contributor</option>
+                            <option value="member">Member</option>
+                          </select>
                         </div>
                         {/* Extra Filters Row */}
                         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-3">
