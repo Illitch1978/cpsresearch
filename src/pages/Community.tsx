@@ -2816,7 +2816,7 @@ const Community = () => {
                           {paginatedAdminMembers.map(m => (
                             <div key={m.id} className={`grid grid-cols-[40px_1fr_100px_110px_1fr_120px_100px] items-center px-6 py-3 hover:bg-muted/20 transition-colors group ${adminSelected.has(m.id) ? "bg-primary/[0.03]" : ""}`}>
                               <div className="flex items-center justify-center">
-                                {(m as any)._source === "invited" ? (
+                                {((m as any)._source === "invited" || (m as any)._source === "prospect") ? (
                                   <button
                                     onClick={() => toggleAdminSelect(m.id)}
                                     className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${adminSelected.has(m.id) ? "bg-primary border-primary text-primary-foreground" : "border-border group-hover:border-primary/30"}`}
