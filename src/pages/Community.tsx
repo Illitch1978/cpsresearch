@@ -680,6 +680,21 @@ const Community = () => {
   const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
 
+  // Members tab sort/search state
+  const [memberSearch, setMemberSearch] = useState("");
+  const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
+  const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
+
+  // MM playlist import state
+  const [selectedMMPlaylist, setSelectedMMPlaylist] = useState("");
+
+  // Admin independent checkboxes
+  const [adminShowMembers, setAdminShowMembers] = useState(true);
+  const [adminShowManagement, setAdminShowManagement] = useState(true);
+  const [adminShowInvited, setAdminShowInvited] = useState(true);
+  const [adminShowRequested, setAdminShowRequested] = useState(true);
+  const [adminShowBlocked, setAdminShowBlocked] = useState(true);
+
   const allExpertise = useMemo(() => Array.from(new Set(mockMembers.flatMap(m => m.expertise))).sort(), []);
   const allFirms = useMemo(() => Array.from(new Set(mockMembers.map(m => m.firm))).sort(), []);
   const allCountries = useMemo(() => Array.from(new Set(mockMembers.map(m => m.location?.split(", ").pop()).filter(Boolean) as string[])).sort(), []);
