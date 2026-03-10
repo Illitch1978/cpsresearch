@@ -911,8 +911,12 @@ const Community = () => {
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
-  const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
-  const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
+   const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
+   const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
+   const [groupVisibilityOverrides, setGroupVisibilityOverrides] = useState<Record<string, GroupVisibility>>({});
+   const [showVisibilitySettings, setShowVisibilitySettings] = useState(false);
+   const [groupDiscussionFilter, setGroupDiscussionFilter] = useState<"all" | GroupVisibility>("all");
+   const [groupResourceFilter, setGroupResourceFilter] = useState<"all" | GroupVisibility>("all");
   const [memberSearch, setMemberSearch] = useState("");
   const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
   const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
