@@ -681,7 +681,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   onClick={() => { setJoiningCommunity(previewCommunity); setJoinContributions([]); }}
                   className="flex items-center gap-1.5 bg-slate-900 text-white text-[11px] font-bold px-4 py-2 rounded hover:bg-brand-red transition-colors"
                 >
-                  {isAtMax ? "Request to Join" : previewCommunity.requiresApproval ? "Request to Join" : "Join Community"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                  {isAtMax ? "Request to Join" : previewCommunity.requiresApproval ? "Request to Join" : "Apply"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
                 </button>
               )}
             </div>
