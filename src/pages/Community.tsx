@@ -837,6 +837,13 @@ const Community = () => {
       const q = memberSearch.toLowerCase();
       list = list.filter(m => m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q));
     }
+    const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+    const parseJoinedDate = (d: string) => {
+      const parts = d.split(" ");
+      const month = monthOrder[parts[0]] ?? 0;
+      const year = parseInt(parts[1] || "2025", 10);
+      return year * 12 + month;
+    };
     const sortFn = (a: Member, b: Member) => {
       let cmp = 0;
       if (memberSort === "name") {
@@ -845,8 +852,8 @@ const Community = () => {
         cmp = aLast.localeCompare(bLast);
       } else if (memberSort === "firm") cmp = a.firm.localeCompare(b.firm);
       else if (memberSort === "role") cmp = a.role.localeCompare(b.role);
-      else if (memberSort === "joined") cmp = a.joinedDate.localeCompare(b.joinedDate);
-      else if (memberSort === "posts") cmp = (a.publications || 0) - (b.publications || 0);
+      else if (memberSort === "joined") cmp = parseJoinedDate(a.joinedDate) - parseJoinedDate(b.joinedDate);
+      else if (memberSort === "posts") cmp = (a.posts || 0) - (b.posts || 0);
       return memberSortDir === "asc" ? cmp : -cmp;
     };
     list.sort(sortFn);
