@@ -275,18 +275,18 @@ const initialCommunities: CommunityItem[] = [
 
 // Owner rankings mock data
 const ownerRankings = [
-  { name: "Richard Chaplin", communities: 4, members: 702, resources: 83, conversations: 168 },
-  { name: "Sarah Mitchell", communities: 3, members: 534, resources: 62, conversations: 124 },
-  { name: "James Thornton", communities: 2, members: 389, resources: 47, conversations: 98 },
-  { name: "Anna Kowalski", communities: 2, members: 278, resources: 31, conversations: 76 },
-  { name: "David Chen", communities: 1, members: 156, resources: 24, conversations: 32 },
+  { name: "Richard Chaplin", communities: 4, members: 702, discussions: 168, resources: 83, events: 12 },
+  { name: "Sarah Mitchell", communities: 3, members: 534, discussions: 124, resources: 62, events: 8 },
+  { name: "James Thornton", communities: 2, members: 389, discussions: 98, resources: 47, events: 5 },
+  { name: "Anna Kowalski", communities: 2, members: 278, discussions: 76, resources: 31, events: 4 },
+  { name: "David Chen", communities: 1, members: 156, discussions: 32, resources: 24, events: 2 },
 ];
 
 const pluralize = (count: number, singular: string, plural?: string) => {
   return `${count} ${count === 1 ? singular : (plural || singular + "s")}`;
 };
 
-type SortField = "name" | "members" | "discussions" | "resources";
+type SortField = "name" | "members" | "discussions" | "resources" | "events";
 type SortDir = "asc" | "desc";
 
 const MyCommunities = () => {
