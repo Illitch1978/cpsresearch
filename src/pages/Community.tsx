@@ -92,6 +92,7 @@ interface Member {
   email?: string;
   linkedin?: string;
   publications?: number;
+  posts?: number;
   location?: string;
 }
 
