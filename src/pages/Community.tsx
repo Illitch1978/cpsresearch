@@ -2847,6 +2847,15 @@ const Community = () => {
                       <p className="text-xs text-muted-foreground">{viewingGroup.description}</p>
                       <div className="text-xs text-muted-foreground">Formed {viewingGroup.formed} · Led by <button onClick={() => setSelectedMember(viewingGroup.lead)} className="text-primary hover:underline font-medium">{viewingGroup.lead.name}</button></div>
 
+                      {/* Access principle notice */}
+                      <div className="flex items-start gap-2 px-3 py-2.5 bg-primary/5 border border-primary/15 rounded-lg text-[11px] text-card-foreground">
+                        <FontAwesomeIcon icon={faLock} className="text-primary mt-0.5 text-[10px]" />
+                        <span>
+                          <strong>Access principle:</strong> Only members of this group can see its discussions and resources by default.
+                          {isAdmin && <> Admins can promote individual items to <em>Community-wide</em> visibility or restrict them to <em>Managers only</em>.</>}
+                        </span>
+                      </div>
+
                       {/* Visibility Rules Panel */}
                       {showVisibilitySettings && isAdmin && (
                         <div className="bg-accent/30 border border-accent rounded-lg p-4 space-y-3">
