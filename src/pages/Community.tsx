@@ -2290,56 +2290,197 @@ const Community = () => {
 
               {/* ─── EVENTS TAB ─── */}
               <TabsContent value="events">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {communityEvents.map(e => (
-                    <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-gray-200"}`}>
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <EventTypeBadge type={e.type} />
-                          {e.recurring && (
-                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
-                              <FontAwesomeIcon icon={faRepeat} className="text-[8px]" />
-                              {e.recurring === "weekly" ? "Weekly" : e.recurring === "biweekly" ? "Fortnightly" : "Monthly"}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-muted-foreground">{e.attendees} attending</span>
-                      </div>
-                      <h3 className="text-sm font-semibold text-card-foreground mb-1">{e.title}</h3>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}
-                        {e.speaker && <> · Speaker: <button onClick={() => { const member = mockMembers.find(m => m.name === e.speaker); if (member) setSelectedMember(member); }} className="font-medium text-slate-600 hover:text-primary transition-colors">{e.speaker}</button></>}
-                      </p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{e.description}</p>
-                      {e.nextOccurrences && e.nextOccurrences.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-50">
-                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming sessions</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {e.nextOccurrences.map((date, i) => (
-                              <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                                {date}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {eventRegistrations.has(e.id) ? (
-                        <span className="mt-4 text-xs font-medium text-emerald-600 flex items-center gap-1">
-                          <FontAwesomeIcon icon={faCheck} className="text-[10px]" /> Registered
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setEventRegistrations(prev => new Set([...prev, e.id]));
-                          }}
-                          className="mt-4 text-xs font-medium text-primary hover:underline"
-                        >
-                          Register →
+                {/* Search, Filter, Sort bar */}
+                <div className="space-y-3 mb-5">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-[200px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input
+                        type="text"
+                        value={eventSearch}
+                        onChange={e => setEventSearch(e.target.value)}
+                        placeholder="Search by name, presenter, city…"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      {eventSearch && (
+                        <button onClick={() => setEventSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                          <FontAwesomeIcon icon={faTimes} className="text-xs" />
                         </button>
                       )}
                     </div>
-                  ))}
+                    {/* Type Filter */}
+                    <select
+                      value={eventTypeFilter}
+                      onChange={e => setEventTypeFilter(e.target.value)}
+                      className="text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                    >
+                      <option value="all">All types</option>
+                      <option value="webinar">Webinar</option>
+                      <option value="workshop">Workshop</option>
+                      <option value="conference">Conference</option>
+                      <option value="meetup">Meetup</option>
+                    </select>
+                    {/* Status Filter */}
+                    <select
+                      value={eventStatusFilter}
+                      onChange={e => setEventStatusFilter(e.target.value)}
+                      className="text-xs border border-border rounded-lg px-3 py-2 bg-background text-foreground"
+                    >
+                      <option value="all">All statuses</option>
+                      <option value="registered">Registered</option>
+                      <option value="eligible">Eligible</option>
+                      <option value="ineligible">Ineligible</option>
+                    </select>
+                  </div>
+                  {/* Sort buttons */}
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                    {(["name", "presenter", "date", "delegates", "city", "country"] as const).map(field => (
+                      <button
+                        key={field}
+                        onClick={() => {
+                          if (eventSort === field) setEventSortDir(d => d === "asc" ? "desc" : "asc");
+                          else { setEventSort(field); setEventSortDir("asc"); }
+                        }}
+                        className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${eventSort === field ? "bg-primary/10 border-primary/30 text-primary font-semibold" : "border-border text-muted-foreground hover:bg-muted"}`}
+                      >
+                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                        {eventSort === field && (
+                          <FontAwesomeIcon icon={faSort} className="ml-1 text-[9px]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {(() => {
+                  const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                  const parseEventDate = (d: string) => {
+                    const parts = d.split(" ");
+                    if (parts.length >= 3) {
+                      const day = parseInt(parts[0], 10);
+                      const month = monthOrder[parts[1]] ?? 0;
+                      const year = parseInt(parts[2], 10);
+                      return year * 10000 + month * 100 + day;
+                    }
+                    return 99999999; // recurring / non-standard dates go last
+                  };
+
+                  const getEventStatus = (e: Event): "registered" | "eligible" | "ineligible" => {
+                    if (eventRegistrations.has(e.id)) return "registered";
+                    if (e.eligible === false) return "ineligible";
+                    return "eligible";
+                  };
+
+                  let filtered = communityEvents.filter(e => {
+                    const q = eventSearch.toLowerCase();
+                    const matchesSearch = !q ||
+                      e.title.toLowerCase().includes(q) ||
+                      (e.speaker?.toLowerCase().includes(q)) ||
+                      (e.city?.toLowerCase().includes(q)) ||
+                      (e.country?.toLowerCase().includes(q)) ||
+                      e.description.toLowerCase().includes(q);
+                    const matchesType = eventTypeFilter === "all" || e.type === eventTypeFilter;
+                    const status = getEventStatus(e);
+                    const matchesStatus = eventStatusFilter === "all" || status === eventStatusFilter;
+                    return matchesSearch && matchesType && matchesStatus;
+                  });
+
+                  filtered.sort((a, b) => {
+                    let cmp = 0;
+                    switch (eventSort) {
+                      case "name": cmp = a.title.localeCompare(b.title); break;
+                      case "presenter": cmp = (a.speaker || "").localeCompare(b.speaker || ""); break;
+                      case "date": cmp = parseEventDate(a.date) - parseEventDate(b.date); break;
+                      case "delegates": cmp = a.attendees - b.attendees; break;
+                      case "city": cmp = (a.city || "").localeCompare(b.city || ""); break;
+                      case "country": cmp = (a.country || "").localeCompare(b.country || ""); break;
+                    }
+                    return eventSortDir === "desc" ? -cmp : cmp;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <FontAwesomeIcon icon={faCalendarDays} className="text-3xl mb-3 opacity-40" />
+                        <p className="text-sm">No events match your filters.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {filtered.map(e => {
+                        const status = getEventStatus(e);
+                        return (
+                          <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-border"}`}>
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <EventTypeBadge type={e.type} />
+                                {e.recurring && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
+                                    <FontAwesomeIcon icon={faRepeat} className="text-[8px]" />
+                                    {e.recurring === "weekly" ? "Weekly" : e.recurring === "biweekly" ? "Fortnightly" : "Monthly"}
+                                  </span>
+                                )}
+                                {/* Status badge */}
+                                {status === "registered" && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Registered</span>
+                                )}
+                                {status === "ineligible" && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">Ineligible</span>
+                                )}
+                                {status === "eligible" && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200">Eligible</span>
+                                )}
+                              </div>
+                              <span className="text-xs text-muted-foreground">{e.attendees} delegates</span>
+                            </div>
+                            <h3 className="text-sm font-semibold text-card-foreground mb-1">{e.title}</h3>
+                            <p className="text-xs text-muted-foreground mb-1">
+                              <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}
+                              {e.speaker && <> · Presenter: <button onClick={() => { const member = mockMembers.find(m => m.name === e.speaker); if (member) setSelectedMember(member); }} className="font-medium text-muted-foreground hover:text-primary transition-colors">{e.speaker}</button></>}
+                            </p>
+                            {(e.city || e.country) && (
+                              <p className="text-xs text-muted-foreground mb-2">
+                                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />
+                                {[e.city, e.country].filter(Boolean).join(", ")}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground leading-relaxed">{e.description}</p>
+                            {e.nextOccurrences && e.nextOccurrences.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-border/50">
+                                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Upcoming sessions</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {e.nextOccurrences.map((date, i) => (
+                                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                                      {date}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {status === "registered" ? (
+                              <span className="mt-4 text-xs font-medium text-emerald-600 flex items-center gap-1">
+                                <FontAwesomeIcon icon={faCheck} className="text-[10px]" /> Registered
+                              </span>
+                            ) : status === "eligible" ? (
+                              <button
+                                onClick={() => setEventRegistrations(prev => new Set([...prev, e.id]))}
+                                className="mt-4 text-xs font-medium text-primary hover:underline"
+                              >
+                                Register →
+                              </button>
+                            ) : (
+                              <span className="mt-4 text-xs text-muted-foreground italic">Not eligible for this event</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </TabsContent>
 
               {/* ─── GROUPS TAB ─── */}
