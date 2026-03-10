@@ -451,7 +451,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
     formed: "Sep 2025",
-    defaultVisibility: "community-wide",
+    defaultVisibility: "group-only",
     groupDiscussions: [
       { id: "gd13", title: "African professional services market — 2026 outlook", author: mockMembers[7], content: "I've drafted a 2026 outlook for the African professional services market. Key trends: rapid digital adoption, talent competition with tech sector, and regulatory harmonisation efforts.", date: "4 Mar 2026", replies: 6, likes: 15, tags: ["Africa", "Outlook"], pinned: true, visibility: "community-wide" },
       { id: "gd14", title: "Cross-border regulatory challenges in ASEAN", author: mockMembers[4], content: "Mapping the regulatory landscape for professional services across ASEAN member states. Significant disparities in licensing requirements.", date: "27 Feb 2026", replies: 3, likes: 8, tags: ["ASEAN", "Regulation"], visibility: "group-only" },
