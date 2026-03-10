@@ -403,7 +403,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
     formed: "Mar 2025",
-    defaultVisibility: "community-wide",
+    defaultVisibility: "group-only",
     groupDiscussions: [
       { id: "gd6", title: "2026 diversity data collection — methodology update", author: mockMembers[2], content: "We're refining our data collection methodology for the 2026 cycle. Key change: we'll now track intersectional categories. Please review the updated framework.", date: "7 Mar 2026", replies: 6, likes: 11, tags: ["Methodology", "Data"], pinned: true, visibility: "group-only" },
       { id: "gd7", title: "FT coverage of our frozen middle findings", author: mockMembers[0], content: "The Financial Times has picked up Emma's frozen middle research. Great visibility for the group. Let's discuss how to build on this media attention.", date: "3 Mar 2026", replies: 8, likes: 27, tags: ["Media", "Impact"], visibility: "community-wide" },
@@ -451,7 +451,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
     formed: "Sep 2025",
-    defaultVisibility: "community-wide",
+    defaultVisibility: "group-only",
     groupDiscussions: [
       { id: "gd13", title: "African professional services market — 2026 outlook", author: mockMembers[7], content: "I've drafted a 2026 outlook for the African professional services market. Key trends: rapid digital adoption, talent competition with tech sector, and regulatory harmonisation efforts.", date: "4 Mar 2026", replies: 6, likes: 15, tags: ["Africa", "Outlook"], pinned: true, visibility: "community-wide" },
       { id: "gd14", title: "Cross-border regulatory challenges in ASEAN", author: mockMembers[4], content: "Mapping the regulatory landscape for professional services across ASEAN member states. Significant disparities in licensing requirements.", date: "27 Feb 2026", replies: 3, likes: 8, tags: ["ASEAN", "Regulation"], visibility: "group-only" },
@@ -2846,6 +2846,15 @@ const Community = () => {
                       </div>
                       <p className="text-xs text-muted-foreground">{viewingGroup.description}</p>
                       <div className="text-xs text-muted-foreground">Formed {viewingGroup.formed} · Led by <button onClick={() => setSelectedMember(viewingGroup.lead)} className="text-primary hover:underline font-medium">{viewingGroup.lead.name}</button></div>
+
+                      {/* Access principle notice */}
+                      <div className="flex items-start gap-2 px-3 py-2.5 bg-primary/5 border border-primary/15 rounded-lg text-[11px] text-card-foreground">
+                        <FontAwesomeIcon icon={faLock} className="text-primary mt-0.5 text-[10px]" />
+                        <span>
+                          <strong>Access principle:</strong> Only members of this group can see its discussions and resources by default.
+                          {isAdmin && <> Admins can promote individual items to <em>Community-wide</em> visibility or restrict them to <em>Managers only</em>.</>}
+                        </span>
+                      </div>
 
                       {/* Visibility Rules Panel */}
                       {showVisibilitySettings && isAdmin && (
