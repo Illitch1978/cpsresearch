@@ -559,13 +559,16 @@ const MyCommunities = () => {
 
   const handleConfirmJoin = () => {
     if (joinContributions.length === 0 || !joiningCommunity) return;
-    const activeMemberCount = communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length;
-    const isAtMax = activeMemberCount >= MAX_COMMUNITIES;
 
     setCommunities(prev => prev.map(c => {
       if (c.id !== joiningCommunity.id) return c;
-      if (isAtMax) return { ...c, membershipStatus: "pending" as MembershipStatus, role: "Pending" };
-      return { ...c, membershipStatus: "member" as MembershipStatus, role: "Member" };
+      // "Prospect" clicking Apply → becomes "Applied" (awaiting manager approval if required)
+      // "Invited" clicking Join → becomes "Member" immediately
+      if (c.membershipStatus === "invited") {
+        return { ...c, membershipStatus: "member" as MembershipStatus, role: "Member" };
+      }
+      // Prospect → Applied (application submitted)
+      return { ...c, membershipStatus: "applied" as MembershipStatus, role: "Applied" };
     }));
     setCommunityContributions(prev => ({ ...prev, [joiningCommunity.id]: joinContributions }));
     setJoiningCommunity(null);
@@ -578,13 +581,16 @@ const MyCommunities = () => {
       case "applied": return <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600">Applied</Badge>;
       case "pending": return <Badge variant="outline" className="text-[10px] border-orange-300 text-orange-600">Pending</Badge>;
       case "managed": return <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Managed</Badge>;
+      case "blocked": return <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">Blocked</Badge>;
+      case "prospect": return <Badge variant="outline" className="text-[10px] border-slate-300 text-slate-600">Prospect</Badge>;
       default: return null;
     }
   };
 
   const isPending = (c: CommunityItem) => c.membershipStatus === "pending";
-  const canClickThrough = (c: CommunityItem) => !c.archived && !isPending(c) && c.membershipStatus !== "applied" && c.membershipStatus !== "invited";
-  const canJoin = (c: CommunityItem) => c.membershipStatus === "invited" || c.membershipStatus === "applied" || (!c.membershipStatus);
+  const isBlocked = (c: CommunityItem) => c.membershipStatus === "blocked";
+  const canClickThrough = (c: CommunityItem) => !c.archived && !isPending(c) && !isBlocked(c) && c.membershipStatus !== "applied" && c.membershipStatus !== "invited" && c.membershipStatus !== "prospect";
+  const canJoin = (c: CommunityItem) => c.membershipStatus === "prospect" || c.membershipStatus === "invited";
 
   const renderCommunityCard = (community: CommunityItem) => {
     const contributions = communityContributions[community.id] || [];
