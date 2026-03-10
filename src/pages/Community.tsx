@@ -1561,7 +1561,7 @@ const Community = () => {
                             }}
                             className={`text-xs px-2 py-1 rounded-md transition-colors ${discussionSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
                           >
-                            {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                            {{ date: "Date", name: "Title", author: "Author", pinned: "Pinned", replies: "Replies", likes: "Likes" }[s]}
                             {discussionSort === s && <span className="ml-0.5">{discussionSortDir === "asc" ? "↑" : "↓"}</span>}
                           </button>
                         ))}
