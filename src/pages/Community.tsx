@@ -211,11 +211,11 @@ const mockDiscussions: Discussion[] = [
 ];
 
 const mockResources: Resource[] = [
-  { id: "1", title: "Professional Services Research Methods Handbook (2026 Edition)", type: "paper", author: "Prof. Sarah Mitchell et al.", date: "Jan 2026", downloads: 342, description: "Comprehensive guide to research methodologies specific to studying professional service firms." },
-  { id: "2", title: "AI Adoption in Audit: A Systematic Review", type: "report", author: "Dr. James Hargreaves", date: "Feb 2026", downloads: 189, description: "Systematic review of 152 papers on AI adoption patterns in audit firms across 18 jurisdictions." },
-  { id: "3", title: "CPSR Annual Conference 2025 — Keynote Recordings", type: "video", author: "CPSR", date: "Dec 2025", downloads: 94, description: "Full recordings of all keynote presentations from the 2025 annual conference." },
-  { id: "4", title: "Diversity Pipeline Analysis: Methodology & Dataset", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 67, description: "Open-access dataset and methodology documentation for the Big Four diversity pipeline study." },
-  { id: "5", title: "Regulatory Landscape for Professional Services (EU & UK)", type: "link", author: "Thomas Wright", date: "Mar 2026", description: "Living document tracking regulatory changes affecting professional services in Europe." },
+  { id: "1", title: "Professional Services Research Methods Handbook (2026 Edition)", type: "paper", author: "Prof. Sarah Mitchell et al.", date: "Jan 2026", downloads: 342, likes: 56, description: "Comprehensive guide to research methodologies specific to studying professional service firms." },
+  { id: "2", title: "AI Adoption in Audit: A Systematic Review", type: "report", author: "Dr. James Hargreaves", date: "Feb 2026", downloads: 189, likes: 38, description: "Systematic review of 152 papers on AI adoption patterns in audit firms across 18 jurisdictions." },
+  { id: "3", title: "CPSR Annual Conference 2025 — Keynote Recordings", type: "video", author: "CPSR", date: "Dec 2025", downloads: 94, likes: 21, description: "Full recordings of all keynote presentations from the 2025 annual conference." },
+  { id: "4", title: "Diversity Pipeline Analysis: Methodology & Dataset", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 67, likes: 15, description: "Open-access dataset and methodology documentation for the Big Four diversity pipeline study." },
+  { id: "5", title: "Regulatory Landscape for Professional Services (EU & UK)", type: "link", author: "Thomas Wright", date: "Mar 2026", likes: 9, description: "Living document tracking regulatory changes affecting professional services in Europe." },
 ];
 
 const mockEvents: Event[] = [
