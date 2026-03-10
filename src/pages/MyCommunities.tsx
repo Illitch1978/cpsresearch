@@ -396,9 +396,13 @@ const MyCommunities = () => {
 
   // Ownership tracking
   const ownedOpenCount = useMemo(() => {
-    return communities.filter(c => !c.archived && !c.isPrivate && (c.role === "Owner" || c.role === "Founder")).length;
+    return communities.filter(c => !c.archived && !c.isPrivate && c.membershipStatus === "managed").length;
   }, [communities]);
   const isAtOwnershipLimit = ownedOpenCount >= MAX_OWNED_OPEN;
+  const activeMemberCount = useMemo(() => {
+    return communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length;
+  }, [communities]);
+  const isAtCommunityLimit = activeMemberCount >= MAX_COMMUNITIES;
 
   // Visibility: private communities only shown to members/invited/managed
   const visibleCommunities = useMemo(() => {
