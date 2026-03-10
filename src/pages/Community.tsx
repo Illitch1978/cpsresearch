@@ -2414,6 +2414,41 @@ const Community = () => {
               {isAdmin && (
                 <TabsContent value="admin">
                   <div className="space-y-6">
+                    {/* Community Details */}
+                    <div className="bg-background border border-border rounded-lg p-6">
+                      <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2 mb-4">
+                        <FontAwesomeIcon icon={faCircleInfo} className="text-primary text-sm" /> Community Details
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                          <input type="text" defaultValue={community.name} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                          <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
+                            <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-primary text-primary-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
+                              <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
+                            </button>
+                            <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-background text-muted-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : "hover:bg-muted"}`}>
+                              <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
+                          <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
+                          <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                        </div>
+                        <div className="flex justify-end">
+                          <button className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Save changes</button>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Add Contacts Card */}
                     <div className="bg-background border border-border rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
