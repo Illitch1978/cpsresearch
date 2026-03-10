@@ -275,18 +275,18 @@ const initialCommunities: CommunityItem[] = [
 
 // Owner rankings mock data
 const ownerRankings = [
-  { name: "Richard Chaplin", communities: 4, members: 702, resources: 83, conversations: 168 },
-  { name: "Sarah Mitchell", communities: 3, members: 534, resources: 62, conversations: 124 },
-  { name: "James Thornton", communities: 2, members: 389, resources: 47, conversations: 98 },
-  { name: "Anna Kowalski", communities: 2, members: 278, resources: 31, conversations: 76 },
-  { name: "David Chen", communities: 1, members: 156, resources: 24, conversations: 32 },
+  { name: "Richard Chaplin", communities: 4, members: 702, discussions: 168, resources: 83, events: 12 },
+  { name: "Sarah Mitchell", communities: 3, members: 534, discussions: 124, resources: 62, events: 8 },
+  { name: "James Thornton", communities: 2, members: 389, discussions: 98, resources: 47, events: 5 },
+  { name: "Anna Kowalski", communities: 2, members: 278, discussions: 76, resources: 31, events: 4 },
+  { name: "David Chen", communities: 1, members: 156, discussions: 32, resources: 24, events: 2 },
 ];
 
 const pluralize = (count: number, singular: string, plural?: string) => {
   return `${count} ${count === 1 ? singular : (plural || singular + "s")}`;
 };
 
-type SortField = "name" | "members" | "discussions" | "resources";
+type SortField = "name" | "members" | "discussions" | "resources" | "events";
 type SortDir = "asc" | "desc";
 
 const MyCommunities = () => {
@@ -377,8 +377,10 @@ const MyCommunities = () => {
   const [editingContributions, setEditingContributions] = useState<string | null>(null);
   const [editContributionsList, setEditContributionsList] = useState<string[]>([]);
 
-  // Owner rankings visibility
+  // Owner rankings visibility & sort
   const [showOwnerRankings, setShowOwnerRankings] = useState(false);
+  const [rankingSortField, setRankingSortField] = useState<string>("communities");
+  const [rankingSortDir, setRankingSortDir] = useState<"asc" | "desc">("desc");
 
   // Join modal state
   const [joiningCommunity, setJoiningCommunity] = useState<CommunityItem | null>(null);
@@ -463,6 +465,7 @@ const MyCommunities = () => {
       else if (sortField === "members") cmp = a.members - b.members;
       else if (sortField === "discussions") cmp = a.discussions - b.discussions;
       else if (sortField === "resources") cmp = a.resources - b.resources;
+      else if (sortField === "events") cmp = a.events - b.events;
       return sortDir === "desc" ? -cmp : cmp;
     });
 
@@ -647,7 +650,7 @@ const MyCommunities = () => {
             {isPending(community) && (
               <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
                 <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
-                <p className="text-[10px] text-amber-700">You have reached the maximum of {MAX_COMMUNITIES} communities. Drop another community to change this status to Prospect and enable joining.</p>
+                <p className="text-[10px] text-amber-700">You have reached the maximum of {MAX_COMMUNITIES} open communities. Drop another community to change this status to Prospect and enable joining.</p>
               </div>
             )}
             {community.membershipStatus === "applied" && (
@@ -867,22 +870,44 @@ const MyCommunities = () => {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 pr-4 font-medium text-muted-foreground">#</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Owner</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Communities</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Members</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Resources</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Conversations</th>
+                    {([
+                      { field: "name", label: "Owner" },
+                      { field: "communities", label: "Communities" },
+                      { field: "members", label: "Members" },
+                      { field: "discussions", label: "Discussions" },
+                      { field: "resources", label: "Resources" },
+                      { field: "events", label: "Events" },
+                    ]).map(col => (
+                      <th
+                        key={col.field}
+                        onClick={() => {
+                          if (rankingSortField === col.field) setRankingSortDir(d => d === "asc" ? "desc" : "asc");
+                          else { setRankingSortField(col.field); setRankingSortDir("desc"); }
+                        }}
+                        className="text-left py-2 pr-4 font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none"
+                      >
+                        {col.label}
+                        {rankingSortField === col.field && <span className="ml-1">{rankingSortDir === "asc" ? "↑" : "↓"}</span>}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {ownerRankings.map((owner, i) => (
+                  {[...ownerRankings].sort((a, b) => {
+                    let cmp = 0;
+                    const f = rankingSortField as keyof typeof a;
+                    if (f === "name") cmp = a.name.localeCompare(b.name);
+                    else cmp = (a[f] as number) - (b[f] as number);
+                    return rankingSortDir === "desc" ? -cmp : cmp;
+                  }).map((owner, i) => (
                     <tr key={owner.name} className="border-b border-border/50 last:border-0">
                       <td className="py-2 pr-4 font-semibold text-card-foreground">{i + 1}</td>
                       <td className="py-2 pr-4 font-medium text-card-foreground">{owner.name}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.communities}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.members}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{owner.discussions}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.resources}</td>
-                      <td className="py-2 text-muted-foreground">{owner.conversations}</td>
+                      <td className="py-2 text-muted-foreground">{owner.events}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -939,25 +964,6 @@ const MyCommunities = () => {
           </div>
         </div>
 
-        {/* Sort buttons */}
-        <div className="flex items-center gap-1 mb-4 flex-wrap">
-          <span className="text-xs font-medium text-muted-foreground mr-1">Sort:</span>
-          {([
-            { field: "name" as SortField, label: "Name" },
-            { field: "members" as SortField, label: "Members" },
-            { field: "discussions" as SortField, label: "Discussions" },
-            { field: "resources" as SortField, label: "Resources" },
-          ]).map(s => (
-            <button
-              key={s.field}
-              onClick={() => toggleSort(s.field)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded transition-colors ${sortField === s.field ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-            >
-              {s.label} <FontAwesomeIcon icon={getSortIcon(s.field)} className="text-[9px]" />
-            </button>
-          ))}
-        </div>
-
         {/* Filter Checkboxes */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-3">
           <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
@@ -975,7 +981,7 @@ const MyCommunities = () => {
             </label>
           ))}
           {isHQ && (
-            <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none ml-3 pl-3 border-l border-border">
+            <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
               <input type="checkbox" checked={showArchived} onChange={() => setShowArchived(!showArchived)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               Archived (HQ)
             </label>
@@ -983,7 +989,7 @@ const MyCommunities = () => {
         </div>
 
         {/* Status Checkboxes */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4">
           <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
           {[
             { label: "Research panel member", state: filterResearchPanelMember, setter: setFilterResearchPanelMember },
@@ -999,6 +1005,26 @@ const MyCommunities = () => {
               <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               {f.label}
             </label>
+          ))}
+        </div>
+
+        {/* Sort buttons */}
+        <div className="flex items-center gap-1 mb-4 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Sort:</span>
+          {([
+            { field: "name" as SortField, label: "Name" },
+            { field: "members" as SortField, label: "Members" },
+            { field: "discussions" as SortField, label: "Discussions" },
+            { field: "resources" as SortField, label: "Resources" },
+            { field: "events" as SortField, label: "Events" },
+          ]).map(s => (
+            <button
+              key={s.field}
+              onClick={() => toggleSort(s.field)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded transition-colors ${sortField === s.field ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+            >
+              {s.label} <FontAwesomeIcon icon={getSortIcon(s.field)} className="text-[9px]" />
+            </button>
           ))}
         </div>
 

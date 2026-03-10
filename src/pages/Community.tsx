@@ -314,6 +314,7 @@ interface WorkingGroup {
   lastActive: string;
   tags: string[];
   lead: Member;
+  formed: string;
 }
 
 const mockWorkingGroups: WorkingGroup[] = [
@@ -328,6 +329,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "2 hours ago",
     tags: ["AI", "Audit", "Regulation", "Technology"],
     lead: mockMembers[1],
+    formed: "Feb 2025",
   },
   {
     id: "diversity-research",
@@ -340,6 +342,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "Yesterday",
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
+    formed: "Mar 2025",
   },
   {
     id: "consulting-impact",
@@ -352,6 +355,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "3 days ago",
     tags: ["Consulting", "Impact", "Methodology", "Transparency"],
     lead: mockMembers[3],
+    formed: "May 2025",
   },
   {
     id: "emerging-markets",
@@ -364,6 +368,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "1 week ago",
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
+    formed: "Sep 2025",
   },
 ];
 
@@ -456,6 +461,13 @@ const communityData = {
 
 // ─── Sub-components ──────────────────────────────────────────
 
+/** Get initials from a name, skipping titles like Dr., Prof., etc. */
+const getInitials = (name: string): string => {
+  const titles = new Set(["dr.", "dr", "prof.", "prof", "mr.", "mr", "mrs.", "mrs", "ms.", "ms", "sir"]);
+  const parts = name.split(" ").filter(n => !titles.has(n.toLowerCase()));
+  return parts.map(n => n[0]).join("").slice(0, 2);
+};
+
 const BadgeIcon = ({ badge }: { badge?: string }) => {
   if (!badge) return null;
   const config = {
@@ -506,7 +518,7 @@ const MemberProfileModal = ({ member, open, onClose }: { member: Member | null; 
           <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
-                {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {getInitials(member.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -720,6 +732,15 @@ const Community = () => {
   const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
   // Members tab sort/search state
+  // Groups tab state
+  const [groupSearch, setGroupSearch] = useState("");
+  const [groupSort, setGroupSort] = useState<"name" | "leader" | "formed" | "activity" | "members">("name");
+  const [groupSortDir, setGroupSortDir] = useState<"asc" | "desc">("asc");
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
+  const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
   const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
@@ -2588,86 +2609,169 @@ const Community = () => {
                     <p className="text-sm text-muted-foreground">
                       {mockWorkingGroups.length} working groups within this community
                     </p>
+                    {isAdmin && (
+                      <button
+                        onClick={() => setShowAddGroup(!showAddGroup)}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Add Group
+                      </button>
+                    )}
                   </div>
-                  {mockWorkingGroups.map(group => (
+
+                  {/* Add Group Form */}
+                  {showAddGroup && isAdmin && (
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-3">
+                      <h3 className="text-sm font-semibold text-card-foreground">Create a working group</h3>
+                      <input type="text" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="Group name *" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <textarea value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} placeholder="Description *" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => { setShowAddGroup(false); setNewGroupName(""); setNewGroupDesc(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                        <button disabled={!newGroupName.trim() || !newGroupDesc.trim()} onClick={() => { setShowAddGroup(false); setNewGroupName(""); setNewGroupDesc(""); }} className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newGroupName.trim() && newGroupDesc.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}>Create Group</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Search & Sort */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                      <input type="text" value={groupSearch} onChange={e => setGroupSearch(e.target.value)} placeholder="Search groups…" className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                      <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                      {(["name", "leader", "formed", "activity", "members"] as const).map(s => (
+                        <button key={s} onClick={() => { if (groupSort === s) setGroupSortDir(d => d === "asc" ? "desc" : "asc"); else { setGroupSort(s); setGroupSortDir("asc"); } }} className={`text-xs px-2 py-1 rounded-md transition-colors ${groupSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}>
+                          {{ name: "Group name", leader: "Leader", formed: "Formation date", activity: "Activity", members: "Members" }[s]}
+                          {groupSort === s && <span className="ml-0.5">{groupSortDir === "asc" ? "↑" : "↓"}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Viewing a specific group */}
+                  {viewingGroup && (
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-serif font-semibold text-xs flex items-center justify-center">{viewingGroup.avatar}</span>
+                          {viewingGroup.name}
+                        </h3>
+                        <button onClick={() => setViewingGroup(null)} className="text-xs text-muted-foreground hover:text-foreground"><FontAwesomeIcon icon={faTimes} className="mr-1" />Close</button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{viewingGroup.description}</p>
+                      <div className="text-xs text-muted-foreground">Formed {viewingGroup.formed} · Led by <button onClick={() => setSelectedMember(viewingGroup.lead)} className="text-primary hover:underline font-medium">{viewingGroup.lead.name}</button></div>
+
+                      {/* Group Members */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-card-foreground mb-2">Members ({viewingGroup.members.length})</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {viewingGroup.members.map(m => (
+                            <button key={m.id} onClick={() => setSelectedMember(m)} className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg hover:bg-muted transition-colors">
+                              <Avatar className="h-6 w-6"><AvatarFallback className="bg-slate-100 text-slate-600 text-[9px] font-medium">{getInitials(m.name)}</AvatarFallback></Avatar>
+                              <span className="text-xs text-card-foreground">{m.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Group Discussions */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-xs font-semibold text-card-foreground">Discussions ({viewingGroup.discussions})</h4>
+                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add discussion</button>}
+                        </div>
+                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.discussions} discussions in this group. Navigate to the Discussions tab to view them.</p>
+                      </div>
+
+                      {/* Group Resources */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-xs font-semibold text-card-foreground">Resources ({viewingGroup.resources})</h4>
+                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add resource</button>}
+                        </div>
+                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.resources} resources shared in this group. Navigate to the Resources tab to view them.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Group List */}
+                  {(() => {
+                    const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                    let groups = [...mockWorkingGroups];
+                    if (groupSearch.trim()) {
+                      const q = groupSearch.toLowerCase();
+                      groups = groups.filter(g => g.name.toLowerCase().includes(q) || g.lead.name.toLowerCase().includes(q) || g.tags.some(t => t.toLowerCase().includes(q)));
+                    }
+                    groups.sort((a, b) => {
+                      let cmp = 0;
+                      if (groupSort === "name") cmp = a.name.localeCompare(b.name);
+                      else if (groupSort === "leader") cmp = a.lead.name.localeCompare(b.lead.name);
+                      else if (groupSort === "members") cmp = a.members.length - b.members.length;
+                      else if (groupSort === "activity") cmp = a.lastActive.localeCompare(b.lastActive);
+                      else {
+                        const parseDate = (d: string) => { const parts = d.split(" "); return (parseInt(parts[1] || "2025", 10) * 12) + (monthOrder[parts[0]] ?? 0); };
+                        cmp = parseDate(a.formed) - parseDate(b.formed);
+                      }
+                      return groupSortDir === "desc" ? -cmp : cmp;
+                    });
+                    if (groups.length === 0) {
+                      return <div className="text-center py-8 text-sm text-muted-foreground">No groups match your search.</div>;
+                    }
+                    return groups.map(group => (
                     <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all">
                       <div className="flex items-start gap-4">
-                        {/* Group Avatar */}
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary font-serif font-semibold text-sm flex items-center justify-center shrink-0">
                           {group.avatar}
                         </div>
-
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
                               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{group.description}</p>
                             </div>
+                            {!joinedGroups.has(group.id) ? (
+                              <button onClick={() => setJoinedGroups(prev => new Set([...prev, group.id]))} className="flex items-center gap-1.5 px-3 py-1.5 border border-primary/30 text-primary rounded-lg text-xs font-medium hover:bg-primary/5 transition-colors shrink-0">
+                                <FontAwesomeIcon icon={faPlus} className="text-[10px]" /> Join
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1 shrink-0"><FontAwesomeIcon icon={faCheck} className="text-[9px]" /> Joined</span>
+                            )}
                           </div>
-
-                          {/* Tags */}
                           <div className="flex flex-wrap gap-1.5 mt-3">
                             {group.tags.map(tag => (
                               <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{tag}</span>
                             ))}
                           </div>
-
-                          {/* Stats Row */}
                           <div className="flex items-center gap-5 mt-4 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1.5">
-                              <FontAwesomeIcon icon={faUsers} className="text-[10px]" />
-                              {group.members.length} members
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <FontAwesomeIcon icon={faComments} className="text-[10px]" />
-                              {group.discussions} discussions
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <FontAwesomeIcon icon={faFolderOpen} className="text-[10px]" />
-                              {group.resources} resources
-                            </span>
+                            <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faUsers} className="text-[10px]" /> {group.members.length} members</span>
+                            <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faComments} className="text-[10px]" /> {group.discussions} discussions</span>
+                            <span className="flex items-center gap-1.5"><FontAwesomeIcon icon={faFolderOpen} className="text-[10px]" /> {group.resources} resources</span>
+                            <span className="text-muted-foreground/60">·</span>
+                            <span>Formed {group.formed}</span>
                             <span className="text-muted-foreground/60">·</span>
                             <span>Active {group.lastActive}</span>
                           </div>
-
-                          {/* Lead + Member Avatars */}
                           <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                            <button
-                              onClick={() => setSelectedMember(group.lead)}
-                              className="flex items-center gap-2 text-xs hover:text-primary transition-colors"
-                            >
-                              <Avatar className="h-6 w-6">
-                                <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
-                                  {group.lead.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
+                            <button onClick={() => setSelectedMember(group.lead)} className="flex items-center gap-2 text-xs hover:text-primary transition-colors">
+                              <Avatar className="h-6 w-6"><AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">{getInitials(group.lead.name)}</AvatarFallback></Avatar>
                               <span className="text-muted-foreground">Led by <span className="font-medium text-slate-700">{group.lead.name}</span></span>
                             </button>
                             <div className="flex items-center">
                               <div className="flex -space-x-2">
-                                {group.members.slice(0, 4).map((m, i) => (
-                                  <Avatar key={m.id} className="h-7 w-7 border-2 border-white">
-                                    <AvatarFallback className="bg-slate-100 text-slate-500 text-[9px] font-medium">
-                                      {m.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                                    </AvatarFallback>
-                                  </Avatar>
+                                {group.members.slice(0, 4).map(m => (
+                                  <Avatar key={m.id} className="h-7 w-7 border-2 border-white"><AvatarFallback className="bg-slate-100 text-slate-500 text-[9px] font-medium">{getInitials(m.name)}</AvatarFallback></Avatar>
                                 ))}
                               </div>
-                              <button
-                                onClick={() => {
-                                  // Navigate to a sub-view or expand the group inline
-                                  setActiveTab("discussions");
-                                }}
-                                className="ml-3 text-xs font-medium text-primary hover:underline"
-                              >
-                                View group →
-                              </button>
+                              <button onClick={() => setViewingGroup(group)} className="ml-3 text-xs font-medium text-primary hover:underline">View group →</button>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ));
+                  })()}
                 </div>
               </TabsContent>
 
