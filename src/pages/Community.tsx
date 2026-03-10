@@ -1056,7 +1056,7 @@ const Community = () => {
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
     return [...pinned, ...unpinned];
-  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources]);
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
 
   const community = communityData["prof-services-research"];
 
