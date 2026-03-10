@@ -320,6 +320,33 @@ const mockPlaylists: Playlist[] = [
   },
 ];
 
+type GroupVisibility = "group-only" | "community-wide" | "managers-only";
+
+interface GroupDiscussion {
+  id: string;
+  title: string;
+  author: Member;
+  content: string;
+  date: string;
+  replies: number;
+  likes: number;
+  tags: string[];
+  pinned?: boolean;
+  visibility: GroupVisibility;
+}
+
+interface GroupResource {
+  id: string;
+  title: string;
+  type: "paper" | "report" | "presentation" | "video" | "link";
+  author: string;
+  date: string;
+  downloads: number;
+  likes: number;
+  description: string;
+  visibility: GroupVisibility;
+}
+
 interface WorkingGroup {
   id: string;
   name: string;
@@ -332,6 +359,9 @@ interface WorkingGroup {
   tags: string[];
   lead: Member;
   formed: string;
+  groupDiscussions: GroupDiscussion[];
+  groupResources: GroupResource[];
+  defaultVisibility: GroupVisibility;
 }
 
 const mockWorkingGroups: WorkingGroup[] = [
@@ -347,6 +377,19 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["AI", "Audit", "Regulation", "Technology"],
     lead: mockMembers[1],
     formed: "Feb 2025",
+    defaultVisibility: "group-only",
+    groupDiscussions: [
+      { id: "gd1", title: "LLM-assisted audit sampling — early results", author: mockMembers[1], content: "We've been piloting LLM-assisted sampling at three mid-tier firms. Initial results suggest a 40% reduction in sample selection time with comparable error detection rates. Full write-up coming next week.", date: "8 Mar 2026", replies: 7, likes: 18, tags: ["AI", "Sampling"], pinned: true, visibility: "community-wide" },
+      { id: "gd2", title: "FRC draft guidance on AI in audit — group response", author: mockMembers[0], content: "The FRC has issued draft guidance on AI use in statutory audit. I'd like us to prepare a group response by end of March. Please review the attached and add comments.", date: "5 Mar 2026", replies: 12, likes: 9, tags: ["Regulation", "FRC"], visibility: "group-only" },
+      { id: "gd3", title: "Dataset sharing: anomaly detection benchmarks", author: mockMembers[4], content: "I've compiled anonymised benchmark datasets for testing anomaly detection models in audit contexts. Available to group members — see the resources section.", date: "1 Mar 2026", replies: 4, likes: 14, tags: ["Data", "ML"], visibility: "group-only" },
+      { id: "gd4", title: "Bias in AI audit tools — a critical review", author: mockMembers[5], content: "Recent literature highlights significant bias risks in AI-assisted audit tools, particularly around client-specific training data. We should discuss mitigation strategies.", date: "25 Feb 2026", replies: 9, likes: 22, tags: ["Bias", "Ethics"], visibility: "community-wide" },
+      { id: "gd5", title: "Confidential: partner feedback on AI adoption roadmap", author: mockMembers[1], content: "Summary of confidential partner feedback from the Big Four on their AI adoption timelines. For management eyes only.", date: "20 Feb 2026", replies: 2, likes: 5, tags: ["Strategy", "Confidential"], visibility: "managers-only" },
+    ],
+    groupResources: [
+      { id: "gr1", title: "LLM Audit Sampling — Pilot Results (Draft)", type: "paper", author: "Dr. James Hargreaves", date: "Mar 2026", downloads: 34, likes: 12, description: "Draft paper on LLM-assisted sampling pilot across three firms.", visibility: "group-only" },
+      { id: "gr2", title: "FRC AI Guidance — Annotated Copy", type: "report", author: "Prof. Sarah Mitchell", date: "Mar 2026", downloads: 28, likes: 8, description: "Annotated version of FRC draft guidance with group commentary.", visibility: "group-only" },
+      { id: "gr3", title: "Anomaly Detection Benchmark Dataset", type: "link", author: "Dr. Aisha Patel", date: "Mar 2026", downloads: 19, likes: 15, description: "Anonymised datasets for testing anomaly detection in audit.", visibility: "community-wide" },
+    ],
   },
   {
     id: "diversity-research",
@@ -360,6 +403,18 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
     formed: "Mar 2025",
+    defaultVisibility: "community-wide",
+    groupDiscussions: [
+      { id: "gd6", title: "2026 diversity data collection — methodology update", author: mockMembers[2], content: "We're refining our data collection methodology for the 2026 cycle. Key change: we'll now track intersectional categories. Please review the updated framework.", date: "7 Mar 2026", replies: 6, likes: 11, tags: ["Methodology", "Data"], pinned: true, visibility: "group-only" },
+      { id: "gd7", title: "FT coverage of our frozen middle findings", author: mockMembers[0], content: "The Financial Times has picked up Emma's frozen middle research. Great visibility for the group. Let's discuss how to build on this media attention.", date: "3 Mar 2026", replies: 8, likes: 27, tags: ["Media", "Impact"], visibility: "community-wide" },
+      { id: "gd8", title: "Partner sponsorship programmes — comparative analysis", author: mockMembers[6], content: "I've been comparing partner sponsorship programmes across 12 firms in the US, UK and France. Early patterns are striking — happy to present at next group meeting.", date: "28 Feb 2026", replies: 5, likes: 16, tags: ["Sponsorship", "Leadership"], visibility: "group-only" },
+      { id: "gd9", title: "Confidential: firm-level diversity scorecards Q4 2025", author: mockMembers[2], content: "Quarterly diversity scorecards from participating firms. Strictly for group management review before publication.", date: "15 Feb 2026", replies: 1, likes: 3, tags: ["Scorecards", "Confidential"], visibility: "managers-only" },
+    ],
+    groupResources: [
+      { id: "gr4", title: "Intersectional Diversity Framework v2", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 45, likes: 19, description: "Updated methodology for intersectional diversity data collection.", visibility: "community-wide" },
+      { id: "gr5", title: "Frozen Middle — Working Paper (Final Draft)", type: "paper", author: "Emma Richardson", date: "Feb 2026", downloads: 89, likes: 31, description: "The complete working paper on leadership pipeline barriers.", visibility: "community-wide" },
+      { id: "gr6", title: "Q4 2025 Firm Diversity Scorecards", type: "report", author: "DRI Group", date: "Feb 2026", downloads: 12, likes: 4, description: "Confidential quarterly scorecards from participating firms.", visibility: "managers-only" },
+    ],
   },
   {
     id: "consulting-impact",
@@ -373,6 +428,16 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Consulting", "Impact", "Methodology", "Transparency"],
     lead: mockMembers[3],
     formed: "May 2025",
+    defaultVisibility: "group-only",
+    groupDiscussions: [
+      { id: "gd10", title: "Impact measurement framework — v3 review", author: mockMembers[3], content: "Version 3 of our impact measurement framework is ready for review. Major additions: longitudinal tracking metrics and client satisfaction indices.", date: "6 Mar 2026", replies: 11, likes: 20, tags: ["Framework", "Review"], pinned: true, visibility: "group-only" },
+      { id: "gd11", title: "Client pushback on ROI evidence — how to respond", author: mockMembers[7], content: "Several firms report increasing client demands for ROI evidence post-engagement. What frameworks are people using? Are there sector-specific approaches?", date: "2 Mar 2026", replies: 14, likes: 25, tags: ["ROI", "Clients"], visibility: "community-wide" },
+      { id: "gd12", title: "Benchmarking consulting fees against outcomes", author: mockMembers[0], content: "Provocative paper from HBS suggests no correlation between consulting fees and measurable outcomes. We should develop a rigorous counter-analysis.", date: "24 Feb 2026", replies: 19, likes: 34, tags: ["Fees", "Research"], visibility: "community-wide" },
+    ],
+    groupResources: [
+      { id: "gr7", title: "Impact Measurement Framework v3 (Draft)", type: "report", author: "Michael Chen", date: "Mar 2026", downloads: 56, likes: 22, description: "Third iteration of the consulting impact measurement framework.", visibility: "group-only" },
+      { id: "gr8", title: "Client ROI Evidence — Survey Results", type: "paper", author: "Robert Kimani", date: "Feb 2026", downloads: 38, likes: 14, description: "Survey of 200+ clients on ROI evidence expectations.", visibility: "community-wide" },
+    ],
   },
   {
     id: "emerging-markets",
@@ -386,6 +451,16 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
     formed: "Sep 2025",
+    defaultVisibility: "community-wide",
+    groupDiscussions: [
+      { id: "gd13", title: "African professional services market — 2026 outlook", author: mockMembers[7], content: "I've drafted a 2026 outlook for the African professional services market. Key trends: rapid digital adoption, talent competition with tech sector, and regulatory harmonisation efforts.", date: "4 Mar 2026", replies: 6, likes: 15, tags: ["Africa", "Outlook"], pinned: true, visibility: "community-wide" },
+      { id: "gd14", title: "Cross-border regulatory challenges in ASEAN", author: mockMembers[4], content: "Mapping the regulatory landscape for professional services across ASEAN member states. Significant disparities in licensing requirements.", date: "27 Feb 2026", replies: 3, likes: 8, tags: ["ASEAN", "Regulation"], visibility: "group-only" },
+      { id: "gd15", title: "Talent retention strategies — emerging vs mature markets", author: mockMembers[6], content: "Comparative study of talent retention across emerging and mature markets. Emerging markets show 2x higher voluntary turnover in professional services.", date: "20 Feb 2026", replies: 7, likes: 12, tags: ["Talent", "Retention"], visibility: "community-wide" },
+    ],
+    groupResources: [
+      { id: "gr9", title: "African PS Market — 2026 Outlook Report", type: "report", author: "Robert Kimani", date: "Mar 2026", downloads: 42, likes: 17, description: "Comprehensive outlook for professional services across African markets.", visibility: "community-wide" },
+      { id: "gr10", title: "ASEAN Regulatory Mapping — Working Document", type: "link", author: "Dr. Aisha Patel", date: "Feb 2026", downloads: 15, likes: 6, description: "Living document mapping PS regulatory requirements across ASEAN.", visibility: "group-only" },
+    ],
   },
 ];
 
@@ -836,8 +911,12 @@ const Community = () => {
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
-  const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
-  const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
+   const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
+   const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
+   const [groupVisibilityOverrides, setGroupVisibilityOverrides] = useState<Record<string, GroupVisibility>>({});
+   const [showVisibilitySettings, setShowVisibilitySettings] = useState(false);
+   const [groupDiscussionFilter, setGroupDiscussionFilter] = useState<"all" | GroupVisibility>("all");
+   const [groupResourceFilter, setGroupResourceFilter] = useState<"all" | GroupVisibility>("all");
   const [memberSearch, setMemberSearch] = useState("");
   const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
   const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
@@ -2749,16 +2828,70 @@ const Community = () => {
 
                   {/* Viewing a specific group */}
                   {viewingGroup && (
-                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-4">
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-5">
                       <div className="flex items-center justify-between">
                         <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
                           <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-serif font-semibold text-xs flex items-center justify-center">{viewingGroup.avatar}</span>
                           {viewingGroup.name}
                         </h3>
-                        <button onClick={() => setViewingGroup(null)} className="text-xs text-muted-foreground hover:text-foreground"><FontAwesomeIcon icon={faTimes} className="mr-1" />Close</button>
+                        <div className="flex items-center gap-3">
+                          {isAdmin && (
+                            <button onClick={() => setShowVisibilitySettings(!showVisibilitySettings)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                              <FontAwesomeIcon icon={faEye} className="text-[10px]" />
+                              Visibility rules
+                            </button>
+                          )}
+                          <button onClick={() => { setViewingGroup(null); setShowVisibilitySettings(false); setGroupDiscussionFilter("all"); setGroupResourceFilter("all"); }} className="text-xs text-muted-foreground hover:text-foreground"><FontAwesomeIcon icon={faTimes} className="mr-1" />Close</button>
+                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground">{viewingGroup.description}</p>
                       <div className="text-xs text-muted-foreground">Formed {viewingGroup.formed} · Led by <button onClick={() => setSelectedMember(viewingGroup.lead)} className="text-primary hover:underline font-medium">{viewingGroup.lead.name}</button></div>
+
+                      {/* Visibility Rules Panel */}
+                      {showVisibilitySettings && isAdmin && (
+                        <div className="bg-accent/30 border border-accent rounded-lg p-4 space-y-3">
+                          <h4 className="text-xs font-semibold text-card-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faEye} className="text-primary text-[10px]" />
+                            Discussion & Resource Visibility Rules
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            Control who can see discussions and resources in this group. Each item can be set to:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Community-wide</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Visible to all community members, not just group members.</p>
+                            </div>
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Group only</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Only visible to members of this working group.</p>
+                            </div>
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Managers only</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Restricted to group leader and community managers/owners.</p>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-border">
+                            <label className="text-[11px] font-medium text-card-foreground">Default visibility for new items:</label>
+                            <div className="flex gap-2 mt-1.5">
+                              {(["community-wide", "group-only", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} className={`text-[10px] px-3 py-1.5 rounded-md border transition-colors ${viewingGroup.defaultVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "community-wide": "Community-wide", "group-only": "Group only", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Group Members */}
                       <div>
@@ -2776,19 +2909,132 @@ const Community = () => {
                       {/* Group Discussions */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs font-semibold text-card-foreground">Discussions ({viewingGroup.discussions})</h4>
-                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add discussion</button>}
+                          <h4 className="text-xs font-semibold text-card-foreground">Discussions ({viewingGroup.groupDiscussions.length})</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              {(["all", "community-wide", "group-only", "managers-only"] as const).map(f => (
+                                <button key={f} onClick={() => setGroupDiscussionFilter(f)} className={`text-[10px] px-2 py-0.5 rounded-md transition-colors ${groupDiscussionFilter === f ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}>
+                                  {{ all: "All", "community-wide": "Community", "group-only": "Group", "managers-only": "Managers" }[f]}
+                                </button>
+                              ))}
+                            </div>
+                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.discussions} discussions in this group. Navigate to the Discussions tab to view them.</p>
+                        <div className="space-y-2">
+                          {viewingGroup.groupDiscussions
+                            .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
+                            .map(d => {
+                              const effectiveVis = groupVisibilityOverrides[d.id] || d.visibility;
+                              return (
+                                <div key={d.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {d.pinned && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200 font-medium"><FontAwesomeIcon icon={faThumbtack} className="mr-0.5 text-[8px]" />Pinned</span>}
+                                        <h5 className="text-xs font-semibold text-card-foreground">{d.title}</h5>
+                                      </div>
+                                      <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{d.content}</p>
+                                      <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                                        <button onClick={() => setSelectedMember(d.author)} className="hover:text-primary">{d.author.name}</button>
+                                        <span>{d.date}</span>
+                                        <span><FontAwesomeIcon icon={faReply} className="mr-0.5" />{d.replies}</span>
+                                        <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{d.likes}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium border ${
+                                        effectiveVis === "community-wide" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                        effectiveVis === "group-only" ? "bg-primary/5 text-primary border-primary/20" :
+                                        "bg-amber-50 text-amber-700 border-amber-200"
+                                      }`}>
+                                        <FontAwesomeIcon icon={effectiveVis === "managers-only" ? faLock : effectiveVis === "group-only" ? faUsers : faGlobe} className="mr-1 text-[8px]" />
+                                        {{ "community-wide": "Community", "group-only": "Group only", "managers-only": "Managers" }[effectiveVis]}
+                                      </span>
+                                      {isAdmin && (
+                                        <select
+                                          value={effectiveVis}
+                                          onChange={e => setGroupVisibilityOverrides(prev => ({ ...prev, [d.id]: e.target.value as GroupVisibility }))}
+                                          className="text-[9px] border border-border rounded px-1 py-0.5 bg-background text-card-foreground"
+                                        >
+                                          <option value="community-wide">Community-wide</option>
+                                          <option value="group-only">Group only</option>
+                                          <option value="managers-only">Managers only</option>
+                                        </select>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          {viewingGroup.groupDiscussions.filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4">No discussions match the selected visibility filter.</p>
+                          )}
+                        </div>
                       </div>
 
                       {/* Group Resources */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs font-semibold text-card-foreground">Resources ({viewingGroup.resources})</h4>
-                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add resource</button>}
+                          <h4 className="text-xs font-semibold text-card-foreground">Resources ({viewingGroup.groupResources.length})</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              {(["all", "community-wide", "group-only", "managers-only"] as const).map(f => (
+                                <button key={f} onClick={() => setGroupResourceFilter(f)} className={`text-[10px] px-2 py-0.5 rounded-md transition-colors ${groupResourceFilter === f ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}>
+                                  {{ all: "All", "community-wide": "Community", "group-only": "Group", "managers-only": "Managers" }[f]}
+                                </button>
+                              ))}
+                            </div>
+                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.resources} resources shared in this group. Navigate to the Resources tab to view them.</p>
+                        <div className="space-y-2">
+                          {viewingGroup.groupResources
+                            .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
+                            .map(r => {
+                              const effectiveVis = groupVisibilityOverrides[r.id] || r.visibility;
+                              return (
+                                <div key={r.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
+                                      <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                                        <span>{r.author}</span>
+                                        <span>{r.date}</span>
+                                        <span><FontAwesomeIcon icon={faDownload} className="mr-0.5" />{r.downloads}</span>
+                                        <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{r.likes}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium border ${
+                                        effectiveVis === "community-wide" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                        effectiveVis === "group-only" ? "bg-primary/5 text-primary border-primary/20" :
+                                        "bg-amber-50 text-amber-700 border-amber-200"
+                                      }`}>
+                                        <FontAwesomeIcon icon={effectiveVis === "managers-only" ? faLock : effectiveVis === "group-only" ? faUsers : faGlobe} className="mr-1 text-[8px]" />
+                                        {{ "community-wide": "Community", "group-only": "Group only", "managers-only": "Managers" }[effectiveVis]}
+                                      </span>
+                                      {isAdmin && (
+                                        <select
+                                          value={effectiveVis}
+                                          onChange={e => setGroupVisibilityOverrides(prev => ({ ...prev, [r.id]: e.target.value as GroupVisibility }))}
+                                          className="text-[9px] border border-border rounded px-1 py-0.5 bg-background text-card-foreground"
+                                        >
+                                          <option value="community-wide">Community-wide</option>
+                                          <option value="group-only">Group only</option>
+                                          <option value="managers-only">Managers only</option>
+                                        </select>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          {viewingGroup.groupResources.filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4">No resources match the selected visibility filter.</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
