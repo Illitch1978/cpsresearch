@@ -732,6 +732,15 @@ const Community = () => {
   const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
   // Members tab sort/search state
+  // Groups tab state
+  const [groupSearch, setGroupSearch] = useState("");
+  const [groupSort, setGroupSort] = useState<"name" | "leader" | "formed" | "activity" | "members">("name");
+  const [groupSortDir, setGroupSortDir] = useState<"asc" | "desc">("asc");
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [joinedGroups, setJoinedGroups] = useState<Set<string>>(new Set(["ai-in-audit"]));
+  const [viewingGroup, setViewingGroup] = useState<WorkingGroup | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberSort, setMemberSort] = useState<"name" | "firm" | "posts" | "role" | "joined">("name");
   const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
