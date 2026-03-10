@@ -1438,7 +1438,7 @@ const MyCommunities = () => {
       <Dialog open={!!joiningCommunity} onOpenChange={(open) => { if (!open) { setJoiningCommunity(null); setJoinContributions([]); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base font-serif">Join {joiningCommunity?.name}</DialogTitle>
+            <DialogTitle className="text-base font-serif">{joiningCommunity?.membershipStatus === "prospect" ? "Apply to" : "Join"} {joiningCommunity?.name}</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Select your anticipated contributions to this community. At least one is required.
             </DialogDescription>
