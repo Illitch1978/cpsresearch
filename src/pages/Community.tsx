@@ -1006,13 +1006,22 @@ const Community = () => {
       const q = discussionSearch.toLowerCase();
       list = list.filter(d => d.title.toLowerCase().includes(q) || d.author.name.toLowerCase().includes(q) || d.date.toLowerCase().includes(q));
     }
-    // Sort: pinned always first
+    // Sort
+    if (discussionSort === "pinned") {
+      // Pinned first, then unpinned
+      const pinned = list.filter(d => pinnedDiscussions.has(d.id));
+      const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
+      return discussionSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+    }
+    // For other sorts, pinned still float to top
     const pinned = list.filter(d => pinnedDiscussions.has(d.id));
     const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
     const sortFn = (a: Discussion, b: Discussion) => {
       let cmp = 0;
       if (discussionSort === "name") cmp = a.title.localeCompare(b.title);
       else if (discussionSort === "author") cmp = a.author.name.localeCompare(b.author.name);
+      else if (discussionSort === "replies") cmp = a.replies - b.replies;
+      else if (discussionSort === "likes") cmp = a.likes - b.likes;
       else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
       return discussionSortDir === "asc" ? -cmp : cmp;
     };
@@ -1028,12 +1037,19 @@ const Community = () => {
       const q = resourceSearch.toLowerCase();
       list = list.filter(r => r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.date.toLowerCase().includes(q));
     }
+    if (resourceSort === "pinned") {
+      const pinned = list.filter(r => pinnedResources.has(r.id));
+      const unpinned = list.filter(r => !pinnedResources.has(r.id));
+      return resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+    }
     const pinned = list.filter(r => pinnedResources.has(r.id));
     const unpinned = list.filter(r => !pinnedResources.has(r.id));
     const sortFn = (a: Resource, b: Resource) => {
       let cmp = 0;
       if (resourceSort === "name") cmp = a.title.localeCompare(b.title);
       else if (resourceSort === "author") cmp = a.author.localeCompare(b.author);
+      else if (resourceSort === "downloads") cmp = (a.downloads || 0) - (b.downloads || 0);
+      else if (resourceSort === "likes") cmp = (resourceLikes[a.id] || 0) - (resourceLikes[b.id] || 0);
       else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
       return resourceSortDir === "asc" ? -cmp : cmp;
     };
