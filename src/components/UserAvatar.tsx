@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket, faUsers } from "@fortawesome/free-solid-svg-icons";
+import { faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import richardAvatar from "@/assets/richard-avatar.png";
 
