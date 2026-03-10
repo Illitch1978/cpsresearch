@@ -689,6 +689,11 @@ const Community = () => {
   const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
   const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
   const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
+  const [eventSearch, setEventSearch] = useState("");
+  const [eventSort, setEventSort] = useState<"name" | "presenter" | "date" | "delegates" | "city" | "country">("date");
+  const [eventSortDir, setEventSortDir] = useState<"asc" | "desc">("asc");
+  const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
+  const [eventStatusFilter, setEventStatusFilter] = useState<string>("all");
 
   // Discussion sort/search state
   const [discussionSearch, setDiscussionSearch] = useState("");
