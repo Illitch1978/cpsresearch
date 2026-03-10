@@ -698,7 +698,7 @@ const Community = () => {
 
   // Discussion sort/search state
   const [discussionSearch, setDiscussionSearch] = useState("");
-  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author">("date");
+  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author" | "pinned" | "replies" | "likes">("date");
   const [discussionSortDir, setDiscussionSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedDiscussions, setPinnedDiscussions] = useState<Set<string>>(new Set(mockDiscussions.filter(d => d.pinned).map(d => d.id)));
 
