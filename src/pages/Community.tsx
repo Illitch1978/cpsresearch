@@ -128,6 +128,7 @@ interface Resource {
   author: string;
   date: string;
   downloads?: number;
+  likes?: number;
   description: string;
   url?: string;
 }
