@@ -964,25 +964,6 @@ const MyCommunities = () => {
           </div>
         </div>
 
-        {/* Sort buttons */}
-        <div className="flex items-center gap-1 mb-4 flex-wrap">
-          <span className="text-xs font-medium text-muted-foreground mr-1">Sort:</span>
-          {([
-            { field: "name" as SortField, label: "Name" },
-            { field: "members" as SortField, label: "Members" },
-            { field: "discussions" as SortField, label: "Discussions" },
-            { field: "resources" as SortField, label: "Resources" },
-          ]).map(s => (
-            <button
-              key={s.field}
-              onClick={() => toggleSort(s.field)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded transition-colors ${sortField === s.field ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-            >
-              {s.label} <FontAwesomeIcon icon={getSortIcon(s.field)} className="text-[9px]" />
-            </button>
-          ))}
-        </div>
-
         {/* Filter Checkboxes */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-3">
           <span className="text-xs font-medium text-muted-foreground mr-1">Filter:</span>
@@ -1000,7 +981,7 @@ const MyCommunities = () => {
             </label>
           ))}
           {isHQ && (
-            <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none ml-3 pl-3 border-l border-border">
+            <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
               <input type="checkbox" checked={showArchived} onChange={() => setShowArchived(!showArchived)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               Archived (HQ)
             </label>
@@ -1008,7 +989,7 @@ const MyCommunities = () => {
         </div>
 
         {/* Status Checkboxes */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4">
           <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
           {[
             { label: "Research panel member", state: filterResearchPanelMember, setter: setFilterResearchPanelMember },
@@ -1024,6 +1005,26 @@ const MyCommunities = () => {
               <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               {f.label}
             </label>
+          ))}
+        </div>
+
+        {/* Sort buttons */}
+        <div className="flex items-center gap-1 mb-4 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Sort:</span>
+          {([
+            { field: "name" as SortField, label: "Name" },
+            { field: "members" as SortField, label: "Members" },
+            { field: "discussions" as SortField, label: "Discussions" },
+            { field: "resources" as SortField, label: "Resources" },
+            { field: "events" as SortField, label: "Events" },
+          ]).map(s => (
+            <button
+              key={s.field}
+              onClick={() => toggleSort(s.field)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 text-xs rounded transition-colors ${sortField === s.field ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+            >
+              {s.label} <FontAwesomeIcon icon={getSortIcon(s.field)} className="text-[9px]" />
+            </button>
           ))}
         </div>
 
