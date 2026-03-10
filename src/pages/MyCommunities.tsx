@@ -620,10 +620,10 @@ const MyCommunities = () => {
               >
                 {community.name}
               </button>
-              <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">
-                {community.role}
-              </span>
               {getStatusBadge(community.membershipStatus)}
+              {!community.membershipStatus || community.membershipStatus === "member" ? (
+                <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">Member</span>
+              ) : null}
               {community.isPrivate && (
                 <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <FontAwesomeIcon icon={faLock} className="text-[9px]" /> Private
