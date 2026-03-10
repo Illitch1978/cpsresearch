@@ -456,6 +456,13 @@ const communityData = {
 
 // ─── Sub-components ──────────────────────────────────────────
 
+/** Get initials from a name, skipping titles like Dr., Prof., etc. */
+const getInitials = (name: string): string => {
+  const titles = new Set(["dr.", "dr", "prof.", "prof", "mr.", "mr", "mrs.", "mrs", "ms.", "ms", "sir"]);
+  const parts = name.split(" ").filter(n => !titles.has(n.toLowerCase()));
+  return parts.map(n => n[0]).join("").slice(0, 2);
+};
+
 const BadgeIcon = ({ badge }: { badge?: string }) => {
   if (!badge) return null;
   const config = {
