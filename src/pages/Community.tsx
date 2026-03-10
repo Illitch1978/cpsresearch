@@ -128,6 +128,7 @@ interface Resource {
   author: string;
   date: string;
   downloads?: number;
+  likes?: number;
   description: string;
   url?: string;
 }
@@ -210,11 +211,11 @@ const mockDiscussions: Discussion[] = [
 ];
 
 const mockResources: Resource[] = [
-  { id: "1", title: "Professional Services Research Methods Handbook (2026 Edition)", type: "paper", author: "Prof. Sarah Mitchell et al.", date: "Jan 2026", downloads: 342, description: "Comprehensive guide to research methodologies specific to studying professional service firms." },
-  { id: "2", title: "AI Adoption in Audit: A Systematic Review", type: "report", author: "Dr. James Hargreaves", date: "Feb 2026", downloads: 189, description: "Systematic review of 152 papers on AI adoption patterns in audit firms across 18 jurisdictions." },
-  { id: "3", title: "CPSR Annual Conference 2025 — Keynote Recordings", type: "video", author: "CPSR", date: "Dec 2025", downloads: 94, description: "Full recordings of all keynote presentations from the 2025 annual conference." },
-  { id: "4", title: "Diversity Pipeline Analysis: Methodology & Dataset", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 67, description: "Open-access dataset and methodology documentation for the Big Four diversity pipeline study." },
-  { id: "5", title: "Regulatory Landscape for Professional Services (EU & UK)", type: "link", author: "Thomas Wright", date: "Mar 2026", description: "Living document tracking regulatory changes affecting professional services in Europe." },
+  { id: "1", title: "Professional Services Research Methods Handbook (2026 Edition)", type: "paper", author: "Prof. Sarah Mitchell et al.", date: "Jan 2026", downloads: 342, likes: 56, description: "Comprehensive guide to research methodologies specific to studying professional service firms." },
+  { id: "2", title: "AI Adoption in Audit: A Systematic Review", type: "report", author: "Dr. James Hargreaves", date: "Feb 2026", downloads: 189, likes: 38, description: "Systematic review of 152 papers on AI adoption patterns in audit firms across 18 jurisdictions." },
+  { id: "3", title: "CPSR Annual Conference 2025 — Keynote Recordings", type: "video", author: "CPSR", date: "Dec 2025", downloads: 94, likes: 21, description: "Full recordings of all keynote presentations from the 2025 annual conference." },
+  { id: "4", title: "Diversity Pipeline Analysis: Methodology & Dataset", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 67, likes: 15, description: "Open-access dataset and methodology documentation for the Big Four diversity pipeline study." },
+  { id: "5", title: "Regulatory Landscape for Professional Services (EU & UK)", type: "link", author: "Thomas Wright", date: "Mar 2026", likes: 9, description: "Living document tracking regulatory changes affecting professional services in Europe." },
 ];
 
 const mockEvents: Event[] = [
@@ -697,15 +698,26 @@ const Community = () => {
 
   // Discussion sort/search state
   const [discussionSearch, setDiscussionSearch] = useState("");
-  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author">("date");
+  const [discussionSort, setDiscussionSort] = useState<"date" | "name" | "author" | "pinned" | "replies" | "likes">("date");
   const [discussionSortDir, setDiscussionSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedDiscussions, setPinnedDiscussions] = useState<Set<string>>(new Set(mockDiscussions.filter(d => d.pinned).map(d => d.id)));
 
   // Resource sort/search/pin state
   const [resourceSearch, setResourceSearch] = useState("");
-  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author">("date");
+  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author" | "downloads" | "pinned" | "likes">("date");
   const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
+  const [resourceLikes, setResourceLikes] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    mockResources.forEach(r => { initial[r.id] = r.likes || 0; });
+    return initial;
+  });
+  const [likedResources, setLikedResources] = useState<Set<string>>(new Set());
+
+  // Playlist search/sort state
+  const [playlistSearch, setPlaylistSearch] = useState("");
+  const [playlistSort, setPlaylistSort] = useState<"name" | "curator" | "date" | "likes">("date");
+  const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
   // Members tab sort/search state
   const [memberSearch, setMemberSearch] = useState("");
@@ -994,13 +1006,22 @@ const Community = () => {
       const q = discussionSearch.toLowerCase();
       list = list.filter(d => d.title.toLowerCase().includes(q) || d.author.name.toLowerCase().includes(q) || d.date.toLowerCase().includes(q));
     }
-    // Sort: pinned always first
+    // Sort
+    if (discussionSort === "pinned") {
+      // Pinned first, then unpinned
+      const pinned = list.filter(d => pinnedDiscussions.has(d.id));
+      const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
+      return discussionSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+    }
+    // For other sorts, pinned still float to top
     const pinned = list.filter(d => pinnedDiscussions.has(d.id));
     const unpinned = list.filter(d => !pinnedDiscussions.has(d.id));
     const sortFn = (a: Discussion, b: Discussion) => {
       let cmp = 0;
       if (discussionSort === "name") cmp = a.title.localeCompare(b.title);
       else if (discussionSort === "author") cmp = a.author.name.localeCompare(b.author.name);
+      else if (discussionSort === "replies") cmp = a.replies - b.replies;
+      else if (discussionSort === "likes") cmp = a.likes - b.likes;
       else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
       return discussionSortDir === "asc" ? -cmp : cmp;
     };
@@ -1016,19 +1037,26 @@ const Community = () => {
       const q = resourceSearch.toLowerCase();
       list = list.filter(r => r.title.toLowerCase().includes(q) || r.author.toLowerCase().includes(q) || r.date.toLowerCase().includes(q));
     }
+    if (resourceSort === "pinned") {
+      const pinned = list.filter(r => pinnedResources.has(r.id));
+      const unpinned = list.filter(r => !pinnedResources.has(r.id));
+      return resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+    }
     const pinned = list.filter(r => pinnedResources.has(r.id));
     const unpinned = list.filter(r => !pinnedResources.has(r.id));
     const sortFn = (a: Resource, b: Resource) => {
       let cmp = 0;
       if (resourceSort === "name") cmp = a.title.localeCompare(b.title);
       else if (resourceSort === "author") cmp = a.author.localeCompare(b.author);
+      else if (resourceSort === "downloads") cmp = (a.downloads || 0) - (b.downloads || 0);
+      else if (resourceSort === "likes") cmp = (resourceLikes[a.id] || 0) - (resourceLikes[b.id] || 0);
       else cmp = new Date(b.date).getTime() - new Date(a.date).getTime();
       return resourceSortDir === "asc" ? -cmp : cmp;
     };
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
     return [...pinned, ...unpinned];
-  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources]);
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
 
   const community = communityData["prof-services-research"];
 
@@ -1524,7 +1552,7 @@ const Community = () => {
                       <div className="flex items-center gap-1">
                         <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
                         <span className="text-xs text-muted-foreground mr-1">Sort:</span>
-                        {(["date", "name", "author"] as const).map(s => (
+                        {(["date", "name", "author", "pinned", "replies", "likes"] as const).map(s => (
                           <button
                             key={s}
                             onClick={() => {
@@ -1533,7 +1561,7 @@ const Community = () => {
                             }}
                             className={`text-xs px-2 py-1 rounded-md transition-colors ${discussionSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
                           >
-                            {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                            {{ date: "Date", name: "Title", author: "Author", pinned: "Pinned", replies: "Replies", likes: "Likes" }[s]}
                             {discussionSort === s && <span className="ml-0.5">{discussionSortDir === "asc" ? "↑" : "↓"}</span>}
                           </button>
                         ))}
@@ -1932,16 +1960,16 @@ const Community = () => {
                     <div className="flex items-center gap-1">
                       <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
                       <span className="text-xs text-muted-foreground mr-1">Sort:</span>
-                      {(["date", "name", "author"] as const).map(s => (
+                      {(["date", "name", "author", "downloads", "pinned", "likes"] as const).map(s => (
                         <button
                           key={s}
                           onClick={() => {
                             if (resourceSort === s) setResourceSortDir(d => d === "asc" ? "desc" : "asc");
-                            else { setResourceSort(s); setResourceSortDir(s === "date" ? "desc" : "asc"); }
+                            else { setResourceSort(s); setResourceSortDir(s === "date" || s === "downloads" || s === "likes" ? "desc" : "asc"); }
                           }}
                           className={`text-xs px-2 py-1 rounded-md transition-colors ${resourceSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
                         >
-                          {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                          {{ date: "Date", name: "Title", author: "Author", downloads: "Downloads", pinned: "Pinned", likes: "Likes" }[s]}
                           {resourceSort === s && <span className="ml-0.5">{resourceSortDir === "asc" ? "↑" : "↓"}</span>}
                         </button>
                       ))}
@@ -2033,7 +2061,23 @@ const Community = () => {
                       </div>
                       <div className="flex flex-col items-center gap-2 shrink-0">
                         <div className="flex items-center gap-3">
-                          {r.downloads && (
+                          <button
+                            onClick={() => {
+                              setLikedResources(prev => {
+                                const next = new Set(prev);
+                                if (next.has(r.id)) next.delete(r.id); else next.add(r.id);
+                                return next;
+                              });
+                              setResourceLikes(prev => ({
+                                ...prev,
+                                [r.id]: (prev[r.id] || 0) + (likedResources.has(r.id) ? -1 : 1),
+                              }));
+                            }}
+                            className={`text-xs flex items-center gap-1 transition-colors ${likedResources.has(r.id) ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"}`}
+                          >
+                            <FontAwesomeIcon icon={faHeart} /> {resourceLikes[r.id] || 0}
+                          </button>
+                          {r.downloads != null && (
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <FontAwesomeIcon icon={faDownload} /> {r.downloads}
                             </span>
@@ -2222,8 +2266,61 @@ const Community = () => {
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       Community Playlists ({mockPlaylists.length + userPlaylists.length})
                     </h3>
+
+                    {/* Playlist Search & Sort */}
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      <div className="relative flex-1 min-w-[160px]">
+                        <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                        <input
+                          type="text"
+                          value={playlistSearch}
+                          onChange={e => setPlaylistSearch(e.target.value)}
+                          placeholder="Search playlists…"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                        <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                        {(["name", "curator", "date", "likes"] as const).map(s => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              if (playlistSort === s) setPlaylistSortDir(d => d === "asc" ? "desc" : "asc");
+                              else { setPlaylistSort(s); setPlaylistSortDir(s === "date" || s === "likes" ? "desc" : "asc"); }
+                            }}
+                            className={`text-xs px-2 py-1 rounded-md transition-colors ${playlistSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                          >
+                            {{ name: "Name", curator: "Curator", date: "Date", likes: "Likes" }[s]}
+                            {playlistSort === s && <span className="ml-0.5">{playlistSortDir === "asc" ? "↑" : "↓"}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[...userPlaylists, ...mockPlaylists].map(pl => (
+                      {(() => {
+                        const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                        let allPl = [...userPlaylists, ...mockPlaylists];
+                        if (playlistSearch.trim()) {
+                          const q = playlistSearch.toLowerCase();
+                          allPl = allPl.filter(pl => pl.name.toLowerCase().includes(q) || pl.author.name.toLowerCase().includes(q) || pl.description.toLowerCase().includes(q));
+                        }
+                        allPl.sort((a, b) => {
+                          let cmp = 0;
+                          if (playlistSort === "name") cmp = a.name.localeCompare(b.name);
+                          else if (playlistSort === "curator") cmp = a.author.name.localeCompare(b.author.name);
+                          else if (playlistSort === "likes") cmp = a.likes - b.likes;
+                          else {
+                            const parseDate = (d: string) => { const parts = d.split(" "); return (parseInt(parts[1] || "2026", 10) * 12) + (monthOrder[parts[0]] ?? 0); };
+                            cmp = parseDate(a.createdDate) - parseDate(b.createdDate);
+                          }
+                          return playlistSortDir === "desc" ? -cmp : cmp;
+                        });
+                        if (allPl.length === 0) {
+                          return <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">No playlists match your search.</div>;
+                        }
+                        return allPl.map(pl => (
                         <div key={pl.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -2282,7 +2379,8 @@ const Community = () => {
                             <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
                           </div>
                         </div>
-                      ))}
+                      ));
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -2585,14 +2683,23 @@ const Community = () => {
                         </h3>
                         <button
                           onClick={() => setShowManageDetails(!showManageDetails)}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showManageDetails ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-primary/30 text-primary hover:bg-primary/5"
                         >
                           <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Manage community details
                         </button>
                       </div>
+                    </div>
 
-                      {showManageDetails && (
-                        <div className="mt-4 space-y-4">
+                    {/* Manage Community Details Dialog */}
+                    <Dialog open={showManageDetails} onOpenChange={setShowManageDetails}>
+                      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+                        <DialogHeader className="shrink-0">
+                          <DialogTitle className="text-lg font-serif">Edit Community Details</DialogTitle>
+                          <DialogDescription className="text-sm text-muted-foreground">
+                            Update your community settings. Name and access status changes are restricted to HQ.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
                           {/* HQ-only notice for non-HQ users */}
                           {!isHQ && (
                             <div className="flex items-start gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border text-xs text-muted-foreground">
@@ -2600,10 +2707,12 @@ const Community = () => {
                               <span>Community name and access status can only be changed by HQ. To request changes, <a href="mailto:hq@cpsr.uk?subject=Community%20Details%20Change%20Request" className="text-primary hover:underline font-medium">contact HQ</a>.</span>
                             </div>
                           )}
+                          {/* Name */}
                           <div>
                             <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
                             <input type="text" defaultValue={community.name} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
                           </div>
+                          {/* Access */}
                           <div>
                             <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
                             <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
@@ -2615,23 +2724,6 @@ const Community = () => {
                               </button>
                             </div>
                           </div>
-                          <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
-                            <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
-                            <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
-                          </div>
-
-                          {/* Thumbnail */}
-                          <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Thumbnail</label>
-                            <button className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
-                              <FontAwesomeIcon icon={faCamera} className="text-sm text-muted-foreground/50" /> <span>Change thumbnail image (max 500KB)</span>
-                            </button>
-                          </div>
-
                           {/* Official status */}
                           <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border">
                             <FontAwesomeIcon icon={faShieldHalved} className="text-[10px] text-muted-foreground" />
@@ -2640,13 +2732,84 @@ const Community = () => {
                               <a href="mailto:hq@cpsr.uk?subject=Request%20for%20Official%20Community%20Status" className="text-primary hover:underline font-medium">email HQ</a>.
                             </span>
                           </div>
-
-                          <div className="flex justify-end">
-                            <button className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Save changes</button>
+                          {/* Thumbnail */}
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Thumbnail</label>
+                            <button className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
+                              <FontAwesomeIcon icon={faCamera} className="text-sm text-muted-foreground/50" /> <span>Change thumbnail image (max 500KB)</span>
+                            </button>
+                          </div>
+                          {/* Summary */}
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
+                            <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                          </div>
+                          {/* Description */}
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
+                            <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                          </div>
+                          {/* Community criteria section */}
+                          <div className="border border-border rounded-lg overflow-hidden">
+                            <div className="px-4 py-3 bg-muted/30">
+                              <span className="text-xs font-semibold text-card-foreground">Community criteria</span>
+                            </div>
+                            <div className="px-4 py-4 space-y-4 border-t border-border text-xs text-muted-foreground">
+                              <p>Location, Sectors, Org Types, Expertise, and External Factors criteria can be edited here. These match the filters used when creating the community.</p>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Location:</span> Global</div>
+                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Sectors:</span> Any sector</div>
+                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Org Types:</span> Any org type</div>
+                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Expertise:</span> Any expertise</div>
+                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">External Factors:</span> Any</div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Rules section */}
+                          <div className="border border-border rounded-lg overflow-hidden">
+                            <div className="px-4 py-3 bg-muted/30">
+                              <span className="text-xs font-semibold text-card-foreground">Rules</span>
+                            </div>
+                            <div className="px-4 py-4 space-y-3 border-t border-border">
+                              <div>
+                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Membership approval</label>
+                                <select className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
+                                  <option>Anyone can join</option>
+                                  <option>Anyone meeting criteria</option>
+                                  <option selected>Approval required</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Post review</label>
+                                <select className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
+                                  <option>No review required</option>
+                                  <option>Posts that meet criteria require review</option>
+                                  <option selected>Review required for all posts</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry</label>
+                                <div className="flex items-center gap-2">
+                                  <select className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
+                                    <option>30</option><option>60</option><option selected>90</option><option>120</option><option>180</option>
+                                  </select>
+                                  <span className="text-xs text-muted-foreground">days after being sent.</span>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Community rules</label>
+                                <textarea defaultValue={community.rules.map(r => `${r.title} ${r.detail}`).join('\n')} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                              </div>
+                            </div>
+                          </div>
+                          {/* Actions */}
+                          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                            <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
+                            <button onClick={() => setShowManageDetails(false)} className="px-5 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Save changes</button>
                           </div>
                         </div>
-                      )}
-                    </div>
+                      </DialogContent>
+                    </Dialog>
 
                     {/* Add Contacts Card */}
                     <div className="bg-background border border-border rounded-lg p-6">
