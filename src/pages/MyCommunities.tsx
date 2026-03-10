@@ -65,7 +65,7 @@ import {
   externalFactorsList,
 } from "@/lib/communityFilterData";
 
-type MembershipStatus = "member" | "invited" | "applied" | "managed" | "pending";
+type MembershipStatus = "member" | "invited" | "applied" | "managed" | "pending" | "blocked" | "prospect";
 
 interface CommunityItem {
   id: string;
@@ -84,6 +84,7 @@ interface CommunityItem {
   isOfficial?: boolean;
   lastVisited?: string;
   isResearchPanel?: boolean;
+  isResearchPanelMember?: boolean;
   theme?: string;
   owner?: string;
   manager?: string;
@@ -110,6 +111,7 @@ const initialCommunities: CommunityItem[] = [
     isOfficial: true,
     lastVisited: "2 hours ago",
     isResearchPanel: true,
+    isResearchPanelMember: true,
     theme: "Market Intelligence",
     owner: "Sarah Mitchell",
     manager: "James Thornton",
@@ -123,7 +125,7 @@ const initialCommunities: CommunityItem[] = [
     discussions: 32,
     resources: 24,
     events: 1,
-    role: "Contributor",
+    role: "Member",
     lastActive: "Yesterday",
     avatar: "LMI",
     isPrivate: true,
@@ -143,7 +145,7 @@ const initialCommunities: CommunityItem[] = [
     discussions: 89,
     resources: 41,
     events: 5,
-    role: "Owner",
+    role: "Managed",
     lastActive: "3 days ago",
     avatar: "MCT",
     isPrivate: false,
@@ -231,6 +233,44 @@ const initialCommunities: CommunityItem[] = [
     manager: "Anna Kowalski",
     membershipStatus: "member",
   },
+  {
+    id: "data-analytics-forum",
+    name: "Data Analytics Forum",
+    description: "A community for data professionals sharing insights on analytics, visualisation, and data-driven decision making.",
+    members: 320,
+    discussions: 45,
+    resources: 22,
+    events: 2,
+    role: "Blocked",
+    lastActive: "1 week ago",
+    avatar: "DAF",
+    isPrivate: false,
+    isFavourite: false,
+    isOfficial: false,
+    theme: "Data & Analytics",
+    owner: "Sarah Mitchell",
+    manager: "David Chen",
+    membershipStatus: "blocked",
+  },
+  {
+    id: "governance-network",
+    name: "Corporate Governance Network",
+    description: "Forum for board members and governance professionals to discuss best practices in corporate oversight.",
+    members: 210,
+    discussions: 28,
+    resources: 15,
+    events: 3,
+    role: "Prospect",
+    lastActive: "2 days ago",
+    avatar: "CGN",
+    isPrivate: false,
+    isFavourite: false,
+    isOfficial: true,
+    theme: "Corporate Governance",
+    owner: "Anna Kowalski",
+    manager: "James Thornton",
+    membershipStatus: "prospect",
+  },
 ];
 
 // Owner rankings mock data
@@ -271,6 +311,9 @@ const MyCommunities = () => {
   const [filterApplied, setFilterApplied] = useState(false);
   const [filterManaged, setFilterManaged] = useState(false);
   const [filterPending, setFilterPending] = useState(false);
+  const [filterBlocked, setFilterBlocked] = useState(false);
+  const [filterProspect, setFilterProspect] = useState(false);
+  const [filterResearchPanelMember, setFilterResearchPanelMember] = useState(false);
 
   // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
@@ -353,9 +396,13 @@ const MyCommunities = () => {
 
   // Ownership tracking
   const ownedOpenCount = useMemo(() => {
-    return communities.filter(c => !c.archived && !c.isPrivate && (c.role === "Owner" || c.role === "Founder")).length;
+    return communities.filter(c => !c.archived && !c.isPrivate && c.membershipStatus === "managed").length;
   }, [communities]);
   const isAtOwnershipLimit = ownedOpenCount >= MAX_OWNED_OPEN;
+  const activeMemberCount = useMemo(() => {
+    return communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length;
+  }, [communities]);
+  const isAtCommunityLimit = activeMemberCount >= MAX_COMMUNITIES;
 
   // Visibility: private communities only shown to members/invited/managed
   const visibleCommunities = useMemo(() => {
@@ -381,14 +428,17 @@ const MyCommunities = () => {
       if (filterResearchPanels && !c.isResearchPanel) return false;
 
       // Status filters (OR logic)
-      const anyStatusFilter = filterMember || filterInvited || filterApplied || filterManaged || filterPending;
+      const anyStatusFilter = filterResearchPanelMember || filterMember || filterInvited || filterApplied || filterManaged || filterPending || filterBlocked || filterProspect;
       if (anyStatusFilter) {
         const status = c.membershipStatus;
+        if (filterResearchPanelMember && c.isResearchPanelMember) return true;
         if (filterMember && status === "member") return true;
         if (filterInvited && status === "invited") return true;
         if (filterApplied && status === "applied") return true;
         if (filterManaged && status === "managed") return true;
         if (filterPending && status === "pending") return true;
+        if (filterBlocked && status === "blocked") return true;
+        if (filterProspect && status === "prospect") return true;
         return false;
       }
 
@@ -417,7 +467,7 @@ const MyCommunities = () => {
     });
 
     return result;
-  }, [visibleCommunities, showArchived, isHQ, filterOpen, filterPrivate, filterFavourites, filterOfficial, filterRecentlyVisited, filterResearchPanels, filterMember, filterInvited, filterApplied, filterManaged, filterPending, searchQuery, sortField, sortDir]);
+  }, [visibleCommunities, showArchived, isHQ, filterOpen, filterPrivate, filterFavourites, filterOfficial, filterRecentlyVisited, filterResearchPanels, filterResearchPanelMember, filterMember, filterInvited, filterApplied, filterManaged, filterPending, filterBlocked, filterProspect, searchQuery, sortField, sortDir]);
 
   const toggleFavourite = (id: string) => {
     setCommunities(prev => prev.map(c => c.id === id ? { ...c, isFavourite: !c.isFavourite } : c));
@@ -509,13 +559,16 @@ const MyCommunities = () => {
 
   const handleConfirmJoin = () => {
     if (joinContributions.length === 0 || !joiningCommunity) return;
-    const activeMemberCount = communities.filter(c => !c.archived && c.membershipStatus === "member" && !c.isPrivate).length;
-    const isAtMax = activeMemberCount >= MAX_COMMUNITIES;
 
     setCommunities(prev => prev.map(c => {
       if (c.id !== joiningCommunity.id) return c;
-      if (isAtMax) return { ...c, membershipStatus: "pending" as MembershipStatus, role: "Pending" };
-      return { ...c, membershipStatus: "member" as MembershipStatus, role: "Member" };
+      // "Prospect" clicking Apply → becomes "Applied" (awaiting manager approval if required)
+      // "Invited" clicking Join → becomes "Member" immediately
+      if (c.membershipStatus === "invited") {
+        return { ...c, membershipStatus: "member" as MembershipStatus, role: "Member" };
+      }
+      // Prospect → Applied (application submitted)
+      return { ...c, membershipStatus: "applied" as MembershipStatus, role: "Applied" };
     }));
     setCommunityContributions(prev => ({ ...prev, [joiningCommunity.id]: joinContributions }));
     setJoiningCommunity(null);
@@ -528,13 +581,16 @@ const MyCommunities = () => {
       case "applied": return <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600">Applied</Badge>;
       case "pending": return <Badge variant="outline" className="text-[10px] border-orange-300 text-orange-600">Pending</Badge>;
       case "managed": return <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Managed</Badge>;
+      case "blocked": return <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">Blocked</Badge>;
+      case "prospect": return <Badge variant="outline" className="text-[10px] border-slate-300 text-slate-600">Prospect</Badge>;
       default: return null;
     }
   };
 
   const isPending = (c: CommunityItem) => c.membershipStatus === "pending";
-  const canClickThrough = (c: CommunityItem) => !c.archived && !isPending(c) && c.membershipStatus !== "applied" && c.membershipStatus !== "invited";
-  const canJoin = (c: CommunityItem) => c.membershipStatus === "invited" || c.membershipStatus === "applied" || (!c.membershipStatus);
+  const isBlocked = (c: CommunityItem) => c.membershipStatus === "blocked";
+  const canClickThrough = (c: CommunityItem) => !c.archived && !isPending(c) && !isBlocked(c) && c.membershipStatus !== "applied" && c.membershipStatus !== "invited" && c.membershipStatus !== "prospect";
+  const canJoin = (c: CommunityItem) => c.membershipStatus === "prospect" || c.membershipStatus === "invited";
 
   const renderCommunityCard = (community: CommunityItem) => {
     const contributions = communityContributions[community.id] || [];
@@ -564,10 +620,10 @@ const MyCommunities = () => {
               >
                 {community.name}
               </button>
-              <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">
-                {community.role}
-              </span>
               {getStatusBadge(community.membershipStatus)}
+              {!community.membershipStatus || community.membershipStatus === "member" ? (
+                <span className="text-[10px] uppercase tracking-wider font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded-sm">Member</span>
+              ) : null}
               {community.isPrivate && (
                 <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <FontAwesomeIcon icon={faLock} className="text-[9px]" /> Private
@@ -591,7 +647,13 @@ const MyCommunities = () => {
             {isPending(community) && (
               <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
                 <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
-                <p className="text-[10px] text-amber-700">Your application is pending approval by the community manager. You'll be notified once a decision is made.</p>
+                <p className="text-[10px] text-amber-700">You have reached the maximum of {MAX_COMMUNITIES} communities. Drop another community to change this status to Prospect and enable joining.</p>
+              </div>
+            )}
+            {community.membershipStatus === "applied" && (
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
+                <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
+                <p className="text-[10px] text-amber-700">Your application to join is subject to approval by a community manager. You'll be notified once a decision is made.</p>
               </div>
             )}
 
@@ -690,18 +752,16 @@ const MyCommunities = () => {
                 onClick={() => { setJoiningCommunity(community); setJoinContributions([]); }}
                 className="text-[10px] font-medium px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Join
+                {community.membershipStatus === "prospect" ? "Apply" : "Join"}
               </button>
             )}
-            {(community.membershipStatus === "member" || community.membershipStatus === "managed") && (
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
-                className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
-                title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
-              >
-                <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
-              </button>
-            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
+              className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
+              title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
+            >
+              <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
+            </button>
             <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
               <button
                 onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === community.id ? null : community.id); }}
@@ -914,29 +974,32 @@ const MyCommunities = () => {
               {f.label}
             </label>
           ))}
-        </div>
-
-        {/* Status Checkboxes */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
-          <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
-          {[
-            { label: "Member", state: filterMember, setter: setFilterMember },
-            { label: "Invited", state: filterInvited, setter: setFilterInvited },
-            { label: "Applied", state: filterApplied, setter: setFilterApplied },
-            { label: "Managed", state: filterManaged, setter: setFilterManaged },
-            { label: "Pending", state: filterPending, setter: setFilterPending },
-          ].map(f => (
-            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
-              <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
-              {f.label}
-            </label>
-          ))}
           {isHQ && (
             <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none ml-3 pl-3 border-l border-border">
               <input type="checkbox" checked={showArchived} onChange={() => setShowArchived(!showArchived)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               Archived (HQ)
             </label>
           )}
+        </div>
+
+        {/* Status Checkboxes */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
+          {[
+            { label: "Research panel member", state: filterResearchPanelMember, setter: setFilterResearchPanelMember },
+            { label: "Member", state: filterMember, setter: setFilterMember },
+            { label: "Invited", state: filterInvited, setter: setFilterInvited },
+            { label: "Applied", state: filterApplied, setter: setFilterApplied },
+            { label: "Managed", state: filterManaged, setter: setFilterManaged },
+            { label: "Pending", state: filterPending, setter: setFilterPending },
+            { label: "Blocked", state: filterBlocked, setter: setFilterBlocked },
+            { label: "Prospect", state: filterProspect, setter: setFilterProspect },
+          ].map(f => (
+            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
+              <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+              {f.label}
+            </label>
+          ))}
         </div>
 
         {/* Communities List */}
@@ -1375,7 +1438,7 @@ const MyCommunities = () => {
       <Dialog open={!!joiningCommunity} onOpenChange={(open) => { if (!open) { setJoiningCommunity(null); setJoinContributions([]); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base font-serif">Join {joiningCommunity?.name}</DialogTitle>
+            <DialogTitle className="text-base font-serif">{joiningCommunity?.membershipStatus === "prospect" ? "Apply to" : "Join"} {joiningCommunity?.name}</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Select your anticipated contributions to this community. At least one is required.
             </DialogDescription>
@@ -1403,7 +1466,7 @@ const MyCommunities = () => {
                 disabled={joinContributions.length === 0}
                 className={`flex-1 text-sm font-medium rounded-lg py-2 transition-colors ${joinContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
               >
-                Join
+                {joiningCommunity?.membershipStatus === "prospect" ? "Submit Application" : "Join"}
               </button>
             </div>
           </div>

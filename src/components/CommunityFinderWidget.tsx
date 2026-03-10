@@ -681,7 +681,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   onClick={() => { setJoiningCommunity(previewCommunity); setJoinContributions([]); }}
                   className="flex items-center gap-1.5 bg-slate-900 text-white text-[11px] font-bold px-4 py-2 rounded hover:bg-brand-red transition-colors"
                 >
-                  {isAtMax ? "Request to Join" : previewCommunity.requiresApproval ? "Request to Join" : "Join Community"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                  {isAtMax ? "Request to Join" : previewCommunity.requiresApproval ? "Request to Join" : "Apply"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
                 </button>
               )}
             </div>
@@ -695,7 +695,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
           <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setJoiningCommunity(null)} />
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100vw-3rem)] sm:w-96 max-w-96 bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden">
             <div className="bg-slate-800 text-white px-4 py-3">
-              <h3 className="font-medium text-sm">{isAtMax || joiningCommunity.requiresApproval ? "Request to join" : "Join"} {joiningCommunity.name}</h3>
+              <h3 className="font-medium text-sm">{isAtMax || joiningCommunity.requiresApproval ? "Request to join" : "Apply to"} {joiningCommunity.name}</h3>
               <p className="text-xs text-slate-400 mt-0.5">Select your anticipated contributions</p>
             </div>
             <div className="p-4 max-h-[50vh] overflow-y-auto">
@@ -735,7 +735,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   joinContributions.length === 0 ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-brand-red"
                 }`}
               >
-                {isAtMax || joiningCommunity.requiresApproval ? "Submit Request" : "Confirm & Join"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                {isAtMax || joiningCommunity.requiresApproval ? "Submit Request" : "Submit Application"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
               </button>
             </div>
           </div>
