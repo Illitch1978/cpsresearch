@@ -735,7 +735,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                   joinContributions.length === 0 ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-brand-red"
                 }`}
               >
-                {isAtMax || joiningCommunity.requiresApproval ? "Submit Request" : "Confirm & Join"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                {isAtMax || joiningCommunity.requiresApproval ? "Submit Request" : "Submit Application"} <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
               </button>
             </div>
           </div>
