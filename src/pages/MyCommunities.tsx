@@ -974,29 +974,32 @@ const MyCommunities = () => {
               {f.label}
             </label>
           ))}
-        </div>
-
-        {/* Status Checkboxes */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
-          <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
-          {[
-            { label: "Member", state: filterMember, setter: setFilterMember },
-            { label: "Invited", state: filterInvited, setter: setFilterInvited },
-            { label: "Applied", state: filterApplied, setter: setFilterApplied },
-            { label: "Managed", state: filterManaged, setter: setFilterManaged },
-            { label: "Pending", state: filterPending, setter: setFilterPending },
-          ].map(f => (
-            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
-              <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
-              {f.label}
-            </label>
-          ))}
           {isHQ && (
             <label className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none ml-3 pl-3 border-l border-border">
               <input type="checkbox" checked={showArchived} onChange={() => setShowArchived(!showArchived)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
               Archived (HQ)
             </label>
           )}
+        </div>
+
+        {/* Status Checkboxes */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-5">
+          <span className="text-xs font-medium text-muted-foreground mr-1">Status:</span>
+          {[
+            { label: "Research panel member", state: filterResearchPanelMember, setter: setFilterResearchPanelMember },
+            { label: "Member", state: filterMember, setter: setFilterMember },
+            { label: "Invited", state: filterInvited, setter: setFilterInvited },
+            { label: "Applied", state: filterApplied, setter: setFilterApplied },
+            { label: "Managed", state: filterManaged, setter: setFilterManaged },
+            { label: "Pending", state: filterPending, setter: setFilterPending },
+            { label: "Blocked", state: filterBlocked, setter: setFilterBlocked },
+            { label: "Prospect", state: filterProspect, setter: setFilterProspect },
+          ].map(f => (
+            <label key={f.label} className="flex items-center gap-1.5 text-xs text-card-foreground cursor-pointer select-none">
+              <input type="checkbox" checked={f.state} onChange={() => f.setter(!f.state)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+              {f.label}
+            </label>
+          ))}
         </div>
 
         {/* Communities List */}
