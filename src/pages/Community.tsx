@@ -65,7 +65,10 @@ import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-r
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
 import communityBannerDefault from "@/assets/community-banner-default.jpg";
-import { faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCamera, faImage, faBold, faItalic, faAlignLeft, faAlignCenter, faAlignRight, faAlignJustify,
+  faListUl, faListOl, faLink as faLinkIcon, faImage as faImageIcon,
+} from "@fortawesome/free-solid-svg-icons";
 import UserAvatar from "@/components/UserAvatar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +80,20 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  continents,
+  countriesByContinent,
+  sectorsByCategory,
+  sectors,
+  orgTypes,
+  managementExpertiseList,
+  leadershipExpertiseList,
+  contributionsList,
+  externalFactorsList,
+} from "@/lib/communityFilterData";
 
 // ─── Mock Data ───────────────────────────────────────────────
 
