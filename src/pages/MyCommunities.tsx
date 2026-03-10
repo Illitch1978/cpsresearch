@@ -1466,7 +1466,7 @@ const MyCommunities = () => {
                 disabled={joinContributions.length === 0}
                 className={`flex-1 text-sm font-medium rounded-lg py-2 transition-colors ${joinContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
               >
-                Join
+                {joiningCommunity?.membershipStatus === "prospect" ? "Submit Application" : "Join"}
               </button>
             </div>
           </div>
