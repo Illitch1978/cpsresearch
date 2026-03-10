@@ -2266,8 +2266,61 @@ const Community = () => {
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       Community Playlists ({mockPlaylists.length + userPlaylists.length})
                     </h3>
+
+                    {/* Playlist Search & Sort */}
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      <div className="relative flex-1 min-w-[160px]">
+                        <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+                        <input
+                          type="text"
+                          value={playlistSearch}
+                          onChange={e => setPlaylistSearch(e.target.value)}
+                          placeholder="Search playlists…"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
+                        <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+                        {(["name", "curator", "date", "likes"] as const).map(s => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              if (playlistSort === s) setPlaylistSortDir(d => d === "asc" ? "desc" : "asc");
+                              else { setPlaylistSort(s); setPlaylistSortDir(s === "date" || s === "likes" ? "desc" : "asc"); }
+                            }}
+                            className={`text-xs px-2 py-1 rounded-md transition-colors ${playlistSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                          >
+                            {{ name: "Name", curator: "Curator", date: "Date", likes: "Likes" }[s]}
+                            {playlistSort === s && <span className="ml-0.5">{playlistSortDir === "asc" ? "↑" : "↓"}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[...userPlaylists, ...mockPlaylists].map(pl => (
+                      {(() => {
+                        const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                        let allPl = [...userPlaylists, ...mockPlaylists];
+                        if (playlistSearch.trim()) {
+                          const q = playlistSearch.toLowerCase();
+                          allPl = allPl.filter(pl => pl.name.toLowerCase().includes(q) || pl.author.name.toLowerCase().includes(q) || pl.description.toLowerCase().includes(q));
+                        }
+                        allPl.sort((a, b) => {
+                          let cmp = 0;
+                          if (playlistSort === "name") cmp = a.name.localeCompare(b.name);
+                          else if (playlistSort === "curator") cmp = a.author.name.localeCompare(b.author.name);
+                          else if (playlistSort === "likes") cmp = a.likes - b.likes;
+                          else {
+                            const parseDate = (d: string) => { const parts = d.split(" "); return (parseInt(parts[1] || "2026", 10) * 12) + (monthOrder[parts[0]] ?? 0); };
+                            cmp = parseDate(a.createdDate) - parseDate(b.createdDate);
+                          }
+                          return playlistSortDir === "desc" ? -cmp : cmp;
+                        });
+                        if (allPl.length === 0) {
+                          return <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">No playlists match your search.</div>;
+                        }
+                        return allPl.map(pl => (
                         <div key={pl.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -2326,7 +2379,8 @@ const Community = () => {
                             <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
                           </div>
                         </div>
-                      ))}
+                      ));
+                      })()}
                     </div>
                   </div>
                 </div>
