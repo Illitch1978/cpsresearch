@@ -2883,7 +2883,7 @@ const Community = () => {
                           <FontAwesomeIcon icon={faCircleInfo} className="text-primary text-sm" /> Community Details
                         </h3>
                         <button
-                          onClick={() => setShowManageDetails(!showManageDetails)}
+                          onClick={openManageDetails}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-primary/30 text-primary hover:bg-primary/5"
                         >
                           <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Manage community details
