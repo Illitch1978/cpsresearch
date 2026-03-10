@@ -647,7 +647,13 @@ const MyCommunities = () => {
             {isPending(community) && (
               <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
                 <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
-                <p className="text-[10px] text-amber-700">Your application is pending approval by the community manager. You'll be notified once a decision is made.</p>
+                <p className="text-[10px] text-amber-700">You have reached the maximum of {MAX_COMMUNITIES} communities. Drop another community to change this status to Prospect and enable joining.</p>
+              </div>
+            )}
+            {community.membershipStatus === "applied" && (
+              <div className="mt-2 bg-amber-50 border border-amber-200 rounded-sm p-2 flex items-start gap-1.5">
+                <FontAwesomeIcon icon={faClock} className="text-amber-500 text-[10px] mt-0.5" />
+                <p className="text-[10px] text-amber-700">Your application to join is subject to approval by a community manager. You'll be notified once a decision is made.</p>
               </div>
             )}
 
