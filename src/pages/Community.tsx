@@ -1960,16 +1960,16 @@ const Community = () => {
                     <div className="flex items-center gap-1">
                       <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
                       <span className="text-xs text-muted-foreground mr-1">Sort:</span>
-                      {(["date", "name", "author"] as const).map(s => (
+                      {(["date", "name", "author", "downloads", "pinned", "likes"] as const).map(s => (
                         <button
                           key={s}
                           onClick={() => {
                             if (resourceSort === s) setResourceSortDir(d => d === "asc" ? "desc" : "asc");
-                            else { setResourceSort(s); setResourceSortDir(s === "date" ? "desc" : "asc"); }
+                            else { setResourceSort(s); setResourceSortDir(s === "date" || s === "downloads" || s === "likes" ? "desc" : "asc"); }
                           }}
                           className={`text-xs px-2 py-1 rounded-md transition-colors ${resourceSort === s ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}
                         >
-                          {s === "date" ? "Date" : s === "name" ? "Title" : "Author"}
+                          {{ date: "Date", name: "Title", author: "Author", downloads: "Downloads", pinned: "Pinned", likes: "Likes" }[s]}
                           {resourceSort === s && <span className="ml-0.5">{resourceSortDir === "asc" ? "↑" : "↓"}</span>}
                         </button>
                       ))}
