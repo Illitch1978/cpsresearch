@@ -2061,7 +2061,23 @@ const Community = () => {
                       </div>
                       <div className="flex flex-col items-center gap-2 shrink-0">
                         <div className="flex items-center gap-3">
-                          {r.downloads && (
+                          <button
+                            onClick={() => {
+                              setLikedResources(prev => {
+                                const next = new Set(prev);
+                                if (next.has(r.id)) next.delete(r.id); else next.add(r.id);
+                                return next;
+                              });
+                              setResourceLikes(prev => ({
+                                ...prev,
+                                [r.id]: (prev[r.id] || 0) + (likedResources.has(r.id) ? -1 : 1),
+                              }));
+                            }}
+                            className={`text-xs flex items-center gap-1 transition-colors ${likedResources.has(r.id) ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"}`}
+                          >
+                            <FontAwesomeIcon icon={faHeart} /> {resourceLikes[r.id] || 0}
+                          </button>
+                          {r.downloads != null && (
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <FontAwesomeIcon icon={faDownload} /> {r.downloads}
                             </span>
