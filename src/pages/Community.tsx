@@ -143,6 +143,9 @@ interface Event {
   speaker?: string;
   recurring?: "weekly" | "biweekly" | "monthly";
   nextOccurrences?: string[];
+  city?: string;
+  country?: string;
+  eligible?: boolean;
 }
 
 interface Poll {
