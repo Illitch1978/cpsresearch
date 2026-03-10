@@ -1868,8 +1868,11 @@ const Community = () => {
                             <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
                           ))}
                         </div>
-                        <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
-                          Member since {m.joinedDate}
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
+                          <span>Member since {m.joinedDate}</span>
+                          <span className="flex items-center gap-1">
+                            <FontAwesomeIcon icon={faComments} className="text-[9px]" /> {m.posts || 0} posts
+                          </span>
                         </div>
                       </button>
                     ))}
