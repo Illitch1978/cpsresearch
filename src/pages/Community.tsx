@@ -518,7 +518,7 @@ const MemberProfileModal = ({ member, open, onClose }: { member: Member | null; 
           <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
-                {member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {getInitials(member.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
