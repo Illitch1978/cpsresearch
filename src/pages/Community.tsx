@@ -3152,7 +3152,7 @@ const Community = () => {
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                       <div className="flex items-center gap-2 mb-4">
                         <FontAwesomeIcon icon={faShieldHalved} className="text-primary text-sm" />
-                        <h3 className="text-lg font-serif font-semibold text-card-foreground">{community.name} Rules</h3>
+                        <h3 className="text-lg font-serif font-semibold text-card-foreground">Community Rules</h3>
                       </div>
 
                       {/* Governance summary */}
