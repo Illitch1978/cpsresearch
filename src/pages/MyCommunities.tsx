@@ -428,14 +428,17 @@ const MyCommunities = () => {
       if (filterResearchPanels && !c.isResearchPanel) return false;
 
       // Status filters (OR logic)
-      const anyStatusFilter = filterMember || filterInvited || filterApplied || filterManaged || filterPending;
+      const anyStatusFilter = filterResearchPanelMember || filterMember || filterInvited || filterApplied || filterManaged || filterPending || filterBlocked || filterProspect;
       if (anyStatusFilter) {
         const status = c.membershipStatus;
+        if (filterResearchPanelMember && c.isResearchPanelMember) return true;
         if (filterMember && status === "member") return true;
         if (filterInvited && status === "invited") return true;
         if (filterApplied && status === "applied") return true;
         if (filterManaged && status === "managed") return true;
         if (filterPending && status === "pending") return true;
+        if (filterBlocked && status === "blocked") return true;
+        if (filterProspect && status === "prospect") return true;
         return false;
       }
 
@@ -464,7 +467,7 @@ const MyCommunities = () => {
     });
 
     return result;
-  }, [visibleCommunities, showArchived, isHQ, filterOpen, filterPrivate, filterFavourites, filterOfficial, filterRecentlyVisited, filterResearchPanels, filterMember, filterInvited, filterApplied, filterManaged, filterPending, searchQuery, sortField, sortDir]);
+  }, [visibleCommunities, showArchived, isHQ, filterOpen, filterPrivate, filterFavourites, filterOfficial, filterRecentlyVisited, filterResearchPanels, filterResearchPanelMember, filterMember, filterInvited, filterApplied, filterManaged, filterPending, filterBlocked, filterProspect, searchQuery, sortField, sortDir]);
 
   const toggleFavourite = (id: string) => {
     setCommunities(prev => prev.map(c => c.id === id ? { ...c, isFavourite: !c.isFavourite } : c));
