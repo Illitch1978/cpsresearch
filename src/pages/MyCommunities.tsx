@@ -377,8 +377,10 @@ const MyCommunities = () => {
   const [editingContributions, setEditingContributions] = useState<string | null>(null);
   const [editContributionsList, setEditContributionsList] = useState<string[]>([]);
 
-  // Owner rankings visibility
+  // Owner rankings visibility & sort
   const [showOwnerRankings, setShowOwnerRankings] = useState(false);
+  const [rankingSortField, setRankingSortField] = useState<string>("communities");
+  const [rankingSortDir, setRankingSortDir] = useState<"asc" | "desc">("desc");
 
   // Join modal state
   const [joiningCommunity, setJoiningCommunity] = useState<CommunityItem | null>(null);
