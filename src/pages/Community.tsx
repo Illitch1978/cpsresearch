@@ -704,9 +704,20 @@ const Community = () => {
 
   // Resource sort/search/pin state
   const [resourceSearch, setResourceSearch] = useState("");
-  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author">("date");
+  const [resourceSort, setResourceSort] = useState<"date" | "name" | "author" | "downloads" | "pinned" | "likes">("date");
   const [resourceSortDir, setResourceSortDir] = useState<"asc" | "desc">("desc");
   const [pinnedResources, setPinnedResources] = useState<Set<string>>(new Set());
+  const [resourceLikes, setResourceLikes] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    mockResources.forEach(r => { initial[r.id] = r.likes || 0; });
+    return initial;
+  });
+  const [likedResources, setLikedResources] = useState<Set<string>>(new Set());
+
+  // Playlist search/sort state
+  const [playlistSearch, setPlaylistSearch] = useState("");
+  const [playlistSort, setPlaylistSort] = useState<"name" | "curator" | "date" | "likes">("date");
+  const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
   // Members tab sort/search state
   const [memberSearch, setMemberSearch] = useState("");
