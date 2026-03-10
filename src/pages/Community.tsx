@@ -314,6 +314,7 @@ interface WorkingGroup {
   lastActive: string;
   tags: string[];
   lead: Member;
+  formed: string;
 }
 
 const mockWorkingGroups: WorkingGroup[] = [
@@ -328,6 +329,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "2 hours ago",
     tags: ["AI", "Audit", "Regulation", "Technology"],
     lead: mockMembers[1],
+    formed: "Feb 2025",
   },
   {
     id: "diversity-research",
@@ -340,6 +342,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "Yesterday",
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
+    formed: "Mar 2025",
   },
   {
     id: "consulting-impact",
@@ -352,6 +355,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "3 days ago",
     tags: ["Consulting", "Impact", "Methodology", "Transparency"],
     lead: mockMembers[3],
+    formed: "May 2025",
   },
   {
     id: "emerging-markets",
@@ -364,6 +368,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     lastActive: "1 week ago",
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
+    formed: "Sep 2025",
   },
 ];
 
