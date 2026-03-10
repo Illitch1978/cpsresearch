@@ -870,22 +870,44 @@ const MyCommunities = () => {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 pr-4 font-medium text-muted-foreground">#</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Owner</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Communities</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Members</th>
-                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Resources</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Conversations</th>
+                    {([
+                      { field: "name", label: "Owner" },
+                      { field: "communities", label: "Communities" },
+                      { field: "members", label: "Members" },
+                      { field: "discussions", label: "Discussions" },
+                      { field: "resources", label: "Resources" },
+                      { field: "events", label: "Events" },
+                    ]).map(col => (
+                      <th
+                        key={col.field}
+                        onClick={() => {
+                          if (rankingSortField === col.field) setRankingSortDir(d => d === "asc" ? "desc" : "asc");
+                          else { setRankingSortField(col.field); setRankingSortDir("desc"); }
+                        }}
+                        className="text-left py-2 pr-4 font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors select-none"
+                      >
+                        {col.label}
+                        {rankingSortField === col.field && <span className="ml-1">{rankingSortDir === "asc" ? "↑" : "↓"}</span>}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {ownerRankings.map((owner, i) => (
+                  {[...ownerRankings].sort((a, b) => {
+                    let cmp = 0;
+                    const f = rankingSortField as keyof typeof a;
+                    if (f === "name") cmp = a.name.localeCompare(b.name);
+                    else cmp = (a[f] as number) - (b[f] as number);
+                    return rankingSortDir === "desc" ? -cmp : cmp;
+                  }).map((owner, i) => (
                     <tr key={owner.name} className="border-b border-border/50 last:border-0">
                       <td className="py-2 pr-4 font-semibold text-card-foreground">{i + 1}</td>
                       <td className="py-2 pr-4 font-medium text-card-foreground">{owner.name}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.communities}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.members}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{owner.discussions}</td>
                       <td className="py-2 pr-4 text-muted-foreground">{owner.resources}</td>
-                      <td className="py-2 text-muted-foreground">{owner.conversations}</td>
+                      <td className="py-2 text-muted-foreground">{owner.events}</td>
                     </tr>
                   ))}
                 </tbody>
