@@ -674,6 +674,8 @@ const Community = () => {
 
   // Add Event state
   const [showAddEvent, setShowAddEvent] = useState(false);
+  // Manage community details state
+  const [showManageDetails, setShowManageDetails] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
