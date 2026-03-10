@@ -403,7 +403,7 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
     formed: "Mar 2025",
-    defaultVisibility: "community-wide",
+    defaultVisibility: "group-only",
     groupDiscussions: [
       { id: "gd6", title: "2026 diversity data collection — methodology update", author: mockMembers[2], content: "We're refining our data collection methodology for the 2026 cycle. Key change: we'll now track intersectional categories. Please review the updated framework.", date: "7 Mar 2026", replies: 6, likes: 11, tags: ["Methodology", "Data"], pinned: true, visibility: "group-only" },
       { id: "gd7", title: "FT coverage of our frozen middle findings", author: mockMembers[0], content: "The Financial Times has picked up Emma's frozen middle research. Great visibility for the group. Let's discuss how to build on this media attention.", date: "3 Mar 2026", replies: 8, likes: 27, tags: ["Media", "Impact"], visibility: "community-wide" },
