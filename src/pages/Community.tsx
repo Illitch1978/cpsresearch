@@ -1081,7 +1081,7 @@ const Community = () => {
                 className="text-slate-500 hover:text-brand-red transition-colors flex items-center gap-2 text-sm font-medium"
               >
                 <FontAwesomeIcon icon={faArrowLeft} />
-                <span className="hidden sm:inline">All Communities</span>
+                <span className="hidden sm:inline">Communities</span>
               </button>
               <div className="h-5 w-px bg-gray-200" />
               <div className="flex items-center gap-2.5">

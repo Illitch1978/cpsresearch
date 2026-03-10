@@ -835,7 +835,7 @@ const MyCommunities = () => {
           </button>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-card-foreground">All Communities</h1>
+              <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-card-foreground">Communities</h1>
               <p className="text-muted-foreground mt-2 text-sm">Browse, join, and manage communities across the platform.</p>
             </div>
             <div className="flex items-center gap-2">
