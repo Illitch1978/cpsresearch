@@ -1552,7 +1552,7 @@ const Community = () => {
                       <div className="flex items-center gap-1">
                         <FontAwesomeIcon icon={faSort} className="text-muted-foreground text-xs" />
                         <span className="text-xs text-muted-foreground mr-1">Sort:</span>
-                        {(["date", "name", "author"] as const).map(s => (
+                        {(["date", "name", "author", "pinned", "replies", "likes"] as const).map(s => (
                           <button
                             key={s}
                             onClick={() => {
