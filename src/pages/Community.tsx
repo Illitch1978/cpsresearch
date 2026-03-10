@@ -320,6 +320,33 @@ const mockPlaylists: Playlist[] = [
   },
 ];
 
+type GroupVisibility = "group-only" | "community-wide" | "managers-only";
+
+interface GroupDiscussion {
+  id: string;
+  title: string;
+  author: Member;
+  content: string;
+  date: string;
+  replies: number;
+  likes: number;
+  tags: string[];
+  pinned?: boolean;
+  visibility: GroupVisibility;
+}
+
+interface GroupResource {
+  id: string;
+  title: string;
+  type: "paper" | "report" | "presentation" | "video" | "link";
+  author: string;
+  date: string;
+  downloads: number;
+  likes: number;
+  description: string;
+  visibility: GroupVisibility;
+}
+
 interface WorkingGroup {
   id: string;
   name: string;
@@ -332,6 +359,9 @@ interface WorkingGroup {
   tags: string[];
   lead: Member;
   formed: string;
+  groupDiscussions: GroupDiscussion[];
+  groupResources: GroupResource[];
+  defaultVisibility: GroupVisibility;
 }
 
 const mockWorkingGroups: WorkingGroup[] = [
@@ -347,6 +377,19 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["AI", "Audit", "Regulation", "Technology"],
     lead: mockMembers[1],
     formed: "Feb 2025",
+    defaultVisibility: "group-only",
+    groupDiscussions: [
+      { id: "gd1", title: "LLM-assisted audit sampling — early results", author: mockMembers[1], content: "We've been piloting LLM-assisted sampling at three mid-tier firms. Initial results suggest a 40% reduction in sample selection time with comparable error detection rates. Full write-up coming next week.", date: "8 Mar 2026", replies: 7, likes: 18, tags: ["AI", "Sampling"], pinned: true, visibility: "community-wide" },
+      { id: "gd2", title: "FRC draft guidance on AI in audit — group response", author: mockMembers[0], content: "The FRC has issued draft guidance on AI use in statutory audit. I'd like us to prepare a group response by end of March. Please review the attached and add comments.", date: "5 Mar 2026", replies: 12, likes: 9, tags: ["Regulation", "FRC"], visibility: "group-only" },
+      { id: "gd3", title: "Dataset sharing: anomaly detection benchmarks", author: mockMembers[4], content: "I've compiled anonymised benchmark datasets for testing anomaly detection models in audit contexts. Available to group members — see the resources section.", date: "1 Mar 2026", replies: 4, likes: 14, tags: ["Data", "ML"], visibility: "group-only" },
+      { id: "gd4", title: "Bias in AI audit tools — a critical review", author: mockMembers[5], content: "Recent literature highlights significant bias risks in AI-assisted audit tools, particularly around client-specific training data. We should discuss mitigation strategies.", date: "25 Feb 2026", replies: 9, likes: 22, tags: ["Bias", "Ethics"], visibility: "community-wide" },
+      { id: "gd5", title: "Confidential: partner feedback on AI adoption roadmap", author: mockMembers[1], content: "Summary of confidential partner feedback from the Big Four on their AI adoption timelines. For management eyes only.", date: "20 Feb 2026", replies: 2, likes: 5, tags: ["Strategy", "Confidential"], visibility: "managers-only" },
+    ],
+    groupResources: [
+      { id: "gr1", title: "LLM Audit Sampling — Pilot Results (Draft)", type: "paper", author: "Dr. James Hargreaves", date: "Mar 2026", downloads: 34, likes: 12, description: "Draft paper on LLM-assisted sampling pilot across three firms.", visibility: "group-only" },
+      { id: "gr2", title: "FRC AI Guidance — Annotated Copy", type: "report", author: "Prof. Sarah Mitchell", date: "Mar 2026", downloads: 28, likes: 8, description: "Annotated version of FRC draft guidance with group commentary.", visibility: "group-only" },
+      { id: "gr3", title: "Anomaly Detection Benchmark Dataset", type: "link", author: "Dr. Aisha Patel", date: "Mar 2026", downloads: 19, likes: 15, description: "Anonymised datasets for testing anomaly detection in audit.", visibility: "community-wide" },
+    ],
   },
   {
     id: "diversity-research",
@@ -360,6 +403,18 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Diversity", "Inclusion", "Research", "Big Four"],
     lead: mockMembers[2],
     formed: "Mar 2025",
+    defaultVisibility: "community-wide",
+    groupDiscussions: [
+      { id: "gd6", title: "2026 diversity data collection — methodology update", author: mockMembers[2], content: "We're refining our data collection methodology for the 2026 cycle. Key change: we'll now track intersectional categories. Please review the updated framework.", date: "7 Mar 2026", replies: 6, likes: 11, tags: ["Methodology", "Data"], pinned: true, visibility: "group-only" },
+      { id: "gd7", title: "FT coverage of our frozen middle findings", author: mockMembers[0], content: "The Financial Times has picked up Emma's frozen middle research. Great visibility for the group. Let's discuss how to build on this media attention.", date: "3 Mar 2026", replies: 8, likes: 27, tags: ["Media", "Impact"], visibility: "community-wide" },
+      { id: "gd8", title: "Partner sponsorship programmes — comparative analysis", author: mockMembers[6], content: "I've been comparing partner sponsorship programmes across 12 firms in the US, UK and France. Early patterns are striking — happy to present at next group meeting.", date: "28 Feb 2026", replies: 5, likes: 16, tags: ["Sponsorship", "Leadership"], visibility: "group-only" },
+      { id: "gd9", title: "Confidential: firm-level diversity scorecards Q4 2025", author: mockMembers[2], content: "Quarterly diversity scorecards from participating firms. Strictly for group management review before publication.", date: "15 Feb 2026", replies: 1, likes: 3, tags: ["Scorecards", "Confidential"], visibility: "managers-only" },
+    ],
+    groupResources: [
+      { id: "gr4", title: "Intersectional Diversity Framework v2", type: "paper", author: "Emma Richardson", date: "Mar 2026", downloads: 45, likes: 19, description: "Updated methodology for intersectional diversity data collection.", visibility: "community-wide" },
+      { id: "gr5", title: "Frozen Middle — Working Paper (Final Draft)", type: "paper", author: "Emma Richardson", date: "Feb 2026", downloads: 89, likes: 31, description: "The complete working paper on leadership pipeline barriers.", visibility: "community-wide" },
+      { id: "gr6", title: "Q4 2025 Firm Diversity Scorecards", type: "report", author: "DRI Group", date: "Feb 2026", downloads: 12, likes: 4, description: "Confidential quarterly scorecards from participating firms.", visibility: "managers-only" },
+    ],
   },
   {
     id: "consulting-impact",
@@ -373,6 +428,16 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Consulting", "Impact", "Methodology", "Transparency"],
     lead: mockMembers[3],
     formed: "May 2025",
+    defaultVisibility: "group-only",
+    groupDiscussions: [
+      { id: "gd10", title: "Impact measurement framework — v3 review", author: mockMembers[3], content: "Version 3 of our impact measurement framework is ready for review. Major additions: longitudinal tracking metrics and client satisfaction indices.", date: "6 Mar 2026", replies: 11, likes: 20, tags: ["Framework", "Review"], pinned: true, visibility: "group-only" },
+      { id: "gd11", title: "Client pushback on ROI evidence — how to respond", author: mockMembers[7], content: "Several firms report increasing client demands for ROI evidence post-engagement. What frameworks are people using? Are there sector-specific approaches?", date: "2 Mar 2026", replies: 14, likes: 25, tags: ["ROI", "Clients"], visibility: "community-wide" },
+      { id: "gd12", title: "Benchmarking consulting fees against outcomes", author: mockMembers[0], content: "Provocative paper from HBS suggests no correlation between consulting fees and measurable outcomes. We should develop a rigorous counter-analysis.", date: "24 Feb 2026", replies: 19, likes: 34, tags: ["Fees", "Research"], visibility: "community-wide" },
+    ],
+    groupResources: [
+      { id: "gr7", title: "Impact Measurement Framework v3 (Draft)", type: "report", author: "Michael Chen", date: "Mar 2026", downloads: 56, likes: 22, description: "Third iteration of the consulting impact measurement framework.", visibility: "group-only" },
+      { id: "gr8", title: "Client ROI Evidence — Survey Results", type: "paper", author: "Robert Kimani", date: "Feb 2026", downloads: 38, likes: 14, description: "Survey of 200+ clients on ROI evidence expectations.", visibility: "community-wide" },
+    ],
   },
   {
     id: "emerging-markets",
@@ -386,6 +451,16 @@ const mockWorkingGroups: WorkingGroup[] = [
     tags: ["Emerging Markets", "Growth", "Africa", "Asia"],
     lead: mockMembers[7],
     formed: "Sep 2025",
+    defaultVisibility: "community-wide",
+    groupDiscussions: [
+      { id: "gd13", title: "African professional services market — 2026 outlook", author: mockMembers[7], content: "I've drafted a 2026 outlook for the African professional services market. Key trends: rapid digital adoption, talent competition with tech sector, and regulatory harmonisation efforts.", date: "4 Mar 2026", replies: 6, likes: 15, tags: ["Africa", "Outlook"], pinned: true, visibility: "community-wide" },
+      { id: "gd14", title: "Cross-border regulatory challenges in ASEAN", author: mockMembers[4], content: "Mapping the regulatory landscape for professional services across ASEAN member states. Significant disparities in licensing requirements.", date: "27 Feb 2026", replies: 3, likes: 8, tags: ["ASEAN", "Regulation"], visibility: "group-only" },
+      { id: "gd15", title: "Talent retention strategies — emerging vs mature markets", author: mockMembers[6], content: "Comparative study of talent retention across emerging and mature markets. Emerging markets show 2x higher voluntary turnover in professional services.", date: "20 Feb 2026", replies: 7, likes: 12, tags: ["Talent", "Retention"], visibility: "community-wide" },
+    ],
+    groupResources: [
+      { id: "gr9", title: "African PS Market — 2026 Outlook Report", type: "report", author: "Robert Kimani", date: "Mar 2026", downloads: 42, likes: 17, description: "Comprehensive outlook for professional services across African markets.", visibility: "community-wide" },
+      { id: "gr10", title: "ASEAN Regulatory Mapping — Working Document", type: "link", author: "Dr. Aisha Patel", date: "Feb 2026", downloads: 15, likes: 6, description: "Living document mapping PS regulatory requirements across ASEAN.", visibility: "group-only" },
+    ],
   },
 ];
 
