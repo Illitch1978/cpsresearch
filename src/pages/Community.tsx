@@ -58,6 +58,7 @@ import {
   faHome,
   faSort,
   faThumbtack,
+  faPen,
   faCalendar as faCalendarSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";

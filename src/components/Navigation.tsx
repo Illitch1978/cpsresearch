@@ -233,6 +233,12 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
             About
           </button>
           <button
+            onClick={() => handleNavClick(() => navigate("/my-communities"))}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
+          >
+            Communities
+          </button>
+          <button
             onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); })}
             className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
           >

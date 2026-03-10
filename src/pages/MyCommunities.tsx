@@ -1008,8 +1008,12 @@ const MyCommunities = () => {
           {filteredCommunities.length === 0 && (
             <div className="text-center py-12 bg-card border border-border rounded-sm">
               <FontAwesomeIcon icon={faUsers} className="text-3xl text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">No communities match your filters.</p>
-              <button onClick={() => { resetForm(); setCreateOpen(true); }} className="text-sm text-primary font-medium hover:underline mt-2">Create your first community →</button>
+              <p className="text-sm text-muted-foreground">
+                {showArchived ? "No archived communities found." : "No communities match your filters."}
+              </p>
+              {!showArchived && (
+                <button onClick={() => { resetForm(); setCreateOpen(true); }} className="text-sm text-primary font-medium hover:underline mt-2">Create your first community →</button>
+              )}
             </div>
           )}
         </div>
