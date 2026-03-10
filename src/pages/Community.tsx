@@ -710,6 +710,86 @@ const Community = () => {
   const [showAddEvent, setShowAddEvent] = useState(false);
   // Manage community details state
   const [showManageDetails, setShowManageDetails] = useState(false);
+
+  // Edit form state (mirrors create form in MyCommunities)
+  const [editFormName, setEditFormName] = useState("");
+  const [editFormSummary, setEditFormSummary] = useState("");
+  const [editFormDescription, setEditFormDescription] = useState("");
+  const [editFormAccess, setEditFormAccess] = useState<"open" | "private">("open");
+  const [editFormFrontline, setEditFormFrontline] = useState(false);
+  const [editFormThumbnail, setEditFormThumbnail] = useState<string | null>(null);
+  const editThumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [editFormLocationFilter, setEditFormLocationFilter] = useState("any");
+  const [editFormSelectedContinents, setEditFormSelectedContinents] = useState<string[]>([]);
+  const [editFormSelectedCountries, setEditFormSelectedCountries] = useState<string[]>([]);
+  const [editFormSourceFilter, setEditFormSourceFilter] = useState("all");
+  const [editFormSelectedSectors, setEditFormSelectedSectors] = useState<string[]>([]);
+  const [editFormExpandedSectors, setEditFormExpandedSectors] = useState<string[]>([]);
+  const [editFormOrgTypeFilter, setEditFormOrgTypeFilter] = useState("any");
+  const [editFormSelectedOrgTypes, setEditFormSelectedOrgTypes] = useState<string[]>([]);
+  const [editFormExpertiseFilter, setEditFormExpertiseFilter] = useState("any");
+  const [editFormSelectedExpertise, setEditFormSelectedExpertise] = useState<string[]>([]);
+  const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
+  const [editFormSelectedExternalFactors, setEditFormSelectedExternalFactors] = useState<string[]>([]);
+  const [editFormSelectedContributions, setEditFormSelectedContributions] = useState<string[]>(["Research", "Publications"]);
+  const [editFormMembershipRule, setEditFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("approval");
+  const [editFormPostReview, setEditFormPostReview] = useState<"none" | "criteria" | "all">("criteria");
+  const [editFormContentReview, setEditFormContentReview] = useState<"none" | "criteria" | "all">("all");
+  const [editFormInviteExpiry, setEditFormInviteExpiry] = useState("90");
+  const [editFormCommunityRules, setEditFormCommunityRules] = useState("");
+  const [editRulesExpanded, setEditRulesExpanded] = useState(false);
+  const [editMessagesExpanded, setEditMessagesExpanded] = useState(false);
+  const [editActiveMessageTemplate, setEditActiveMessageTemplate] = useState("welcome");
+  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({
+    welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+    decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+    "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+    "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+    "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+    invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+    leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+  });
+  const [editFormSaving, setEditFormSaving] = useState(false);
+
+  // Pre-populate edit form when manage details dialog opens
+  const openManageDetails = () => {
+    setEditFormName(community.name);
+    setEditFormSummary(community.description.split('.')[0] + '.');
+    setEditFormDescription(community.description);
+    setEditFormAccess("open");
+    setEditFormFrontline(false);
+    setEditFormThumbnail(null);
+    setEditFormLocationFilter("any");
+    setEditFormSelectedContinents([]);
+    setEditFormSelectedCountries([]);
+    setEditFormSourceFilter("all");
+    setEditFormSelectedSectors([]);
+    setEditFormOrgTypeFilter("any");
+    setEditFormSelectedOrgTypes([]);
+    setEditFormExpertiseFilter("any");
+    setEditFormSelectedExpertise([]);
+    setEditFormExternalFactorFilter("any");
+    setEditFormSelectedExternalFactors([]);
+    setEditFormSelectedContributions(["Research", "Publications"]);
+    setEditFormMembershipRule(community.governance.membership as "anyone" | "criteria" | "approval");
+    setEditFormPostReview(community.governance.postReview as "none" | "criteria" | "all");
+    setEditFormContentReview(community.governance.contentReview as "none" | "criteria" | "all");
+    setEditFormInviteExpiry(String(community.governance.inviteExpiry));
+    setEditFormCommunityRules(community.rules.map(r => `${r.title} ${r.detail}`).join('\n'));
+    setEditRulesExpanded(false);
+    setEditMessagesExpanded(false);
+    setShowManageDetails(true);
+  };
+
+  const handleEditThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setEditFormThumbnail(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
