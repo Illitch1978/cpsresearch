@@ -86,6 +86,14 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
               About
             </button>
             <button
+              onClick={() => navigate("/my-communities")}
+              className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
+                isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
+              }`}
+            >
+              Communities
+            </button>
+            <button
               onClick={() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); }}
               className={`text-sm font-medium transition-colors duration-200 font-sans cursor-pointer ${
                 isTransparent ? 'text-white/90 hover:text-white' : 'text-slate-600 hover:text-brand-red'
@@ -223,6 +231,12 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
             className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
           >
             About
+          </button>
+          <button
+            onClick={() => handleNavClick(() => navigate("/my-communities"))}
+            className="px-6 py-4 text-left text-slate-700 hover:bg-slate-50 hover:text-brand-red text-base font-medium transition-colors border-b border-gray-50"
+          >
+            Communities
           </button>
           <button
             onClick={() => handleNavClick(() => { onShowHome(); setTimeout(() => onNavigateToSection('initiatives'), 100); })}

@@ -58,6 +58,7 @@ import {
   faHome,
   faSort,
   faThumbtack,
+  faPen,
   faCalendar as faCalendarSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-regular-svg-icons";
@@ -92,6 +93,7 @@ interface Member {
   email?: string;
   linkedin?: string;
   publications?: number;
+  posts?: number;
   location?: string;
 }
 
@@ -154,14 +156,14 @@ interface Poll {
 }
 
 const mockMembers: Member[] = [
-  { id: "1", name: "Prof. Sarah Mitchell", role: "Director of Research", firm: "London Business School", badge: "founder", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance", "Leadership"], bio: "Sarah leads the Centre's research agenda on professional services governance and has published over 40 peer-reviewed papers. She previously served as a non-executive director at two FTSE 250 firms and is a Fellow of the Academy of Management.", email: "s.mitchell@lbs.ac.uk", linkedin: "sarahmitchell", publications: 43, location: "London, UK" },
-  { id: "2", name: "Dr. James Hargreaves", role: "Senior Partner", firm: "Deloitte", badge: "moderator", joinedDate: "Feb 2025", expertise: ["Audit", "Risk Management", "AI in Assurance"], bio: "James combines 20 years of audit practice with academic research on technology-driven assurance. He chairs the CPSR working group on AI adoption in professional services and regularly advises regulators.", email: "jhargreaves@deloitte.co.uk", linkedin: "jameshargreaves", publications: 18, location: "London, UK" },
-  { id: "3", name: "Emma Richardson", role: "Research Fellow", firm: "Oxford Saïd", badge: "contributor", joinedDate: "Mar 2025", expertise: ["Innovation", "Professional Services", "Diversity"], bio: "Emma's doctoral research at Saïd Business School examines diversity pipelines in Big Four firms. Her recent working paper on the 'frozen middle' has been cited by the FRC and featured in the Financial Times.", email: "emma.richardson@sbs.ox.ac.uk", linkedin: "emmarichardson", publications: 7, location: "Oxford, UK" },
-  { id: "4", name: "Michael Chen", role: "Managing Director", firm: "McKinsey & Company", joinedDate: "Apr 2025", expertise: ["Consulting", "Transformation", "Impact Measurement"], bio: "Michael leads McKinsey's internal research function and is passionate about measuring and demonstrating consulting impact. He holds an MBA from Wharton and a PhD from MIT Sloan.", email: "michael_chen@mckinsey.com", linkedin: "michaelchen", publications: 12, location: "New York, US" },
-  { id: "5", name: "Dr. Aisha Patel", role: "Associate Professor", firm: "Imperial College", badge: "contributor", joinedDate: "May 2025", expertise: ["Data Analytics", "AI in Services", "Machine Learning"], bio: "Aisha researches the application of machine learning techniques in professional services delivery. She co-leads Imperial's AI & Professional Services Lab and has secured £2.1M in UKRI funding.", email: "a.patel@imperial.ac.uk", linkedin: "aishapatel", publications: 29, location: "London, UK" },
-  { id: "6", name: "Thomas Wright", role: "Partner", firm: "PwC", joinedDate: "Jun 2025", expertise: ["Tax", "Regulation", "Policy"], bio: "Thomas advises multinational firms on regulatory strategy and is a recognised authority on professional services regulation in the UK and EU. He sits on the Law Society's regulatory policy committee.", email: "thomas.wright@pwc.com", linkedin: "thomaswright", publications: 8, location: "London, UK" },
-  { id: "7", name: "Dr. Claire Dubois", role: "Lecturer", firm: "INSEAD", joinedDate: "Sep 2025", expertise: ["Organisational Behaviour", "Culture", "Leadership Development"], bio: "Claire's research explores organisational culture in global professional services firms, with particular focus on cross-cultural leadership challenges. She previously worked at Bain & Company in Paris.", email: "claire.dubois@insead.edu", linkedin: "clairedubois", publications: 15, location: "Fontainebleau, France" },
-  { id: "8", name: "Robert Kimani", role: "Principal", firm: "BCG", joinedDate: "Nov 2025", expertise: ["Digital", "Operations", "Emerging Markets"], bio: "Robert leads BCG's Africa practice and researches the growth of professional services in emerging markets. He is a regular contributor to Harvard Business Review and sits on the board of the African Management Institute.", email: "kimani.robert@bcg.com", linkedin: "robertkimani", publications: 11, location: "Nairobi, Kenya" },
+  { id: "1", name: "Prof. Sarah Mitchell", role: "Director of Research", firm: "London Business School", badge: "founder", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance", "Leadership"], bio: "Sarah leads the Centre's research agenda on professional services governance and has published over 40 peer-reviewed papers. She previously served as a non-executive director at two FTSE 250 firms and is a Fellow of the Academy of Management.", email: "s.mitchell@lbs.ac.uk", linkedin: "sarahmitchell", publications: 43, posts: 28, location: "London, UK" },
+  { id: "2", name: "Dr. James Hargreaves", role: "Senior Partner", firm: "Deloitte", badge: "moderator", joinedDate: "Feb 2025", expertise: ["Audit", "Risk Management", "AI in Assurance"], bio: "James combines 20 years of audit practice with academic research on technology-driven assurance. He chairs the CPSR working group on AI adoption in professional services and regularly advises regulators.", email: "jhargreaves@deloitte.co.uk", linkedin: "jameshargreaves", publications: 18, posts: 15, location: "London, UK" },
+  { id: "3", name: "Emma Richardson", role: "Research Fellow", firm: "Oxford Saïd", badge: "contributor", joinedDate: "Mar 2025", expertise: ["Innovation", "Professional Services", "Diversity"], bio: "Emma's doctoral research at Saïd Business School examines diversity pipelines in Big Four firms. Her recent working paper on the 'frozen middle' has been cited by the FRC and featured in the Financial Times.", email: "emma.richardson@sbs.ox.ac.uk", linkedin: "emmarichardson", publications: 7, posts: 11, location: "Oxford, UK" },
+  { id: "4", name: "Michael Chen", role: "Managing Director", firm: "McKinsey & Company", joinedDate: "Apr 2025", expertise: ["Consulting", "Transformation", "Impact Measurement"], bio: "Michael leads McKinsey's internal research function and is passionate about measuring and demonstrating consulting impact. He holds an MBA from Wharton and a PhD from MIT Sloan.", email: "michael_chen@mckinsey.com", linkedin: "michaelchen", publications: 12, posts: 9, location: "New York, US" },
+  { id: "5", name: "Dr. Aisha Patel", role: "Associate Professor", firm: "Imperial College", badge: "contributor", joinedDate: "May 2025", expertise: ["Data Analytics", "AI in Services", "Machine Learning"], bio: "Aisha researches the application of machine learning techniques in professional services delivery. She co-leads Imperial's AI & Professional Services Lab and has secured £2.1M in UKRI funding.", email: "a.patel@imperial.ac.uk", linkedin: "aishapatel", publications: 29, posts: 19, location: "London, UK" },
+  { id: "6", name: "Thomas Wright", role: "Partner", firm: "PwC", joinedDate: "Jun 2025", expertise: ["Tax", "Regulation", "Policy"], bio: "Thomas advises multinational firms on regulatory strategy and is a recognised authority on professional services regulation in the UK and EU. He sits on the Law Society's regulatory policy committee.", email: "thomas.wright@pwc.com", linkedin: "thomaswright", publications: 8, posts: 4, location: "London, UK" },
+  { id: "7", name: "Dr. Claire Dubois", role: "Lecturer", firm: "INSEAD", joinedDate: "Sep 2025", expertise: ["Organisational Behaviour", "Culture", "Leadership Development"], bio: "Claire's research explores organisational culture in global professional services firms, with particular focus on cross-cultural leadership challenges. She previously worked at Bain & Company in Paris.", email: "claire.dubois@insead.edu", linkedin: "clairedubois", publications: 15, posts: 7, location: "Fontainebleau, France" },
+  { id: "8", name: "Robert Kimani", role: "Principal", firm: "BCG", joinedDate: "Nov 2025", expertise: ["Digital", "Operations", "Emerging Markets"], bio: "Robert leads BCG's Africa practice and researches the growth of professional services in emerging markets. He is a regular contributor to Harvard Business Review and sits on the board of the African Management Institute.", email: "kimani.robert@bcg.com", linkedin: "robertkimani", publications: 11, posts: 3, location: "Nairobi, Kenya" },
 ];
 
 const mockDiscussions: Discussion[] = [
@@ -673,6 +675,8 @@ const Community = () => {
 
   // Add Event state
   const [showAddEvent, setShowAddEvent] = useState(false);
+  // Manage community details state
+  const [showManageDetails, setShowManageDetails] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
@@ -836,6 +840,13 @@ const Community = () => {
       const q = memberSearch.toLowerCase();
       list = list.filter(m => m.name.toLowerCase().includes(q) || m.firm.toLowerCase().includes(q));
     }
+    const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+    const parseJoinedDate = (d: string) => {
+      const parts = d.split(" ");
+      const month = monthOrder[parts[0]] ?? 0;
+      const year = parseInt(parts[1] || "2025", 10);
+      return year * 12 + month;
+    };
     const sortFn = (a: Member, b: Member) => {
       let cmp = 0;
       if (memberSort === "name") {
@@ -844,8 +855,8 @@ const Community = () => {
         cmp = aLast.localeCompare(bLast);
       } else if (memberSort === "firm") cmp = a.firm.localeCompare(b.firm);
       else if (memberSort === "role") cmp = a.role.localeCompare(b.role);
-      else if (memberSort === "joined") cmp = a.joinedDate.localeCompare(b.joinedDate);
-      else if (memberSort === "posts") cmp = (a.publications || 0) - (b.publications || 0);
+      else if (memberSort === "joined") cmp = parseJoinedDate(a.joinedDate) - parseJoinedDate(b.joinedDate);
+      else if (memberSort === "posts") cmp = (a.posts || 0) - (b.posts || 0);
       return memberSortDir === "asc" ? cmp : -cmp;
     };
     list.sort(sortFn);
@@ -1860,8 +1871,11 @@ const Community = () => {
                             <span key={e} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">{e}</span>
                           ))}
                         </div>
-                        <div className="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
-                          Member since {m.joinedDate}
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-3 pt-3 border-t border-gray-50">
+                          <span>Member since {m.joinedDate}</span>
+                          <span className="flex items-center gap-1">
+                            <FontAwesomeIcon icon={faComments} className="text-[9px]" /> {m.posts || 0} posts
+                          </span>
                         </div>
                       </button>
                     ))}
@@ -2414,39 +2428,75 @@ const Community = () => {
               {isAdmin && (
                 <TabsContent value="admin">
                   <div className="space-y-6">
-                    {/* Community Details */}
+                    {/* Manage Community Details */}
                     <div className="bg-background border border-border rounded-lg p-6">
-                      <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2 mb-4">
-                        <FontAwesomeIcon icon={faCircleInfo} className="text-primary text-sm" /> Community Details
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
-                          <input type="text" defaultValue={community.name} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
-                          <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
-                            <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-primary text-primary-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
-                              <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
-                            </button>
-                            <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-background text-muted-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : "hover:bg-muted"}`}>
-                              <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
+                          <FontAwesomeIcon icon={faCircleInfo} className="text-primary text-sm" /> Community Details
+                        </h3>
+                        <button
+                          onClick={() => setShowManageDetails(!showManageDetails)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${showManageDetails ? "bg-primary text-primary-foreground" : "border border-primary/30 text-primary hover:bg-primary/5"}`}
+                        >
+                          <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Manage community details
+                        </button>
+                      </div>
+
+                      {showManageDetails && (
+                        <div className="mt-4 space-y-4">
+                          {/* HQ-only notice for non-HQ users */}
+                          {!isHQ && (
+                            <div className="flex items-start gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border text-xs text-muted-foreground">
+                              <FontAwesomeIcon icon={faLock} className="text-[10px] mt-0.5" />
+                              <span>Community name and access status can only be changed by HQ. To request changes, <a href="mailto:hq@cpsr.uk?subject=Community%20Details%20Change%20Request" className="text-primary hover:underline font-medium">contact HQ</a>.</span>
+                            </div>
+                          )}
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                            <input type="text" defaultValue={community.name} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                            <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
+                              <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-primary text-primary-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
+                                <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
+                              </button>
+                              <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-background text-muted-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : "hover:bg-muted"}`}>
+                                <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
+                            <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
+                            <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                          </div>
+
+                          {/* Thumbnail */}
+                          <div>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Thumbnail</label>
+                            <button className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
+                              <FontAwesomeIcon icon={faCamera} className="text-sm text-muted-foreground/50" /> <span>Change thumbnail image (max 500KB)</span>
                             </button>
                           </div>
+
+                          {/* Official status */}
+                          <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border">
+                            <FontAwesomeIcon icon={faShieldHalved} className="text-[10px] text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              To request official status,{" "}
+                              <a href="mailto:hq@cpsr.uk?subject=Request%20for%20Official%20Community%20Status" className="text-primary hover:underline font-medium">email HQ</a>.
+                            </span>
+                          </div>
+
+                          <div className="flex justify-end">
+                            <button className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Save changes</button>
+                          </div>
                         </div>
-                        <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
-                          <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
-                          <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
-                        </div>
-                        <div className="flex justify-end">
-                          <button className="px-4 py-2 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Save changes</button>
-                        </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* Add Contacts Card */}
