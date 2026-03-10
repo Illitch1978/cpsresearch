@@ -65,7 +65,10 @@ import { faBookmark as faBookmarkRegular, faCalendar } from "@fortawesome/free-r
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import cpsrLogo from "@/assets/cpsr-logo.jpg";
 import communityBannerDefault from "@/assets/community-banner-default.jpg";
-import { faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCamera, faImage, faBold, faItalic, faAlignLeft, faAlignCenter, faAlignRight, faAlignJustify,
+  faListUl, faListOl, faLink as faLinkIcon, faImage as faImageIcon,
+} from "@fortawesome/free-solid-svg-icons";
 import UserAvatar from "@/components/UserAvatar";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +80,20 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  continents,
+  countriesByContinent,
+  sectorsByCategory,
+  sectors,
+  orgTypes,
+  managementExpertiseList,
+  leadershipExpertiseList,
+  contributionsList,
+  externalFactorsList,
+} from "@/lib/communityFilterData";
 
 // ─── Mock Data ───────────────────────────────────────────────
 
@@ -693,6 +710,86 @@ const Community = () => {
   const [showAddEvent, setShowAddEvent] = useState(false);
   // Manage community details state
   const [showManageDetails, setShowManageDetails] = useState(false);
+
+  // Edit form state (mirrors create form in MyCommunities)
+  const [editFormName, setEditFormName] = useState("");
+  const [editFormSummary, setEditFormSummary] = useState("");
+  const [editFormDescription, setEditFormDescription] = useState("");
+  const [editFormAccess, setEditFormAccess] = useState<"open" | "private">("open");
+  const [editFormFrontline, setEditFormFrontline] = useState(false);
+  const [editFormThumbnail, setEditFormThumbnail] = useState<string | null>(null);
+  const editThumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [editFormLocationFilter, setEditFormLocationFilter] = useState("any");
+  const [editFormSelectedContinents, setEditFormSelectedContinents] = useState<string[]>([]);
+  const [editFormSelectedCountries, setEditFormSelectedCountries] = useState<string[]>([]);
+  const [editFormSourceFilter, setEditFormSourceFilter] = useState("all");
+  const [editFormSelectedSectors, setEditFormSelectedSectors] = useState<string[]>([]);
+  const [editFormExpandedSectors, setEditFormExpandedSectors] = useState<string[]>([]);
+  const [editFormOrgTypeFilter, setEditFormOrgTypeFilter] = useState("any");
+  const [editFormSelectedOrgTypes, setEditFormSelectedOrgTypes] = useState<string[]>([]);
+  const [editFormExpertiseFilter, setEditFormExpertiseFilter] = useState("any");
+  const [editFormSelectedExpertise, setEditFormSelectedExpertise] = useState<string[]>([]);
+  const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
+  const [editFormSelectedExternalFactors, setEditFormSelectedExternalFactors] = useState<string[]>([]);
+  const [editFormSelectedContributions, setEditFormSelectedContributions] = useState<string[]>(["Research", "Publications"]);
+  const [editFormMembershipRule, setEditFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("approval");
+  const [editFormPostReview, setEditFormPostReview] = useState<"none" | "criteria" | "all">("criteria");
+  const [editFormContentReview, setEditFormContentReview] = useState<"none" | "criteria" | "all">("all");
+  const [editFormInviteExpiry, setEditFormInviteExpiry] = useState("90");
+  const [editFormCommunityRules, setEditFormCommunityRules] = useState("");
+  const [editRulesExpanded, setEditRulesExpanded] = useState(false);
+  const [editMessagesExpanded, setEditMessagesExpanded] = useState(false);
+  const [editActiveMessageTemplate, setEditActiveMessageTemplate] = useState("welcome");
+  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({
+    welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+    decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+    "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+    "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+    "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+    invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+    leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+  });
+  const [editFormSaving, setEditFormSaving] = useState(false);
+
+  // Pre-populate edit form when manage details dialog opens
+  const openManageDetails = () => {
+    setEditFormName(community.name);
+    setEditFormSummary(community.description.split('.')[0] + '.');
+    setEditFormDescription(community.description);
+    setEditFormAccess("open");
+    setEditFormFrontline(false);
+    setEditFormThumbnail(null);
+    setEditFormLocationFilter("any");
+    setEditFormSelectedContinents([]);
+    setEditFormSelectedCountries([]);
+    setEditFormSourceFilter("all");
+    setEditFormSelectedSectors([]);
+    setEditFormOrgTypeFilter("any");
+    setEditFormSelectedOrgTypes([]);
+    setEditFormExpertiseFilter("any");
+    setEditFormSelectedExpertise([]);
+    setEditFormExternalFactorFilter("any");
+    setEditFormSelectedExternalFactors([]);
+    setEditFormSelectedContributions(["Research", "Publications"]);
+    setEditFormMembershipRule(community.governance.membership as "anyone" | "criteria" | "approval");
+    setEditFormPostReview(community.governance.postReview as "none" | "criteria" | "all");
+    setEditFormContentReview(community.governance.contentReview as "none" | "criteria" | "all");
+    setEditFormInviteExpiry(String(community.governance.inviteExpiry));
+    setEditFormCommunityRules(community.rules.map(r => `${r.title} ${r.detail}`).join('\n'));
+    setEditRulesExpanded(false);
+    setEditMessagesExpanded(false);
+    setShowManageDetails(true);
+  };
+
+  const handleEditThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setEditFormThumbnail(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
@@ -2786,7 +2883,7 @@ const Community = () => {
                           <FontAwesomeIcon icon={faCircleInfo} className="text-primary text-sm" /> Community Details
                         </h3>
                         <button
-                          onClick={() => setShowManageDetails(!showManageDetails)}
+                          onClick={openManageDetails}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-primary/30 text-primary hover:bg-primary/5"
                         >
                           <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Manage community details
@@ -2798,11 +2895,12 @@ const Community = () => {
                     <Dialog open={showManageDetails} onOpenChange={setShowManageDetails}>
                       <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
                         <DialogHeader className="shrink-0">
-                          <DialogTitle className="text-lg font-serif">Edit Community Details</DialogTitle>
+                          <DialogTitle className="text-lg font-serif">Edit Community</DialogTitle>
                           <DialogDescription className="text-sm text-muted-foreground">
-                            Update your community settings. Name and access status changes are restricted to HQ.
+                            Update your community settings. Name and access changes are restricted to HQ.
                           </DialogDescription>
                         </DialogHeader>
+
                         <div className="space-y-4 pt-2 overflow-y-auto flex-1 pr-1">
                           {/* HQ-only notice for non-HQ users */}
                           {!isHQ && (
@@ -2811,23 +2909,29 @@ const Community = () => {
                               <span>Community name and access status can only be changed by HQ. To request changes, <a href="mailto:hq@cpsr.uk?subject=Community%20Details%20Change%20Request" className="text-primary hover:underline font-medium">contact HQ</a>.</span>
                             </div>
                           )}
+
                           {/* Name */}
                           <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
-                            <input type="text" defaultValue={community.name} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Name <span className="text-destructive">*</span> {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                            <div className="relative">
+                              <input type="text" value={editFormName} onChange={e => setEditFormName(e.target.value.slice(0, 100))} disabled={!isHQ} className={`w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`} />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">{editFormName.length}/100</span>
+                            </div>
                           </div>
+
                           {/* Access */}
                           <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Access <span className="text-destructive">*</span> {!isHQ && <span className="text-muted-foreground font-normal">(HQ only)</span>}</label>
                             <div className="flex items-center gap-0 border border-border rounded-lg overflow-hidden w-fit">
-                              <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-primary text-primary-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
+                              <button disabled={!isHQ} onClick={() => isHQ && setEditFormAccess("open")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${editFormAccess === "open" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"} ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
                                 <FontAwesomeIcon icon={faGlobe} className="text-[10px]" /> Open
                               </button>
-                              <button disabled={!isHQ} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors bg-background text-muted-foreground ${!isHQ ? "opacity-60 cursor-not-allowed" : "hover:bg-muted"}`}>
+                              <button disabled={!isHQ} onClick={() => isHQ && setEditFormAccess("private")} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 transition-colors ${editFormAccess === "private" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"} ${!isHQ ? "opacity-60 cursor-not-allowed" : ""}`}>
                                 <FontAwesomeIcon icon={faLock} className="text-[10px]" /> Private
                               </button>
                             </div>
                           </div>
+
                           {/* Official status */}
                           <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/50 rounded-lg border border-border">
                             <FontAwesomeIcon icon={faShieldHalved} className="text-[10px] text-muted-foreground" />
@@ -2836,80 +2940,370 @@ const Community = () => {
                               <a href="mailto:hq@cpsr.uk?subject=Request%20for%20Official%20Community%20Status" className="text-primary hover:underline font-medium">email HQ</a>.
                             </span>
                           </div>
+
                           {/* Thumbnail */}
                           <div>
                             <label className="text-xs font-medium text-card-foreground mb-1.5 block">Thumbnail</label>
-                            <button className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
-                              <FontAwesomeIcon icon={faCamera} className="text-sm text-muted-foreground/50" /> <span>Change thumbnail image (max 500KB)</span>
-                            </button>
+                            <input ref={editThumbnailInputRef} type="file" accept="image/*" onChange={handleEditThumbnailChange} className="hidden" />
+                            {editFormThumbnail ? (
+                              <div className="flex items-center gap-3">
+                                <img src={editFormThumbnail} alt="Thumbnail preview" className="w-16 h-16 rounded-lg object-cover border border-border" />
+                                <div className="flex flex-col gap-1">
+                                  <button onClick={() => editThumbnailInputRef.current?.click()} className="text-xs text-primary font-medium hover:underline text-left">Change image</button>
+                                  <button onClick={() => setEditFormThumbnail(null)} className="text-xs text-muted-foreground hover:text-destructive transition-colors text-left">Remove</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button onClick={() => editThumbnailInputRef.current?.click()} className="flex items-center gap-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg px-4 py-3 hover:border-primary/30 hover:bg-muted/50 transition-all w-full">
+                                <FontAwesomeIcon icon={faImage} className="text-sm text-muted-foreground/50" /> <span>Choose image (max 500KB)</span>
+                              </button>
+                            )}
                           </div>
+
+                          {/* Frontline content */}
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => setEditFormFrontline(!editFormFrontline)} className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${editFormFrontline ? "bg-primary border-primary text-primary-foreground" : "border-border bg-background"}`}>
+                              {editFormFrontline && <FontAwesomeIcon icon={faCheck} className="text-[8px]" />}
+                            </button>
+                            <label className="text-xs text-card-foreground font-medium cursor-pointer" onClick={() => setEditFormFrontline(!editFormFrontline)}>Frontline content</label>
+                          </div>
+
                           {/* Summary */}
                           <div>
-                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary</label>
-                            <textarea defaultValue={community.description.split('.')[0] + '.'} rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                            <label className="text-xs font-medium text-card-foreground mb-1.5 block">Summary <span className="text-destructive">*</span></label>
+                            <div className="relative">
+                              <textarea value={editFormSummary} onChange={e => setEditFormSummary(e.target.value.slice(0, 250))} placeholder="Brief summary of the community…" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
+                              <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{editFormSummary.length}/250</span>
+                            </div>
                           </div>
+
                           {/* Description */}
                           <div>
                             <label className="text-xs font-medium text-card-foreground mb-1.5 block">Description</label>
-                            <textarea defaultValue={community.description} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
+                            <div className="border border-border rounded-lg overflow-hidden">
+                              <div className="flex items-center gap-0.5 bg-muted/30 px-2 py-1.5 border-b border-border">
+                                {[{ icon: faBold, title: "Bold" }, { icon: faItalic, title: "Italic" }].map(btn => (
+                                  <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                ))}
+                                <div className="w-px h-4 bg-border mx-1" />
+                                {[{ icon: faAlignLeft, title: "Left" }, { icon: faAlignCenter, title: "Centre" }, { icon: faAlignRight, title: "Right" }, { icon: faAlignJustify, title: "Justify" }].map(btn => (
+                                  <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                ))}
+                                <div className="w-px h-4 bg-border mx-1" />
+                                {[{ icon: faListUl, title: "Bullets" }, { icon: faListOl, title: "Numbered" }].map(btn => (
+                                  <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                ))}
+                                <div className="w-px h-4 bg-border mx-1" />
+                                <button title="Link" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faLinkIcon} className="text-xs" /></button>
+                                <button title="Image" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faImageIcon} className="text-xs" /></button>
+                              </div>
+                              <div className="relative">
+                                <textarea value={editFormDescription} onChange={e => setEditFormDescription(e.target.value.slice(0, 2000))} placeholder="Full description…" rows={4} className="w-full text-sm px-3 py-2 bg-background focus:outline-none resize-none" />
+                                <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{editFormDescription.length}/2000</span>
+                              </div>
+                            </div>
                           </div>
-                          {/* Community criteria section */}
+
+                          {/* ─── Filter criteria ─── */}
                           <div className="border border-border rounded-lg overflow-hidden">
                             <div className="px-4 py-3 bg-muted/30">
                               <span className="text-xs font-semibold text-card-foreground">Community criteria</span>
                             </div>
-                            <div className="px-4 py-4 space-y-4 border-t border-border text-xs text-muted-foreground">
-                              <p>Location, Sectors, Org Types, Expertise, and External Factors criteria can be edited here. These match the filters used when creating the community.</p>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Location:</span> Global</div>
-                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Sectors:</span> Any sector</div>
-                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Org Types:</span> Any org type</div>
-                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">Expertise:</span> Any expertise</div>
-                                <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /> <span className="font-medium text-card-foreground">External Factors:</span> Any</div>
+                            <div className="px-4 py-4 space-y-5 border-t border-border">
+                              {/* Location */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Location</p>
+                                <RadioGroup value={editFormLocationFilter} onValueChange={setEditFormLocationFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-loc-any" /><Label htmlFor="edit-loc-any" className="text-xs text-card-foreground cursor-pointer">Any location</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific-continents" id="edit-loc-cont" /><Label htmlFor="edit-loc-cont" className="text-xs text-card-foreground cursor-pointer">Specific continents</Label></div>
+                                  {editFormLocationFilter === "specific-continents" && (
+                                    <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-border pl-3">
+                                      {continents.map(c => (
+                                        <div key={c} className="flex items-center space-x-1.5">
+                                          <Checkbox id={`edit-cont-${c}`} checked={editFormSelectedContinents.includes(c)} onCheckedChange={() => setEditFormSelectedContinents(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])} />
+                                          <Label htmlFor={`edit-cont-${c}`} className="text-[11px] text-muted-foreground cursor-pointer">{c}</Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific-countries" id="edit-loc-country" /><Label htmlFor="edit-loc-country" className="text-xs text-card-foreground cursor-pointer">Specific countries</Label></div>
+                                  {editFormLocationFilter === "specific-countries" && (
+                                    <div className="ml-5 max-h-40 overflow-y-auto space-y-2 border-l-2 border-border pl-3">
+                                      {continents.map(cont => (
+                                        <div key={cont}>
+                                          <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{cont}</p>
+                                          <div className="grid grid-cols-2 gap-1 mb-2">
+                                            {countriesByContinent[cont]?.map(country => (
+                                              <div key={country} className="flex items-center space-x-1.5">
+                                                <Checkbox id={`edit-country-${country}`} checked={editFormSelectedCountries.includes(country)} onCheckedChange={() => setEditFormSelectedCountries(prev => prev.includes(country) ? prev.filter(x => x !== country) : [...prev, country])} />
+                                                <Label htmlFor={`edit-country-${country}`} className="text-[11px] text-muted-foreground cursor-pointer">{country}</Label>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </RadioGroup>
+                              </div>
+
+                              {/* Sectors */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Sectors</p>
+                                <RadioGroup value={editFormSourceFilter} onValueChange={setEditFormSourceFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="all" id="edit-sec-all" /><Label htmlFor="edit-sec-all" className="text-xs text-card-foreground cursor-pointer">Any sector</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific-sectors" id="edit-sec-spec" /><Label htmlFor="edit-sec-spec" className="text-xs text-card-foreground cursor-pointer">Specific sectors</Label></div>
+                                  {editFormSourceFilter === "specific-sectors" && (
+                                    <div className="ml-5 max-h-40 overflow-y-auto space-y-1.5 border-l-2 border-border pl-3">
+                                      {sectors.map(sector => (
+                                        <div key={sector}>
+                                          <div className="flex items-center space-x-1.5">
+                                            <Checkbox id={`edit-sec-${sector}`} checked={editFormSelectedSectors.includes(sector)} onCheckedChange={() => setEditFormSelectedSectors(prev => prev.includes(sector) ? prev.filter(x => x !== sector) : [...prev, sector])} />
+                                            <Label htmlFor={`edit-sec-${sector}`} className="text-[11px] text-muted-foreground cursor-pointer flex-1">{sector}</Label>
+                                            <button type="button" onClick={() => setEditFormExpandedSectors(prev => prev.includes(sector) ? prev.filter(x => x !== sector) : [...prev, sector])} className="text-[10px] text-muted-foreground hover:text-card-foreground">{editFormExpandedSectors.includes(sector) ? "−" : "+"}</button>
+                                          </div>
+                                          {editFormExpandedSectors.includes(sector) && sectorsByCategory[sector] && (
+                                            <div className="ml-5 mt-1 grid grid-cols-2 gap-0.5 pl-2 border-l border-border">
+                                              {sectorsByCategory[sector].map(sub => <span key={sub} className="text-[10px] text-muted-foreground">{sub}</span>)}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </RadioGroup>
+                              </div>
+
+                              {/* Org Types */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Org Type</p>
+                                <RadioGroup value={editFormOrgTypeFilter} onValueChange={setEditFormOrgTypeFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-org-any" /><Label htmlFor="edit-org-any" className="text-xs text-card-foreground cursor-pointer">Any org type</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="edit-org-spec" /><Label htmlFor="edit-org-spec" className="text-xs text-card-foreground cursor-pointer">Specific org types</Label></div>
+                                  {editFormOrgTypeFilter === "specific" && (
+                                    <div className="ml-5 flex flex-col flex-wrap gap-1.5 border-l-2 border-border pl-3 max-h-36">
+                                      {orgTypes.map(item => (
+                                        <div key={item} className="flex items-center space-x-1.5 w-[45%]">
+                                          <Checkbox id={`edit-org-${item}`} checked={editFormSelectedOrgTypes.includes(item)} onCheckedChange={() => setEditFormSelectedOrgTypes(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item])} />
+                                          <Label htmlFor={`edit-org-${item}`} className="text-[11px] text-muted-foreground cursor-pointer">{item}</Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </RadioGroup>
+                              </div>
+
+                              {/* Expertise */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Expertise</p>
+                                <RadioGroup value={editFormExpertiseFilter} onValueChange={setEditFormExpertiseFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-exp-any" /><Label htmlFor="edit-exp-any" className="text-xs text-card-foreground cursor-pointer">Any expertise</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="edit-exp-spec" /><Label htmlFor="edit-exp-spec" className="text-xs text-card-foreground cursor-pointer">Specific expertise</Label></div>
+                                  {editFormExpertiseFilter === "specific" && (
+                                    <div className="ml-5 space-y-3 border-l-2 border-border pl-3 max-h-40 overflow-y-auto">
+                                      <div>
+                                        <p className="text-[11px] font-semibold text-card-foreground mb-1">Management</p>
+                                        <div className="space-y-1 ml-2">
+                                          {managementExpertiseList.map(exp => (
+                                            <div key={exp} className="flex items-center space-x-1.5">
+                                              <Checkbox id={`edit-mgmt-${exp}`} checked={editFormSelectedExpertise.includes(exp)} onCheckedChange={() => setEditFormSelectedExpertise(prev => prev.includes(exp) ? prev.filter(x => x !== exp) : [...prev, exp])} />
+                                              <Label htmlFor={`edit-mgmt-${exp}`} className="text-[11px] text-muted-foreground cursor-pointer">{exp}</Label>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <p className="text-[11px] font-semibold text-card-foreground mb-1">Leadership & Governance</p>
+                                        <div className="space-y-1 ml-2">
+                                          {leadershipExpertiseList.map(exp => (
+                                            <div key={exp} className="flex items-center space-x-1.5">
+                                              <Checkbox id={`edit-lead-${exp}`} checked={editFormSelectedExpertise.includes(exp)} onCheckedChange={() => setEditFormSelectedExpertise(prev => prev.includes(exp) ? prev.filter(x => x !== exp) : [...prev, exp])} />
+                                              <Label htmlFor={`edit-lead-${exp}`} className="text-[11px] text-muted-foreground cursor-pointer">{exp}</Label>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </RadioGroup>
+                              </div>
+
+                              {/* External Factors */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">External Factors</p>
+                                <RadioGroup value={editFormExternalFactorFilter} onValueChange={setEditFormExternalFactorFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-ext-any" /><Label htmlFor="edit-ext-any" className="text-xs text-card-foreground cursor-pointer">Any external factor</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="edit-ext-spec" /><Label htmlFor="edit-ext-spec" className="text-xs text-card-foreground cursor-pointer">Specific factors</Label></div>
+                                  {editFormExternalFactorFilter === "specific" && (
+                                    <div className="ml-5 space-y-3 border-l-2 border-border pl-3">
+                                      {Object.entries(externalFactorsList).map(([cat, factors]) => (
+                                        <div key={cat}>
+                                          <p className="text-[11px] font-semibold text-card-foreground mb-1">{cat}</p>
+                                          <div className="space-y-1 ml-2">
+                                            {factors.map(f => (
+                                              <div key={f} className="flex items-center space-x-1.5">
+                                                <Checkbox id={`edit-ext-${f}`} checked={editFormSelectedExternalFactors.includes(f)} onCheckedChange={() => setEditFormSelectedExternalFactors(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f])} />
+                                                <Label htmlFor={`edit-ext-${f}`} className="text-[11px] text-muted-foreground cursor-pointer">{f}</Label>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </RadioGroup>
+                              </div>
+
+                              {/* Contributions */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Anticipated contributions <span className="text-destructive">*</span></p>
+                                <div className="space-y-1.5">
+                                  {contributionsList.map(c => (
+                                    <div key={c.singular} className="flex items-center space-x-1.5">
+                                      <Checkbox id={`edit-contrib-${c.singular}`} checked={editFormSelectedContributions.includes(c.singular)} onCheckedChange={() => setEditFormSelectedContributions(prev => prev.includes(c.singular) ? prev.filter(x => x !== c.singular) : [...prev, c.singular])} />
+                                      <Label htmlFor={`edit-contrib-${c.singular}`} className="text-xs text-card-foreground cursor-pointer">{c.singular}</Label>
+                                    </div>
+                                  ))}
+                                </div>
+                                {editFormSelectedContributions.length === 0 && (
+                                  <p className="text-[10px] text-destructive mt-1">Please select at least one contribution</p>
+                                )}
                               </div>
                             </div>
                           </div>
-                          {/* Rules section */}
+
+                          {/* ─── Rules Section (Collapsible) ─── */}
                           <div className="border border-border rounded-lg overflow-hidden">
-                            <div className="px-4 py-3 bg-muted/30">
-                              <span className="text-xs font-semibold text-card-foreground">Rules</span>
-                            </div>
-                            <div className="px-4 py-4 space-y-3 border-t border-border">
-                              <div>
-                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Membership approval</label>
-                                <select className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
-                                  <option>Anyone can join</option>
-                                  <option>Anyone meeting criteria</option>
-                                  <option selected>Approval required</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Post review</label>
-                                <select className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
-                                  <option>No review required</option>
-                                  <option>Posts that meet criteria require review</option>
-                                  <option selected>Review required for all posts</option>
-                                </select>
-                              </div>
-                              <div>
-                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry</label>
-                                <div className="flex items-center gap-2">
-                                  <select className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
-                                    <option>30</option><option>60</option><option selected>90</option><option>120</option><option>180</option>
-                                  </select>
-                                  <span className="text-xs text-muted-foreground">days after being sent.</span>
+                            <button onClick={() => setEditRulesExpanded(!editRulesExpanded)} className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors">
+                              <span className="text-xs font-semibold text-card-foreground">Rules (optional)</span>
+                              <span className="text-[10px] text-muted-foreground">{editRulesExpanded ? "▲" : "▼"}</span>
+                            </button>
+                            {editRulesExpanded && (
+                              <div className="px-4 py-4 space-y-5 border-t border-border">
+                                <p className="text-[11px] text-muted-foreground leading-relaxed">The default settings are 'Anyone can join' and 'No review required'. If alternative settings are adopted, please update the guidance in the 'Community rules' box.</p>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for approval of membership applications <span className="text-destructive">*</span></label>
+                                  <div className="space-y-2">
+                                    {([["anyone", "Anyone can join"], ["criteria", "Anyone meeting criteria"], ["approval", "Approval required"]] as const).map(([value, label]) => (
+                                      <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                                        <span onClick={() => setEditFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormMembershipRule === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                          {editFormMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                        </span>
+                                        <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormMembershipRule(value)}>{label}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
+                                  <div className="space-y-2">
+                                    {([["none", "No review required"], ["criteria", "Posts that meet criteria require review"], ["all", "Review required for all posts"]] as const).map(([value, label]) => (
+                                      <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                                        <span onClick={() => setEditFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormPostReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                          {editFormPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                        </span>
+                                        <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormPostReview(value)}>{label}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
+                                  <div className="space-y-2">
+                                    {([["none", "No review required"], ["criteria", "Content items that meet criteria require review"], ["all", "Review required for all content items"]] as const).map(([value, label]) => (
+                                      <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
+                                        <span onClick={() => setEditFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormContentReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                          {editFormContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                        </span>
+                                        <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormContentReview(value)}>{label}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
+                                  <div className="flex items-center gap-2">
+                                    <select value={editFormInviteExpiry} onChange={e => setEditFormInviteExpiry(e.target.value)} className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
+                                      <option value="30">30</option><option value="60">60</option><option value="90">90</option><option value="120">120</option><option value="180">180</option>
+                                    </select>
+                                    <span className="text-xs text-muted-foreground">days after being sent.</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-1.5 block">Community rules <span className="text-destructive">*</span></label>
+                                  <div className="relative">
+                                    <textarea value={editFormCommunityRules} onChange={e => setEditFormCommunityRules(e.target.value.slice(0, 500))} placeholder="Describe the community rules…" rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none" />
+                                    <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{editFormCommunityRules.length}/500</span>
+                                  </div>
                                 </div>
                               </div>
-                              <div>
-                                <label className="text-xs font-medium text-card-foreground mb-1.5 block">Community rules</label>
-                                <textarea defaultValue={community.rules.map(r => `${r.title} ${r.detail}`).join('\n')} rows={4} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" />
-                              </div>
-                            </div>
+                            )}
                           </div>
+
+                          {/* ─── Messages Section (Collapsible) ─── */}
+                          <div className="border border-border rounded-lg overflow-hidden">
+                            <button onClick={() => setEditMessagesExpanded(!editMessagesExpanded)} className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors">
+                              <span className="text-xs font-semibold text-card-foreground">Messages (optional)</span>
+                              <span className="text-[10px] text-muted-foreground">{editMessagesExpanded ? "▲" : "▼"}</span>
+                            </button>
+                            {editMessagesExpanded && (
+                              <div className="border-t border-border">
+                                <p className="text-[11px] text-muted-foreground leading-relaxed px-4 pt-3 pb-2">Salutations and valedictions are system-generated so please include just the body of your message in the box.</p>
+                                <div className="px-4 pb-3">
+                                  <select value={editActiveMessageTemplate} onChange={e => setEditActiveMessageTemplate(e.target.value)} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 text-card-foreground">
+                                    <option value="welcome">Welcome to the Community</option>
+                                    <option value="decline">Decline request to join the Community</option>
+                                    <option value="block-post">Block post to the Community</option>
+                                    <option value="block-content">Block content shared to the Community</option>
+                                    <option value="block-playlist">Block playlist shared to the Community</option>
+                                    <option value="invitation">Invitation to join the Community</option>
+                                    <option value="leave">Leave the Community</option>
+                                  </select>
+                                </div>
+                                <div className="px-4 pb-4">
+                                  <div className="flex items-center gap-0.5 border border-border border-b-0 rounded-t-lg bg-muted/30 px-2 py-1.5">
+                                    {[{ icon: faBold, title: "Bold" }, { icon: faItalic, title: "Italic" }].map(btn => (
+                                      <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                    ))}
+                                    <div className="w-px h-4 bg-border mx-1" />
+                                    {[{ icon: faAlignLeft, title: "Align left" }, { icon: faAlignCenter, title: "Align centre" }, { icon: faAlignRight, title: "Align right" }, { icon: faAlignJustify, title: "Justify" }].map(btn => (
+                                      <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                    ))}
+                                    <div className="w-px h-4 bg-border mx-1" />
+                                    {[{ icon: faListUl, title: "Bullet list" }, { icon: faListOl, title: "Numbered list" }].map(btn => (
+                                      <button key={btn.title} title={btn.title} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={btn.icon} className="text-xs" /></button>
+                                    ))}
+                                    <div className="w-px h-4 bg-border mx-1" />
+                                    <button title="Insert link" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faLinkIcon} className="text-xs" /></button>
+                                    <button title="Insert image" className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-card-foreground hover:bg-muted rounded transition-colors"><FontAwesomeIcon icon={faImageIcon} className="text-xs" /></button>
+                                  </div>
+                                  <div className="relative">
+                                    <textarea
+                                      value={editMessageTemplates[editActiveMessageTemplate] || ""}
+                                      onChange={e => setEditMessageTemplates(prev => ({ ...prev, [editActiveMessageTemplate]: e.target.value.slice(0, 2000) }))}
+                                      rows={8}
+                                      className="w-full text-sm border border-border rounded-b-lg rounded-t-none px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all resize-none leading-relaxed"
+                                    />
+                                    <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">{(editMessageTemplates[editActiveMessageTemplate] || "").length}/2000</span>
+                                  </div>
+                                  <div className="flex justify-end mt-2">
+                                    <button className="text-xs font-medium text-primary border border-primary/30 rounded-md px-3 py-1.5 hover:bg-primary/5 transition-colors">Send me an example email</button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
                           {/* Actions */}
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
-                            <button onClick={() => setShowManageDetails(false)} className="px-5 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Save changes</button>
+                            <button
+                              onClick={() => setShowManageDetails(false)}
+                              disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
+                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                            >
+                              Save changes
+                            </button>
                           </div>
                         </div>
                       </DialogContent>
