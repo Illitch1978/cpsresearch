@@ -311,6 +311,9 @@ const MyCommunities = () => {
   const [filterApplied, setFilterApplied] = useState(false);
   const [filterManaged, setFilterManaged] = useState(false);
   const [filterPending, setFilterPending] = useState(false);
+  const [filterBlocked, setFilterBlocked] = useState(false);
+  const [filterProspect, setFilterProspect] = useState(false);
+  const [filterResearchPanelMember, setFilterResearchPanelMember] = useState(false);
 
   // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
