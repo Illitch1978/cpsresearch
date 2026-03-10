@@ -2828,16 +2828,70 @@ const Community = () => {
 
                   {/* Viewing a specific group */}
                   {viewingGroup && (
-                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-4">
+                    <div className="bg-white border border-primary/20 rounded-lg p-5 space-y-5">
                       <div className="flex items-center justify-between">
                         <h3 className="text-base font-serif font-semibold text-card-foreground flex items-center gap-2">
                           <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-serif font-semibold text-xs flex items-center justify-center">{viewingGroup.avatar}</span>
                           {viewingGroup.name}
                         </h3>
-                        <button onClick={() => setViewingGroup(null)} className="text-xs text-muted-foreground hover:text-foreground"><FontAwesomeIcon icon={faTimes} className="mr-1" />Close</button>
+                        <div className="flex items-center gap-3">
+                          {isAdmin && (
+                            <button onClick={() => setShowVisibilitySettings(!showVisibilitySettings)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                              <FontAwesomeIcon icon={faEye} className="text-[10px]" />
+                              Visibility rules
+                            </button>
+                          )}
+                          <button onClick={() => { setViewingGroup(null); setShowVisibilitySettings(false); setGroupDiscussionFilter("all"); setGroupResourceFilter("all"); }} className="text-xs text-muted-foreground hover:text-foreground"><FontAwesomeIcon icon={faTimes} className="mr-1" />Close</button>
+                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground">{viewingGroup.description}</p>
                       <div className="text-xs text-muted-foreground">Formed {viewingGroup.formed} · Led by <button onClick={() => setSelectedMember(viewingGroup.lead)} className="text-primary hover:underline font-medium">{viewingGroup.lead.name}</button></div>
+
+                      {/* Visibility Rules Panel */}
+                      {showVisibilitySettings && isAdmin && (
+                        <div className="bg-accent/30 border border-accent rounded-lg p-4 space-y-3">
+                          <h4 className="text-xs font-semibold text-card-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faEye} className="text-primary text-[10px]" />
+                            Discussion & Resource Visibility Rules
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            Control who can see discussions and resources in this group. Each item can be set to:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Community-wide</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Visible to all community members, not just group members.</p>
+                            </div>
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Group only</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Only visible to members of this working group.</p>
+                            </div>
+                            <div className="bg-background rounded-md p-3 border border-border">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                                <span className="text-[11px] font-semibold text-card-foreground">Managers only</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">Restricted to group leader and community managers/owners.</p>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-border">
+                            <label className="text-[11px] font-medium text-card-foreground">Default visibility for new items:</label>
+                            <div className="flex gap-2 mt-1.5">
+                              {(["community-wide", "group-only", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} className={`text-[10px] px-3 py-1.5 rounded-md border transition-colors ${viewingGroup.defaultVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "community-wide": "Community-wide", "group-only": "Group only", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Group Members */}
                       <div>
@@ -2855,19 +2909,132 @@ const Community = () => {
                       {/* Group Discussions */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs font-semibold text-card-foreground">Discussions ({viewingGroup.discussions})</h4>
-                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add discussion</button>}
+                          <h4 className="text-xs font-semibold text-card-foreground">Discussions ({viewingGroup.groupDiscussions.length})</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              {(["all", "community-wide", "group-only", "managers-only"] as const).map(f => (
+                                <button key={f} onClick={() => setGroupDiscussionFilter(f)} className={`text-[10px] px-2 py-0.5 rounded-md transition-colors ${groupDiscussionFilter === f ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}>
+                                  {{ all: "All", "community-wide": "Community", "group-only": "Group", "managers-only": "Managers" }[f]}
+                                </button>
+                              ))}
+                            </div>
+                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.discussions} discussions in this group. Navigate to the Discussions tab to view them.</p>
+                        <div className="space-y-2">
+                          {viewingGroup.groupDiscussions
+                            .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
+                            .map(d => {
+                              const effectiveVis = groupVisibilityOverrides[d.id] || d.visibility;
+                              return (
+                                <div key={d.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {d.pinned && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200 font-medium"><FontAwesomeIcon icon={faThumbtack} className="mr-0.5 text-[8px]" />Pinned</span>}
+                                        <h5 className="text-xs font-semibold text-card-foreground">{d.title}</h5>
+                                      </div>
+                                      <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{d.content}</p>
+                                      <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                                        <button onClick={() => setSelectedMember(d.author)} className="hover:text-primary">{d.author.name}</button>
+                                        <span>{d.date}</span>
+                                        <span><FontAwesomeIcon icon={faReply} className="mr-0.5" />{d.replies}</span>
+                                        <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{d.likes}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium border ${
+                                        effectiveVis === "community-wide" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                        effectiveVis === "group-only" ? "bg-primary/5 text-primary border-primary/20" :
+                                        "bg-amber-50 text-amber-700 border-amber-200"
+                                      }`}>
+                                        <FontAwesomeIcon icon={effectiveVis === "managers-only" ? faLock : effectiveVis === "group-only" ? faUsers : faGlobe} className="mr-1 text-[8px]" />
+                                        {{ "community-wide": "Community", "group-only": "Group only", "managers-only": "Managers" }[effectiveVis]}
+                                      </span>
+                                      {isAdmin && (
+                                        <select
+                                          value={effectiveVis}
+                                          onChange={e => setGroupVisibilityOverrides(prev => ({ ...prev, [d.id]: e.target.value as GroupVisibility }))}
+                                          className="text-[9px] border border-border rounded px-1 py-0.5 bg-background text-card-foreground"
+                                        >
+                                          <option value="community-wide">Community-wide</option>
+                                          <option value="group-only">Group only</option>
+                                          <option value="managers-only">Managers only</option>
+                                        </select>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          {viewingGroup.groupDiscussions.filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4">No discussions match the selected visibility filter.</p>
+                          )}
+                        </div>
                       </div>
 
                       {/* Group Resources */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs font-semibold text-card-foreground">Resources ({viewingGroup.resources})</h4>
-                          {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add resource</button>}
+                          <h4 className="text-xs font-semibold text-card-foreground">Resources ({viewingGroup.groupResources.length})</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              {(["all", "community-wide", "group-only", "managers-only"] as const).map(f => (
+                                <button key={f} onClick={() => setGroupResourceFilter(f)} className={`text-[10px] px-2 py-0.5 rounded-md transition-colors ${groupResourceFilter === f ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted"}`}>
+                                  {{ all: "All", "community-wide": "Community", "group-only": "Group", "managers-only": "Managers" }[f]}
+                                </button>
+                              ))}
+                            </div>
+                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3">{viewingGroup.resources} resources shared in this group. Navigate to the Resources tab to view them.</p>
+                        <div className="space-y-2">
+                          {viewingGroup.groupResources
+                            .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
+                            .map(r => {
+                              const effectiveVis = groupVisibilityOverrides[r.id] || r.visibility;
+                              return (
+                                <div key={r.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
+                                      <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
+                                        <span>{r.author}</span>
+                                        <span>{r.date}</span>
+                                        <span><FontAwesomeIcon icon={faDownload} className="mr-0.5" />{r.downloads}</span>
+                                        <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{r.likes}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className={`text-[9px] px-2 py-0.5 rounded-full font-medium border ${
+                                        effectiveVis === "community-wide" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                                        effectiveVis === "group-only" ? "bg-primary/5 text-primary border-primary/20" :
+                                        "bg-amber-50 text-amber-700 border-amber-200"
+                                      }`}>
+                                        <FontAwesomeIcon icon={effectiveVis === "managers-only" ? faLock : effectiveVis === "group-only" ? faUsers : faGlobe} className="mr-1 text-[8px]" />
+                                        {{ "community-wide": "Community", "group-only": "Group only", "managers-only": "Managers" }[effectiveVis]}
+                                      </span>
+                                      {isAdmin && (
+                                        <select
+                                          value={effectiveVis}
+                                          onChange={e => setGroupVisibilityOverrides(prev => ({ ...prev, [r.id]: e.target.value as GroupVisibility }))}
+                                          className="text-[9px] border border-border rounded px-1 py-0.5 bg-background text-card-foreground"
+                                        >
+                                          <option value="community-wide">Community-wide</option>
+                                          <option value="group-only">Group only</option>
+                                          <option value="managers-only">Managers only</option>
+                                        </select>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          {viewingGroup.groupResources.filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4">No resources match the selected visibility filter.</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
