@@ -752,18 +752,16 @@ const MyCommunities = () => {
                 onClick={() => { setJoiningCommunity(community); setJoinContributions([]); }}
                 className="text-[10px] font-medium px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Join
+                {community.membershipStatus === "prospect" ? "Apply" : "Join"}
               </button>
             )}
-            {(community.membershipStatus === "member" || community.membershipStatus === "managed") && (
-              <button
-                onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
-                className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
-                title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
-              >
-                <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
-              </button>
-            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFavourite(community.id); }}
+              className={`p-1.5 rounded-md transition-colors ${community.isFavourite ? "text-amber-500 hover:text-amber-600" : "text-muted-foreground/40 hover:text-amber-400"}`}
+              title={community.isFavourite ? "Remove from favourites" : "Add to favourites"}
+            >
+              <FontAwesomeIcon icon={community.isFavourite ? faStarSolid : faStarRegular} className="text-sm" />
+            </button>
             <div className="relative" ref={menuOpen === community.id ? menuRef : undefined}>
               <button
                 onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === community.id ? null : community.id); }}
