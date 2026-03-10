@@ -84,6 +84,7 @@ interface CommunityItem {
   isOfficial?: boolean;
   lastVisited?: string;
   isResearchPanel?: boolean;
+  isResearchPanelMember?: boolean;
   theme?: string;
   owner?: string;
   manager?: string;
