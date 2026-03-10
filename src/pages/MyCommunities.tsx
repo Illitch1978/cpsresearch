@@ -463,6 +463,7 @@ const MyCommunities = () => {
       else if (sortField === "members") cmp = a.members - b.members;
       else if (sortField === "discussions") cmp = a.discussions - b.discussions;
       else if (sortField === "resources") cmp = a.resources - b.resources;
+      else if (sortField === "events") cmp = a.events - b.events;
       return sortDir === "desc" ? -cmp : cmp;
     });
 
