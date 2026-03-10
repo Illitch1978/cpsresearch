@@ -65,7 +65,7 @@ import {
   externalFactorsList,
 } from "@/lib/communityFilterData";
 
-type MembershipStatus = "member" | "invited" | "applied" | "managed" | "pending";
+type MembershipStatus = "member" | "invited" | "applied" | "managed" | "pending" | "blocked" | "prospect";
 
 interface CommunityItem {
   id: string;
