@@ -1461,7 +1461,7 @@ const Community = () => {
     return [...pinned, ...unpinned];
   }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
 
-  const community = communityData["prof-services-research"];
+  
 
   const toggleBookmark = (discussionId: string) => {
     setBookmarkedDiscussions(prev =>
