@@ -3063,6 +3063,60 @@ const Community = () => {
                             {isAdmin && <button onClick={() => { setShowAddGroupResource(!showAddGroupResource); setShowAddGroupDiscussion(false); }} className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
                           </div>
                         </div>
+                        {/* Add Resource Form */}
+                        {showAddGroupResource && viewingGroup && (
+                          <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2 mb-2">
+                            <h5 className="text-xs font-semibold text-card-foreground">Add resource to {viewingGroup.name}</h5>
+                            <input type="text" value={newGroupResourceTitle} onChange={e => setNewGroupResourceTitle(e.target.value)} placeholder="Resource title *" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <div className="grid grid-cols-2 gap-2">
+                              <select value={newGroupResourceType} onChange={e => setNewGroupResourceType(e.target.value as Resource["type"])} className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <option value="link">Link</option>
+                                <option value="paper">Paper</option>
+                                <option value="report">Report</option>
+                                <option value="presentation">Presentation</option>
+                                <option value="video">Video</option>
+                              </select>
+                              <input type="text" value={newGroupResourceAuthor} onChange={e => setNewGroupResourceAuthor(e.target.value)} placeholder="Author *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            </div>
+                            <textarea value={newGroupResourceDesc} onChange={e => setNewGroupResourceDesc(e.target.value)} placeholder="Description *" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">Visibility:</span>
+                              {(["group-only", "community-wide", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} onClick={() => setNewGroupResourceVisibility(v)} className={`text-[10px] px-2.5 py-1 rounded-md border transition-colors ${newGroupResourceVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "group-only": "Group only", "community-wide": "Community-wide", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => { setShowAddGroupResource(false); setNewGroupResourceTitle(""); setNewGroupResourceAuthor(""); setNewGroupResourceDesc(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                              <button
+                                disabled={!newGroupResourceTitle.trim() || !newGroupResourceAuthor.trim() || !newGroupResourceDesc.trim()}
+                                onClick={() => {
+                                  if (!viewingGroup) return;
+                                  const newRes: GroupResource = {
+                                    id: `gr-${Date.now()}`,
+                                    title: newGroupResourceTitle.trim(),
+                                    type: newGroupResourceType,
+                                    author: newGroupResourceAuthor.trim(),
+                                    date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+                                    downloads: 0, likes: 0,
+                                    description: newGroupResourceDesc.trim(),
+                                    visibility: newGroupResourceVisibility,
+                                  };
+                                  setWorkingGroups(prev => prev.map(g => g.id === viewingGroup.id ? { ...g, groupResources: [newRes, ...g.groupResources] } : g));
+                                  setViewingGroup(prev => prev ? { ...prev, groupResources: [newRes, ...prev.groupResources] } : prev);
+                                  setShowAddGroupResource(false);
+                                  setNewGroupResourceTitle("");
+                                  setNewGroupResourceAuthor("");
+                                  setNewGroupResourceDesc("");
+                                }}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newGroupResourceTitle.trim() && newGroupResourceAuthor.trim() && newGroupResourceDesc.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              >
+                                Add Resource
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           {viewingGroup.groupResources
                             .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
