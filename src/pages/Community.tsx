@@ -3557,7 +3557,13 @@ const Community = () => {
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
                             <button
-                              onClick={() => setShowManageDetails(false)}
+                            onClick={() => {
+                              setEditFormSaving(true);
+                              setTimeout(() => {
+                                setEditFormSaving(false);
+                                setShowManageDetails(false);
+                              }, 600);
+                            }}
                               disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
                               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
