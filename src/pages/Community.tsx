@@ -969,30 +969,40 @@ const Community = () => {
   // Pre-populate edit form when manage details dialog opens
   const openManageDetails = () => {
     setEditFormName(community.name);
-    setEditFormSummary(community.description.split('.')[0] + '.');
+    setEditFormSummary(community.summary);
     setEditFormDescription(community.description);
-    setEditFormAccess("open");
-    setEditFormFrontline(false);
-    setEditFormThumbnail(null);
-    setEditFormLocationFilter("any");
-    setEditFormSelectedContinents([]);
-    setEditFormSelectedCountries([]);
-    setEditFormSourceFilter("all");
-    setEditFormSelectedSectors([]);
-    setEditFormOrgTypeFilter("any");
-    setEditFormSelectedOrgTypes([]);
-    setEditFormExpertiseFilter("any");
-    setEditFormSelectedExpertise([]);
-    setEditFormExternalFactorFilter("any");
-    setEditFormSelectedExternalFactors([]);
-    setEditFormSelectedContributions(["Research", "Publications"]);
-    setEditFormMembershipRule(community.governance.membership as "anyone" | "criteria" | "approval");
-    setEditFormPostReview(community.governance.postReview as "none" | "criteria" | "all");
-    setEditFormContentReview(community.governance.contentReview as "none" | "criteria" | "all");
+    setEditFormAccess(community.settings.access);
+    setEditFormFrontline(community.settings.frontline);
+    setEditFormThumbnail(community.settings.thumbnail);
+    setEditFormLocationFilter(community.settings.locationFilter);
+    setEditFormSelectedContinents([...community.settings.selectedContinents]);
+    setEditFormSelectedCountries([...community.settings.selectedCountries]);
+    setEditFormSourceFilter(community.settings.sourceFilter);
+    setEditFormSelectedSectors([...community.settings.selectedSectors]);
+    setEditFormExpandedSectors([]);
+    setEditFormOrgTypeFilter(community.settings.orgTypeFilter);
+    setEditFormSelectedOrgTypes([...community.settings.selectedOrgTypes]);
+    setEditFormExpertiseFilter(community.settings.expertiseFilter);
+    setEditFormSelectedExpertise([...community.settings.selectedExpertise]);
+    setEditFormExternalFactorFilter(community.settings.externalFactorFilter);
+    setEditFormSelectedExternalFactors([...community.settings.selectedExternalFactors]);
+    setEditFormSelectedContributions([...community.settings.selectedContributions]);
+    setEditFormMembershipRule(community.governance.membership);
+    setEditFormMembershipCriteria([...community.governance.membershipCriteria]);
+    setEditFormPostReview(community.governance.postReview);
+    setEditFormPostReviewCriteria([...community.governance.postReviewCriteria]);
+    setEditFormReviewRetentionMode(community.governance.postReviewRetentionDays === null ? "none" : "days");
+    setEditFormReviewRetentionDays(
+      community.governance.postReviewRetentionDays === null ? "" : String(community.governance.postReviewRetentionDays),
+    );
+    setEditFormContentReview(community.governance.contentReview);
+    setEditFormContentReviewCriteria([...community.governance.contentReviewCriteria]);
     setEditFormInviteExpiry(String(community.governance.inviteExpiry));
-    setEditFormCommunityRules(community.rules.map(r => `${r.title} ${r.detail}`).join('\n'));
+    setEditFormCommunityRules(formatCommunityRulesForTextarea(community.rules));
     setEditRulesExpanded(false);
     setEditMessagesExpanded(false);
+    setEditActiveMessageTemplate("welcome");
+    setEditMessageTemplates({ ...community.settings.messageTemplates });
     setShowManageDetails(true);
   };
 
@@ -1004,6 +1014,59 @@ const Community = () => {
     reader.onload = (ev) => setEditFormThumbnail(ev.target?.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+
+  const handleSaveManageDetails = () => {
+    const parsedRules = parseCommunityRules(editFormCommunityRules);
+    const parsedRetentionDays = Number.parseInt(editFormReviewRetentionDays, 10);
+
+    setEditFormSaving(true);
+
+    window.setTimeout(() => {
+      setCommunity((prev) => ({
+        ...prev,
+        name: editFormName.trim(),
+        summary: editFormSummary.trim(),
+        description: editFormDescription.trim() || editFormSummary.trim(),
+        governance: {
+          membership: editFormMembershipRule,
+          membershipCriteria: editFormMembershipRule === "criteria" ? [...editFormMembershipCriteria] : [],
+          postReview: editFormPostReview,
+          postReviewCriteria: editFormPostReview === "criteria" ? [...editFormPostReviewCriteria] : [],
+          postReviewRetentionDays:
+            editFormPostReview === "none"
+              ? null
+              : editFormReviewRetentionMode === "days" && Number.isFinite(parsedRetentionDays) && parsedRetentionDays >= 0
+                ? parsedRetentionDays
+                : null,
+          contentReview: editFormContentReview,
+          contentReviewCriteria: editFormContentReview === "criteria" ? [...editFormContentReviewCriteria] : [],
+          inviteExpiry: Number.parseInt(editFormInviteExpiry, 10),
+        },
+        rules: parsedRules.length > 0 ? parsedRules : prev.rules,
+        settings: {
+          ...prev.settings,
+          access: editFormAccess,
+          frontline: editFormFrontline,
+          thumbnail: editFormThumbnail,
+          locationFilter: editFormLocationFilter,
+          selectedContinents: [...editFormSelectedContinents],
+          selectedCountries: [...editFormSelectedCountries],
+          sourceFilter: editFormSourceFilter,
+          selectedSectors: [...editFormSelectedSectors],
+          orgTypeFilter: editFormOrgTypeFilter,
+          selectedOrgTypes: [...editFormSelectedOrgTypes],
+          expertiseFilter: editFormExpertiseFilter,
+          selectedExpertise: [...editFormSelectedExpertise],
+          externalFactorFilter: editFormExternalFactorFilter,
+          selectedExternalFactors: [...editFormSelectedExternalFactors],
+          selectedContributions: [...editFormSelectedContributions],
+          messageTemplates: { ...editMessageTemplates },
+        },
+      }));
+      setEditFormSaving(false);
+      setShowManageDetails(false);
+    }, 250);
   };
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
