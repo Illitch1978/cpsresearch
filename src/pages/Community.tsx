@@ -1311,6 +1311,7 @@ const Community = () => {
   const [workingGroups, setWorkingGroups] = useState<WorkingGroup[]>(mockWorkingGroups);
 
   return (
+    <div className="flex flex-col min-h-screen bg-cream">
       {/* Top Navigation Bar */}
       <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
