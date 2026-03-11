@@ -3567,7 +3567,7 @@ const Community = () => {
                               disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
                               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
-                              Save changes
+                              {editFormSaving ? "Saving…" : "Save changes"}
                             </button>
                           </div>
                         </div>
