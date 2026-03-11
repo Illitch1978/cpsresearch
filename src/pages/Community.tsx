@@ -949,24 +949,22 @@ const Community = () => {
   const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
   const [editFormSelectedExternalFactors, setEditFormSelectedExternalFactors] = useState<string[]>([]);
   const [editFormSelectedContributions, setEditFormSelectedContributions] = useState<string[]>(["Research", "Publications"]);
-  const [editFormMembershipRule, setEditFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("approval");
-  const [editFormPostReview, setEditFormPostReview] = useState<"none" | "criteria" | "all">("criteria");
-  const [editFormContentReview, setEditFormContentReview] = useState<"none" | "criteria" | "all">("all");
+  const [editFormMembershipRule, setEditFormMembershipRule] = useState<MembershipRule>("approval");
+  const [editFormMembershipCriteria, setEditFormMembershipCriteria] = useState<string[]>([]);
+  const [editFormPostReview, setEditFormPostReview] = useState<ReviewRule>("criteria");
+  const [editFormPostReviewCriteria, setEditFormPostReviewCriteria] = useState<string[]>([reviewCriteriaOption]);
+  const [editFormReviewRetentionMode, setEditFormReviewRetentionMode] = useState<"none" | "days">("days");
+  const [editFormReviewRetentionDays, setEditFormReviewRetentionDays] = useState("30");
+  const [editFormContentReview, setEditFormContentReview] = useState<ReviewRule>("all");
+  const [editFormContentReviewCriteria, setEditFormContentReviewCriteria] = useState<string[]>([]);
   const [editFormInviteExpiry, setEditFormInviteExpiry] = useState("90");
   const [editFormCommunityRules, setEditFormCommunityRules] = useState("");
   const [editRulesExpanded, setEditRulesExpanded] = useState(false);
   const [editMessagesExpanded, setEditMessagesExpanded] = useState(false);
   const [editActiveMessageTemplate, setEditActiveMessageTemplate] = useState("welcome");
-  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({
-    welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
-    decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
-    "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
-    "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
-    "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
-    invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
-    leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
-  });
+  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({ ...defaultCommunityMessageTemplates });
   const [editFormSaving, setEditFormSaving] = useState(false);
+  const [community, setCommunity] = useState<CommunityRecord>(() => cloneCommunityRecord(communityData["prof-services-research"]));
 
   // Pre-populate edit form when manage details dialog opens
   const openManageDetails = () => {
