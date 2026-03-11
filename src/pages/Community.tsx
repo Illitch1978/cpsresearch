@@ -155,6 +155,7 @@ interface Event {
   title: string;
   date: string;
   time: string;
+  endTime?: string;
   type: "webinar" | "meetup" | "conference" | "workshop";
   attendees: number;
   description: string;
