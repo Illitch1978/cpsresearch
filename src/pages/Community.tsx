@@ -3761,41 +3761,126 @@ const Community = () => {
                                 <div>
                                   <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for approval of membership applications <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["anyone", "Anyone can join"], ["criteria", "Anyone meeting criteria"], ["approval", "Approval required"]] as const).map(([value, label]) => (
+                                    {([['anyone', 'Anyone can join'], ['criteria', 'Anyone meeting criteria'], ['approval', 'Approval required']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormMembershipRule === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormMembershipRule === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormMembershipRule(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormMembershipRule === "criteria" && (
+                                    <div className="ml-6 mt-3 grid gap-2 border-l-2 border-border pl-3 sm:grid-cols-2">
+                                      {membershipCriteriaOptions.map((criterion) => (
+                                        <div key={criterion} className="flex items-center space-x-2">
+                                          <Checkbox
+                                            id={`membership-criterion-${criterion}`}
+                                            checked={editFormMembershipCriteria.includes(criterion)}
+                                            onCheckedChange={() =>
+                                              setEditFormMembershipCriteria((prev) =>
+                                                prev.includes(criterion) ? prev.filter((item) => item !== criterion) : [...prev, criterion],
+                                              )
+                                            }
+                                          />
+                                          <Label htmlFor={`membership-criterion-${criterion}`} className="text-[11px] text-card-foreground cursor-pointer">
+                                            {criterion}
+                                          </Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
-                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts added by members <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["none", "No review required"], ["criteria", "Posts that meet criteria require review"], ["all", "Review required for all posts"]] as const).map(([value, label]) => (
+                                    {([['none', 'No review required'], ['criteria', 'Posts that meet criteria require review'], ['all', 'Review required for all posts']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormPostReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormPostReview === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormPostReview(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormPostReview === "criteria" && (
+                                    <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id="post-review-criterion"
+                                          checked={editFormPostReviewCriteria.includes(reviewCriteriaOption)}
+                                          onCheckedChange={() =>
+                                            setEditFormPostReviewCriteria((prev) =>
+                                              prev.includes(reviewCriteriaOption) ? [] : [reviewCriteriaOption],
+                                            )
+                                          }
+                                        />
+                                        <Label htmlFor="post-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">
+                                          {reviewCriteriaOption}
+                                        </Label>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
-                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Retention period for notes requiring a review <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["none", "No review required"], ["criteria", "Content items that meet criteria require review"], ["all", "Review required for all content items"]] as const).map(([value, label]) => (
+                                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                                      <span onClick={() => setEditFormReviewRetentionMode("none")} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormReviewRetentionMode === 'none' ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
+                                        {editFormReviewRetentionMode === 'none' && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                      </span>
+                                      <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormReviewRetentionMode("none")}>No auto-deletion</span>
+                                    </label>
+                                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                                      <span onClick={() => setEditFormReviewRetentionMode("days")} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormReviewRetentionMode === 'days' ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
+                                        {editFormReviewRetentionMode === 'days' && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                      </span>
+                                      <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormReviewRetentionMode("days")}>Auto-delete after X days</span>
+                                    </label>
+                                  </div>
+                                  {editFormReviewRetentionMode === "days" && (
+                                    <div className="ml-6 mt-3 flex items-center gap-2 border-l-2 border-border pl-3">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={editFormReviewRetentionDays}
+                                        onChange={(e) => setEditFormReviewRetentionDays(e.target.value)}
+                                        className="w-24 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                                      />
+                                      <span className="text-xs text-muted-foreground">days</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items added by members <span className="text-destructive">*</span></label>
+                                  <div className="space-y-2">
+                                    {([['none', 'No review required'], ['criteria', 'Content items that meet criteria require review'], ['all', 'Review required for all content items']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormContentReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormContentReview === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormContentReview(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormContentReview === "criteria" && (
+                                    <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id="content-review-criterion"
+                                          checked={editFormContentReviewCriteria.includes(reviewCriteriaOption)}
+                                          onCheckedChange={() =>
+                                            setEditFormContentReviewCriteria((prev) =>
+                                              prev.includes(reviewCriteriaOption) ? [] : [reviewCriteriaOption],
+                                            )
+                                          }
+                                        />
+                                        <Label htmlFor="content-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">
+                                          {reviewCriteriaOption}
+                                        </Label>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
                                   <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
