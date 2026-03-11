@@ -3758,12 +3758,21 @@ const Community = () => {
                               onChange={e => setNewEventDate(e.target.value)}
                               className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
-                            <input
-                              type="time"
-                              value={newEventTime}
-                              onChange={e => setNewEventTime(e.target.value)}
-                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="time"
+                                value={newEventTime}
+                                onChange={e => setNewEventTime(e.target.value)}
+                                className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              />
+                              <span className="text-xs text-muted-foreground">to</span>
+                              <input
+                                type="time"
+                                value={newEventEndTime}
+                                onChange={e => setNewEventEndTime(e.target.value)}
+                                className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              />
+                            </div>
                             <input
                               type="text"
                               value={newEventSpeaker}
@@ -3781,6 +3790,20 @@ const Community = () => {
                               <option value="biweekly">Fortnightly</option>
                               <option value="monthly">Monthly</option>
                             </select>
+                            <input
+                              type="text"
+                              value={newEventCity}
+                              onChange={e => setNewEventCity(e.target.value)}
+                              placeholder="City (optional)"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <input
+                              type="text"
+                              value={newEventCountry}
+                              onChange={e => setNewEventCountry(e.target.value)}
+                              placeholder="Country (optional)"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
                           </div>
                           <textarea
                             value={newEventDescription}
@@ -3796,10 +3819,13 @@ const Community = () => {
                                 setNewEventTitle("");
                                 setNewEventDate("");
                                 setNewEventTime("");
+                                setNewEventEndTime("");
                                 setNewEventType("webinar");
                                 setNewEventDescription("");
                                 setNewEventSpeaker("");
                                 setNewEventRecurring("");
+                                setNewEventCity("");
+                                setNewEventCountry("");
                               }}
                               className="text-xs text-muted-foreground px-3 py-1.5"
                             >
@@ -3813,21 +3839,27 @@ const Community = () => {
                                   title: newEventTitle.trim(),
                                   date: new Date(newEventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
                                   time: newEventTime,
+                                  endTime: newEventEndTime || undefined,
                                   type: newEventType,
                                   attendees: 0,
                                   description: newEventDescription.trim(),
                                   speaker: newEventSpeaker.trim() || undefined,
                                   recurring: newEventRecurring || undefined,
+                                  city: newEventCity.trim() || undefined,
+                                  country: newEventCountry.trim() || undefined,
                                 };
                                 setCommunityEvents(prev => [newEvent, ...prev]);
                                 setShowAddEvent(false);
                                 setNewEventTitle("");
                                 setNewEventDate("");
                                 setNewEventTime("");
+                                setNewEventEndTime("");
                                 setNewEventType("webinar");
                                 setNewEventDescription("");
                                 setNewEventSpeaker("");
                                 setNewEventRecurring("");
+                                setNewEventCity("");
+                                setNewEventCountry("");
                               }}
                               className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 newEventTitle.trim() && newEventDate && newEventTime && newEventDescription.trim()
