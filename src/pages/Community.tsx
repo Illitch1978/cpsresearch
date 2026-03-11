@@ -520,6 +520,8 @@ const mockReplies: Record<string, Reply[]> = {
   ],
 };
 
+const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap((discussion) => discussion.tags))).sort();
+
 type MembershipRule = "anyone" | "criteria" | "approval";
 type ReviewRule = "none" | "criteria" | "all";
 
