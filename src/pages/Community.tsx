@@ -2953,6 +2953,49 @@ const Community = () => {
                             {isAdmin && <button onClick={() => { setShowAddGroupDiscussion(!showAddGroupDiscussion); setShowAddGroupResource(false); }} className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
                           </div>
                         </div>
+                        {/* Add Discussion Form */}
+                        {showAddGroupDiscussion && viewingGroup && (
+                          <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2 mb-2">
+                            <h5 className="text-xs font-semibold text-card-foreground">Add discussion to {viewingGroup.name}</h5>
+                            <input type="text" value={newGroupDiscussionTitle} onChange={e => setNewGroupDiscussionTitle(e.target.value)} placeholder="Discussion title *" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <textarea value={newGroupDiscussionContent} onChange={e => setNewGroupDiscussionContent(e.target.value)} placeholder="Discussion content *" rows={3} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">Visibility:</span>
+                              {(["group-only", "community-wide", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} onClick={() => setNewGroupDiscussionVisibility(v)} className={`text-[10px] px-2.5 py-1 rounded-md border transition-colors ${newGroupDiscussionVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "group-only": "Group only", "community-wide": "Community-wide", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => { setShowAddGroupDiscussion(false); setNewGroupDiscussionTitle(""); setNewGroupDiscussionContent(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                              <button
+                                disabled={!newGroupDiscussionTitle.trim() || !newGroupDiscussionContent.trim()}
+                                onClick={() => {
+                                  if (!viewingGroup) return;
+                                  const newDisc: GroupDiscussion = {
+                                    id: `gd-${Date.now()}`,
+                                    title: newGroupDiscussionTitle.trim(),
+                                    author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
+                                    content: newGroupDiscussionContent.trim(),
+                                    date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                                    replies: 0, likes: 0,
+                                    tags: [],
+                                    visibility: newGroupDiscussionVisibility,
+                                  };
+                                  setWorkingGroups(prev => prev.map(g => g.id === viewingGroup.id ? { ...g, groupDiscussions: [newDisc, ...g.groupDiscussions] } : g));
+                                  setViewingGroup(prev => prev ? { ...prev, groupDiscussions: [newDisc, ...prev.groupDiscussions] } : prev);
+                                  setShowAddGroupDiscussion(false);
+                                  setNewGroupDiscussionTitle("");
+                                  setNewGroupDiscussionContent("");
+                                }}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newGroupDiscussionTitle.trim() && newGroupDiscussionContent.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              >
+                                Add Discussion
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           {viewingGroup.groupDiscussions
                             .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
