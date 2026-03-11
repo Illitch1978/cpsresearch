@@ -869,10 +869,13 @@ const Community = () => {
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
+  const [newEventEndTime, setNewEventEndTime] = useState("");
   const [newEventType, setNewEventType] = useState<Event["type"]>("webinar");
   const [newEventDescription, setNewEventDescription] = useState("");
   const [newEventSpeaker, setNewEventSpeaker] = useState("");
   const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
+  const [newEventCity, setNewEventCity] = useState("");
+  const [newEventCountry, setNewEventCountry] = useState("");
   const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
   const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
   const [eventSearch, setEventSearch] = useState("");
