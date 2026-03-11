@@ -4744,29 +4744,69 @@ const Community = () => {
                         <h3 className="text-lg font-serif font-semibold text-card-foreground">Community Rules</h3>
                       </div>
 
-                      {/* Governance summary */}
-                      <div className="grid grid-cols-2 gap-3 mb-5">
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Membership</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.membership === "anyone" ? "Open to anyone" : community.governance.membership === "criteria" ? "Criteria-based" : "Requires approval"}
+                      <div className="grid grid-cols-1 gap-3 mb-5 sm:grid-cols-2">
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Membership</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.membership === "anyone" ? "Open to anyone" : community.governance.membership === "criteria" ? "Criteria-based" : "Requires approval"}
+                            </div>
                           </div>
+                          {community.governance.membership === "criteria" && community.governance.membershipCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.membershipCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Post review</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.postReview === "none" ? "No review" : community.governance.postReview === "criteria" ? "Criteria-based" : "All posts reviewed"}
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Post review</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.postReview === "none" ? "No review" : community.governance.postReview === "criteria" ? "Criteria-based" : "All posts reviewed"}
+                            </div>
                           </div>
+                          {community.governance.postReview === "criteria" && community.governance.postReviewCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.postReviewCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {community.governance.postReview !== "none" && (
+                            <div className="text-[11px] text-muted-foreground">
+                              Retention: {community.governance.postReviewRetentionDays === null ? "No auto-deletion" : `Auto-delete after ${community.governance.postReviewRetentionDays} days`}
+                            </div>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Content review</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.contentReview === "none" ? "No review" : community.governance.contentReview === "criteria" ? "Criteria-based" : "All content reviewed"}
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Content review</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.contentReview === "none" ? "No review" : community.governance.contentReview === "criteria" ? "Criteria-based" : "All content reviewed"}
+                            </div>
                           </div>
+                          {community.governance.contentReview === "criteria" && community.governance.contentReviewCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.contentReviewCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
+                        <div className="bg-muted/40 rounded-lg p-3">
                           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Invite expiry</div>
-                          <div className="text-xs font-medium text-slate-700">{community.governance.inviteExpiry} days</div>
+                          <div className="text-xs font-medium text-card-foreground">{community.governance.inviteExpiry} days</div>
                         </div>
                       </div>
 
