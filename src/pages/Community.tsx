@@ -520,12 +520,133 @@ const mockReplies: Record<string, Reply[]> = {
   ],
 };
 
-// Collect all unique discussion tags
-const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap(d => d.tags))).sort();
+const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap((discussion) => discussion.tags))).sort();
 
-const communityData = {
+type MembershipRule = "anyone" | "criteria" | "approval";
+type ReviewRule = "none" | "criteria" | "all";
+
+interface CommunityGovernance {
+  membership: MembershipRule;
+  membershipCriteria: string[];
+  postReview: ReviewRule;
+  postReviewCriteria: string[];
+  postReviewRetentionDays: number | null;
+  contentReview: ReviewRule;
+  contentReviewCriteria: string[];
+  inviteExpiry: number;
+}
+
+interface CommunityRuleItem {
+  title: string;
+  detail: string;
+}
+
+interface CommunitySettings {
+  access: "open" | "private";
+  frontline: boolean;
+  thumbnail: string | null;
+  locationFilter: string;
+  selectedContinents: string[];
+  selectedCountries: string[];
+  sourceFilter: string;
+  selectedSectors: string[];
+  orgTypeFilter: string;
+  selectedOrgTypes: string[];
+  expertiseFilter: string;
+  selectedExpertise: string[];
+  externalFactorFilter: string;
+  selectedExternalFactors: string[];
+  selectedContributions: string[];
+  messageTemplates: Record<string, string>;
+}
+
+interface CommunityRecord {
+  name: string;
+  summary: string;
+  description: string;
+  members: number;
+  researchPanelMembers: number;
+  discussions: number;
+  resources: number;
+  events: number;
+  tags: string[];
+  location: string;
+  founded: string;
+  website: string;
+  governance: CommunityGovernance;
+  rules: CommunityRuleItem[];
+  settings: CommunitySettings;
+}
+
+const membershipCriteriaOptions = [
+  "Profile photo added",
+  "Earned 100 learning points",
+  "Evaluated five content items",
+  "Curated five playlists",
+] as const;
+
+const reviewCriteriaOption = "First logged in to the platform in past 30 days";
+
+const defaultCommunityMessageTemplates: Record<string, string> = {
+  welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+  decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+  "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+  "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+  "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+  invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+  leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+};
+
+const formatCommunityRulesForTextarea = (rules: CommunityRuleItem[]) =>
+  rules.map((rule) => `${rule.title}${rule.detail ? ` ${rule.detail}` : ""}`).join("\n");
+
+const parseCommunityRules = (value: string): CommunityRuleItem[] =>
+  value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/[.:!?]/);
+
+      if (!match || match.index === undefined) {
+        return { title: line, detail: "" };
+      }
+
+      const splitIndex = match.index;
+
+      return {
+        title: line.slice(0, splitIndex + 1).trim(),
+        detail: line.slice(splitIndex + 1).trim(),
+      };
+    });
+
+const cloneCommunityRecord = (record: CommunityRecord): CommunityRecord => ({
+  ...record,
+  tags: [...record.tags],
+  governance: {
+    ...record.governance,
+    membershipCriteria: [...record.governance.membershipCriteria],
+    postReviewCriteria: [...record.governance.postReviewCriteria],
+    contentReviewCriteria: [...record.governance.contentReviewCriteria],
+  },
+  rules: record.rules.map((rule) => ({ ...rule })),
+  settings: {
+    ...record.settings,
+    selectedContinents: [...record.settings.selectedContinents],
+    selectedCountries: [...record.settings.selectedCountries],
+    selectedSectors: [...record.settings.selectedSectors],
+    selectedOrgTypes: [...record.settings.selectedOrgTypes],
+    selectedExpertise: [...record.settings.selectedExpertise],
+    selectedExternalFactors: [...record.settings.selectedExternalFactors],
+    selectedContributions: [...record.settings.selectedContributions],
+    messageTemplates: { ...record.settings.messageTemplates },
+  },
+});
+
+const communityData: Record<string, CommunityRecord> = {
   "prof-services-research": {
     name: "Professional Services Research",
+    summary: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector.",
     description: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector. We bring together academics, practitioners, and policymakers to champion transparency, methodological excellence, and impactful collaboration.",
     members: 247,
     researchPanelMembers: 42,
@@ -538,10 +659,14 @@ const communityData = {
     website: "cpsr.uk",
     governance: {
       membership: "approval",
+      membershipCriteria: [],
       postReview: "criteria",
+      postReviewCriteria: [reviewCriteriaOption],
+      postReviewRetentionDays: 30,
       contentReview: "all",
+      contentReviewCriteria: [],
       inviteExpiry: 90,
-    } as { membership: string; postReview: string; contentReview: string; inviteExpiry: number },
+    },
     rules: [
       { title: "Original research only.", detail: "All shared papers and reports must be original work or have proper permissions from the rights holder." },
       { title: "No promotional content.", detail: "Posts advertising products, services, or events without prior manager approval will be removed." },
@@ -549,6 +674,24 @@ const communityData = {
       { title: "Peer review encouraged.", detail: "Members are encouraged to offer constructive feedback on draft papers shared in the Resources tab." },
       { title: "Chatham House Rule applies.", detail: "Participants may use information received, but the identity of the speaker may not be revealed outside the community." },
     ],
+    settings: {
+      access: "open",
+      frontline: false,
+      thumbnail: null,
+      locationFilter: "any",
+      selectedContinents: [],
+      selectedCountries: [],
+      sourceFilter: "all",
+      selectedSectors: [],
+      orgTypeFilter: "any",
+      selectedOrgTypes: [],
+      expertiseFilter: "any",
+      selectedExpertise: [],
+      externalFactorFilter: "any",
+      selectedExternalFactors: [],
+      selectedContributions: ["Research", "Publications"],
+      messageTemplates: { ...defaultCommunityMessageTemplates },
+    },
   },
 };
 
@@ -808,52 +951,60 @@ const Community = () => {
   const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
   const [editFormSelectedExternalFactors, setEditFormSelectedExternalFactors] = useState<string[]>([]);
   const [editFormSelectedContributions, setEditFormSelectedContributions] = useState<string[]>(["Research", "Publications"]);
-  const [editFormMembershipRule, setEditFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("approval");
-  const [editFormPostReview, setEditFormPostReview] = useState<"none" | "criteria" | "all">("criteria");
-  const [editFormContentReview, setEditFormContentReview] = useState<"none" | "criteria" | "all">("all");
+  const [editFormMembershipRule, setEditFormMembershipRule] = useState<MembershipRule>("approval");
+  const [editFormMembershipCriteria, setEditFormMembershipCriteria] = useState<string[]>([]);
+  const [editFormPostReview, setEditFormPostReview] = useState<ReviewRule>("criteria");
+  const [editFormPostReviewCriteria, setEditFormPostReviewCriteria] = useState<string[]>([reviewCriteriaOption]);
+  const [editFormReviewRetentionMode, setEditFormReviewRetentionMode] = useState<"none" | "days">("days");
+  const [editFormReviewRetentionDays, setEditFormReviewRetentionDays] = useState("30");
+  const [editFormContentReview, setEditFormContentReview] = useState<ReviewRule>("all");
+  const [editFormContentReviewCriteria, setEditFormContentReviewCriteria] = useState<string[]>([]);
   const [editFormInviteExpiry, setEditFormInviteExpiry] = useState("90");
   const [editFormCommunityRules, setEditFormCommunityRules] = useState("");
   const [editRulesExpanded, setEditRulesExpanded] = useState(false);
   const [editMessagesExpanded, setEditMessagesExpanded] = useState(false);
   const [editActiveMessageTemplate, setEditActiveMessageTemplate] = useState("welcome");
-  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({
-    welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
-    decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
-    "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
-    "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
-    "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
-    invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
-    leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
-  });
+  const [editMessageTemplates, setEditMessageTemplates] = useState<Record<string, string>>({ ...defaultCommunityMessageTemplates });
   const [editFormSaving, setEditFormSaving] = useState(false);
+  const [community, setCommunity] = useState<CommunityRecord>(() => cloneCommunityRecord(communityData["prof-services-research"]));
 
   // Pre-populate edit form when manage details dialog opens
   const openManageDetails = () => {
     setEditFormName(community.name);
-    setEditFormSummary(community.description.split('.')[0] + '.');
+    setEditFormSummary(community.summary);
     setEditFormDescription(community.description);
-    setEditFormAccess("open");
-    setEditFormFrontline(false);
-    setEditFormThumbnail(null);
-    setEditFormLocationFilter("any");
-    setEditFormSelectedContinents([]);
-    setEditFormSelectedCountries([]);
-    setEditFormSourceFilter("all");
-    setEditFormSelectedSectors([]);
-    setEditFormOrgTypeFilter("any");
-    setEditFormSelectedOrgTypes([]);
-    setEditFormExpertiseFilter("any");
-    setEditFormSelectedExpertise([]);
-    setEditFormExternalFactorFilter("any");
-    setEditFormSelectedExternalFactors([]);
-    setEditFormSelectedContributions(["Research", "Publications"]);
-    setEditFormMembershipRule(community.governance.membership as "anyone" | "criteria" | "approval");
-    setEditFormPostReview(community.governance.postReview as "none" | "criteria" | "all");
-    setEditFormContentReview(community.governance.contentReview as "none" | "criteria" | "all");
+    setEditFormAccess(community.settings.access);
+    setEditFormFrontline(community.settings.frontline);
+    setEditFormThumbnail(community.settings.thumbnail);
+    setEditFormLocationFilter(community.settings.locationFilter);
+    setEditFormSelectedContinents([...community.settings.selectedContinents]);
+    setEditFormSelectedCountries([...community.settings.selectedCountries]);
+    setEditFormSourceFilter(community.settings.sourceFilter);
+    setEditFormSelectedSectors([...community.settings.selectedSectors]);
+    setEditFormExpandedSectors([]);
+    setEditFormOrgTypeFilter(community.settings.orgTypeFilter);
+    setEditFormSelectedOrgTypes([...community.settings.selectedOrgTypes]);
+    setEditFormExpertiseFilter(community.settings.expertiseFilter);
+    setEditFormSelectedExpertise([...community.settings.selectedExpertise]);
+    setEditFormExternalFactorFilter(community.settings.externalFactorFilter);
+    setEditFormSelectedExternalFactors([...community.settings.selectedExternalFactors]);
+    setEditFormSelectedContributions([...community.settings.selectedContributions]);
+    setEditFormMembershipRule(community.governance.membership);
+    setEditFormMembershipCriteria([...community.governance.membershipCriteria]);
+    setEditFormPostReview(community.governance.postReview);
+    setEditFormPostReviewCriteria([...community.governance.postReviewCriteria]);
+    setEditFormReviewRetentionMode(community.governance.postReviewRetentionDays === null ? "none" : "days");
+    setEditFormReviewRetentionDays(
+      community.governance.postReviewRetentionDays === null ? "" : String(community.governance.postReviewRetentionDays),
+    );
+    setEditFormContentReview(community.governance.contentReview);
+    setEditFormContentReviewCriteria([...community.governance.contentReviewCriteria]);
     setEditFormInviteExpiry(String(community.governance.inviteExpiry));
-    setEditFormCommunityRules(community.rules.map(r => `${r.title} ${r.detail}`).join('\n'));
+    setEditFormCommunityRules(formatCommunityRulesForTextarea(community.rules));
     setEditRulesExpanded(false);
     setEditMessagesExpanded(false);
+    setEditActiveMessageTemplate("welcome");
+    setEditMessageTemplates({ ...community.settings.messageTemplates });
     setShowManageDetails(true);
   };
 
@@ -865,6 +1016,59 @@ const Community = () => {
     reader.onload = (ev) => setEditFormThumbnail(ev.target?.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+
+  const handleSaveManageDetails = () => {
+    const parsedRules = parseCommunityRules(editFormCommunityRules);
+    const parsedRetentionDays = Number.parseInt(editFormReviewRetentionDays, 10);
+
+    setEditFormSaving(true);
+
+    window.setTimeout(() => {
+      setCommunity((prev) => ({
+        ...prev,
+        name: editFormName.trim(),
+        summary: editFormSummary.trim(),
+        description: editFormDescription.trim() || editFormSummary.trim(),
+        governance: {
+          membership: editFormMembershipRule,
+          membershipCriteria: editFormMembershipRule === "criteria" ? [...editFormMembershipCriteria] : [],
+          postReview: editFormPostReview,
+          postReviewCriteria: editFormPostReview === "criteria" ? [...editFormPostReviewCriteria] : [],
+          postReviewRetentionDays:
+            editFormPostReview === "none"
+              ? null
+              : editFormReviewRetentionMode === "days" && Number.isFinite(parsedRetentionDays) && parsedRetentionDays >= 0
+                ? parsedRetentionDays
+                : null,
+          contentReview: editFormContentReview,
+          contentReviewCriteria: editFormContentReview === "criteria" ? [...editFormContentReviewCriteria] : [],
+          inviteExpiry: Number.parseInt(editFormInviteExpiry, 10),
+        },
+        rules: parsedRules.length > 0 ? parsedRules : prev.rules,
+        settings: {
+          ...prev.settings,
+          access: editFormAccess,
+          frontline: editFormFrontline,
+          thumbnail: editFormThumbnail,
+          locationFilter: editFormLocationFilter,
+          selectedContinents: [...editFormSelectedContinents],
+          selectedCountries: [...editFormSelectedCountries],
+          sourceFilter: editFormSourceFilter,
+          selectedSectors: [...editFormSelectedSectors],
+          orgTypeFilter: editFormOrgTypeFilter,
+          selectedOrgTypes: [...editFormSelectedOrgTypes],
+          expertiseFilter: editFormExpertiseFilter,
+          selectedExpertise: [...editFormSelectedExpertise],
+          externalFactorFilter: editFormExternalFactorFilter,
+          selectedExternalFactors: [...editFormSelectedExternalFactors],
+          selectedContributions: [...editFormSelectedContributions],
+          messageTemplates: { ...editMessageTemplates },
+        },
+      }));
+      setEditFormSaving(false);
+      setShowManageDetails(false);
+    }, 250);
   };
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
@@ -1259,7 +1463,7 @@ const Community = () => {
     return [...pinned, ...unpinned];
   }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
 
-  const community = communityData["prof-services-research"];
+  
 
   const toggleBookmark = (discussionId: string) => {
     setBookmarkedDiscussions(prev =>
@@ -3559,41 +3763,126 @@ const Community = () => {
                                 <div>
                                   <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for approval of membership applications <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["anyone", "Anyone can join"], ["criteria", "Anyone meeting criteria"], ["approval", "Approval required"]] as const).map(([value, label]) => (
+                                    {([['anyone', 'Anyone can join'], ['criteria', 'Anyone meeting criteria'], ['approval', 'Approval required']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormMembershipRule === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormMembershipRule(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormMembershipRule === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormMembershipRule === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormMembershipRule(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormMembershipRule === "criteria" && (
+                                    <div className="ml-6 mt-3 grid gap-2 border-l-2 border-border pl-3 sm:grid-cols-2">
+                                      {membershipCriteriaOptions.map((criterion) => (
+                                        <div key={criterion} className="flex items-center space-x-2">
+                                          <Checkbox
+                                            id={`membership-criterion-${criterion}`}
+                                            checked={editFormMembershipCriteria.includes(criterion)}
+                                            onCheckedChange={() =>
+                                              setEditFormMembershipCriteria((prev) =>
+                                                prev.includes(criterion) ? prev.filter((item) => item !== criterion) : [...prev, criterion],
+                                              )
+                                            }
+                                          />
+                                          <Label htmlFor={`membership-criterion-${criterion}`} className="text-[11px] text-card-foreground cursor-pointer">
+                                            {criterion}
+                                          </Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
-                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts added by members <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["none", "No review required"], ["criteria", "Posts that meet criteria require review"], ["all", "Review required for all posts"]] as const).map(([value, label]) => (
+                                    {([['none', 'No review required'], ['criteria', 'Posts that meet criteria require review'], ['all', 'Review required for all posts']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormPostReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormPostReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormPostReview === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormPostReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormPostReview(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormPostReview === "criteria" && (
+                                    <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id="post-review-criterion"
+                                          checked={editFormPostReviewCriteria.includes(reviewCriteriaOption)}
+                                          onCheckedChange={() =>
+                                            setEditFormPostReviewCriteria((prev) =>
+                                              prev.includes(reviewCriteriaOption) ? [] : [reviewCriteriaOption],
+                                            )
+                                          }
+                                        />
+                                        <Label htmlFor="post-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">
+                                          {reviewCriteriaOption}
+                                        </Label>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
-                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Retention period for notes requiring a review <span className="text-destructive">*</span></label>
                                   <div className="space-y-2">
-                                    {([["none", "No review required"], ["criteria", "Content items that meet criteria require review"], ["all", "Review required for all content items"]] as const).map(([value, label]) => (
+                                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                                      <span onClick={() => setEditFormReviewRetentionMode("none")} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormReviewRetentionMode === 'none' ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
+                                        {editFormReviewRetentionMode === 'none' && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                      </span>
+                                      <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormReviewRetentionMode("none")}>No auto-deletion</span>
+                                    </label>
+                                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                                      <span onClick={() => setEditFormReviewRetentionMode("days")} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormReviewRetentionMode === 'days' ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
+                                        {editFormReviewRetentionMode === 'days' && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                                      </span>
+                                      <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormReviewRetentionMode("days")}>Auto-delete after X days</span>
+                                    </label>
+                                  </div>
+                                  {editFormReviewRetentionMode === "days" && (
+                                    <div className="ml-6 mt-3 flex items-center gap-2 border-l-2 border-border pl-3">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={editFormReviewRetentionDays}
+                                        onChange={(e) => setEditFormReviewRetentionDays(e.target.value)}
+                                        className="w-24 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+                                      />
+                                      <span className="text-xs text-muted-foreground">days</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items added by members <span className="text-destructive">*</span></label>
+                                  <div className="space-y-2">
+                                    {([['none', 'No review required'], ['criteria', 'Content items that meet criteria require review'], ['all', 'Review required for all content items']] as const).map(([value, label]) => (
                                       <label key={value} className="flex items-center gap-2.5 cursor-pointer group">
-                                        <span onClick={() => setEditFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormContentReview === value ? "border-primary bg-primary" : "border-muted-foreground/30 group-hover:border-muted-foreground/50"}`}>
+                                        <span onClick={() => setEditFormContentReview(value)} className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${editFormContentReview === value ? 'border-primary bg-primary' : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'}`}>
                                           {editFormContentReview === value && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                                         </span>
                                         <span className="text-xs text-card-foreground font-medium" onClick={() => setEditFormContentReview(value)}>{label}</span>
                                       </label>
                                     ))}
                                   </div>
+                                  {editFormContentReview === "criteria" && (
+                                    <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id="content-review-criterion"
+                                          checked={editFormContentReviewCriteria.includes(reviewCriteriaOption)}
+                                          onCheckedChange={() =>
+                                            setEditFormContentReviewCriteria((prev) =>
+                                              prev.includes(reviewCriteriaOption) ? [] : [reviewCriteriaOption],
+                                            )
+                                          }
+                                        />
+                                        <Label htmlFor="content-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">
+                                          {reviewCriteriaOption}
+                                        </Label>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div>
                                   <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
@@ -3673,13 +3962,7 @@ const Community = () => {
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
                             <button
-                            onClick={() => {
-                              setEditFormSaving(true);
-                              setTimeout(() => {
-                                setEditFormSaving(false);
-                                setShowManageDetails(false);
-                              }, 600);
-                            }}
+                              onClick={handleSaveManageDetails}
                               disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
                               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
@@ -4463,29 +4746,69 @@ const Community = () => {
                         <h3 className="text-lg font-serif font-semibold text-card-foreground">Community Rules</h3>
                       </div>
 
-                      {/* Governance summary */}
-                      <div className="grid grid-cols-2 gap-3 mb-5">
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Membership</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.membership === "anyone" ? "Open to anyone" : community.governance.membership === "criteria" ? "Criteria-based" : "Requires approval"}
+                      <div className="grid grid-cols-1 gap-3 mb-5 sm:grid-cols-2">
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Membership</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.membership === "anyone" ? "Open to anyone" : community.governance.membership === "criteria" ? "Criteria-based" : "Requires approval"}
+                            </div>
                           </div>
+                          {community.governance.membership === "criteria" && community.governance.membershipCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.membershipCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Post review</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.postReview === "none" ? "No review" : community.governance.postReview === "criteria" ? "Criteria-based" : "All posts reviewed"}
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Post review</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.postReview === "none" ? "No review" : community.governance.postReview === "criteria" ? "Criteria-based" : "All posts reviewed"}
+                            </div>
                           </div>
+                          {community.governance.postReview === "criteria" && community.governance.postReviewCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.postReviewCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          {community.governance.postReview !== "none" && (
+                            <div className="text-[11px] text-muted-foreground">
+                              Retention: {community.governance.postReviewRetentionDays === null ? "No auto-deletion" : `Auto-delete after ${community.governance.postReviewRetentionDays} days`}
+                            </div>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
-                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Content review</div>
-                          <div className="text-xs font-medium text-slate-700">
-                            {community.governance.contentReview === "none" ? "No review" : community.governance.contentReview === "criteria" ? "Criteria-based" : "All content reviewed"}
+                        <div className="bg-muted/40 rounded-lg p-3 space-y-2">
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Content review</div>
+                            <div className="text-xs font-medium text-card-foreground">
+                              {community.governance.contentReview === "none" ? "No review" : community.governance.contentReview === "criteria" ? "Criteria-based" : "All content reviewed"}
+                            </div>
                           </div>
+                          {community.governance.contentReview === "criteria" && community.governance.contentReviewCriteria.length > 0 && (
+                            <ul className="space-y-1 text-[11px] text-muted-foreground">
+                              {community.governance.contentReviewCriteria.map((criterion) => (
+                                <li key={criterion} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary/50" />
+                                  <span>{criterion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                        <div className="bg-slate-50 rounded-lg p-3">
+                        <div className="bg-muted/40 rounded-lg p-3">
                           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Invite expiry</div>
-                          <div className="text-xs font-medium text-slate-700">{community.governance.inviteExpiry} days</div>
+                          <div className="text-xs font-medium text-card-foreground">{community.governance.inviteExpiry} days</div>
                         </div>
                       </div>
 
