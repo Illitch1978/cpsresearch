@@ -1515,7 +1515,7 @@ const Community = () => {
                       className="w-full text-left bg-white border border-border rounded-lg p-4 hover:border-primary/30 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-center gap-2 mb-1"><EventTypeBadge type={e.type} /><h4 className="text-sm font-semibold text-card-foreground">{e.title}</h4></div>
-                      <span className="text-[11px] text-muted-foreground">{e.date} · {e.time}{e.speaker && ` · ${e.speaker}`}</span>
+                      <span className="text-[11px] text-muted-foreground">{e.date} · {e.time}{e.endTime && ` – ${e.endTime}`}{e.speaker && ` · ${e.speaker}`}</span>
                     </button>
                   ))}
                 </div>
