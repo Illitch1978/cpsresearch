@@ -520,12 +520,131 @@ const mockReplies: Record<string, Reply[]> = {
   ],
 };
 
-// Collect all unique discussion tags
-const allDiscussionTags = Array.from(new Set(mockDiscussions.flatMap(d => d.tags))).sort();
+type MembershipRule = "anyone" | "criteria" | "approval";
+type ReviewRule = "none" | "criteria" | "all";
 
-const communityData = {
+interface CommunityGovernance {
+  membership: MembershipRule;
+  membershipCriteria: string[];
+  postReview: ReviewRule;
+  postReviewCriteria: string[];
+  postReviewRetentionDays: number | null;
+  contentReview: ReviewRule;
+  contentReviewCriteria: string[];
+  inviteExpiry: number;
+}
+
+interface CommunityRuleItem {
+  title: string;
+  detail: string;
+}
+
+interface CommunitySettings {
+  access: "open" | "private";
+  frontline: boolean;
+  thumbnail: string | null;
+  locationFilter: string;
+  selectedContinents: string[];
+  selectedCountries: string[];
+  sourceFilter: string;
+  selectedSectors: string[];
+  orgTypeFilter: string;
+  selectedOrgTypes: string[];
+  expertiseFilter: string;
+  selectedExpertise: string[];
+  externalFactorFilter: string;
+  selectedExternalFactors: string[];
+  selectedContributions: string[];
+  messageTemplates: Record<string, string>;
+}
+
+interface CommunityRecord {
+  name: string;
+  summary: string;
+  description: string;
+  members: number;
+  researchPanelMembers: number;
+  discussions: number;
+  resources: number;
+  events: number;
+  tags: string[];
+  location: string;
+  founded: string;
+  website: string;
+  governance: CommunityGovernance;
+  rules: CommunityRuleItem[];
+  settings: CommunitySettings;
+}
+
+const membershipCriteriaOptions = [
+  "Profile photo added",
+  "Earned 100 learning points",
+  "Evaluated five content items",
+  "Curated five playlists",
+] as const;
+
+const reviewCriteriaOption = "First logged in to the platform in past 30 days";
+
+const defaultCommunityMessageTemplates: Record<string, string> = {
+  welcome: "Welcome to the Community! We're delighted to have you join us.\n\n• Introduce yourself in the Discussions tab\n• Browse Resources to see what's been shared\n• Click on the 'Content' link in the Community Analytics box on the Community page\n\n• Message fellow members\n  Click on a name on the Members page, and then click on the message icon.",
+  decline: "Thank you for your interest in joining our community. Unfortunately, your request to join has not been approved at this time.\n\nIf you believe this was in error, please contact the community administrators.",
+  "block-post": "Your post has been blocked by a community moderator as it does not meet our community guidelines.\n\nPlease review the community rules and feel free to resubmit a revised version.",
+  "block-content": "Content you shared has been blocked by a community moderator. This may be because it does not meet our quality or relevance standards.\n\nPlease review the community guidelines for acceptable content.",
+  "block-playlist": "A playlist you shared has been blocked by a community moderator as it does not align with the community's focus areas.",
+  invitation: "You've been invited to join our community! We think you'd be a great fit based on your expertise and interests.\n\nClick the link below to accept the invitation and get started.",
+  leave: "We're sorry to see you go. Your contributions to the community have been valued.\n\nIf you change your mind, you're always welcome to rejoin.",
+};
+
+const formatCommunityRulesForTextarea = (rules: CommunityRuleItem[]) =>
+  rules.map((rule) => `${rule.title}${rule.detail ? ` ${rule.detail}` : ""}`).join("\n");
+
+const parseCommunityRules = (value: string): CommunityRuleItem[] =>
+  value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/[.:!?]/);
+
+      if (!match || match.index === undefined) {
+        return { title: line, detail: "" };
+      }
+
+      const splitIndex = match.index;
+
+      return {
+        title: line.slice(0, splitIndex + 1).trim(),
+        detail: line.slice(splitIndex + 1).trim(),
+      };
+    });
+
+const cloneCommunityRecord = (record: CommunityRecord): CommunityRecord => ({
+  ...record,
+  tags: [...record.tags],
+  governance: {
+    ...record.governance,
+    membershipCriteria: [...record.governance.membershipCriteria],
+    postReviewCriteria: [...record.governance.postReviewCriteria],
+    contentReviewCriteria: [...record.governance.contentReviewCriteria],
+  },
+  rules: record.rules.map((rule) => ({ ...rule })),
+  settings: {
+    ...record.settings,
+    selectedContinents: [...record.settings.selectedContinents],
+    selectedCountries: [...record.settings.selectedCountries],
+    selectedSectors: [...record.settings.selectedSectors],
+    selectedOrgTypes: [...record.settings.selectedOrgTypes],
+    selectedExpertise: [...record.settings.selectedExpertise],
+    selectedExternalFactors: [...record.settings.selectedExternalFactors],
+    selectedContributions: [...record.settings.selectedContributions],
+    messageTemplates: { ...record.settings.messageTemplates },
+  },
+});
+
+const communityData: Record<string, CommunityRecord> = {
   "prof-services-research": {
     name: "Professional Services Research",
+    summary: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector.",
     description: "A community dedicated to advancing rigorous, evidence-based research across the professional services sector. We bring together academics, practitioners, and policymakers to champion transparency, methodological excellence, and impactful collaboration.",
     members: 247,
     researchPanelMembers: 42,
@@ -538,10 +657,14 @@ const communityData = {
     website: "cpsr.uk",
     governance: {
       membership: "approval",
+      membershipCriteria: [],
       postReview: "criteria",
+      postReviewCriteria: [reviewCriteriaOption],
+      postReviewRetentionDays: 30,
       contentReview: "all",
+      contentReviewCriteria: [],
       inviteExpiry: 90,
-    } as { membership: string; postReview: string; contentReview: string; inviteExpiry: number },
+    },
     rules: [
       { title: "Original research only.", detail: "All shared papers and reports must be original work or have proper permissions from the rights holder." },
       { title: "No promotional content.", detail: "Posts advertising products, services, or events without prior manager approval will be removed." },
@@ -549,6 +672,24 @@ const communityData = {
       { title: "Peer review encouraged.", detail: "Members are encouraged to offer constructive feedback on draft papers shared in the Resources tab." },
       { title: "Chatham House Rule applies.", detail: "Participants may use information received, but the identity of the speaker may not be revealed outside the community." },
     ],
+    settings: {
+      access: "open",
+      frontline: false,
+      thumbnail: null,
+      locationFilter: "any",
+      selectedContinents: [],
+      selectedCountries: [],
+      sourceFilter: "all",
+      selectedSectors: [],
+      orgTypeFilter: "any",
+      selectedOrgTypes: [],
+      expertiseFilter: "any",
+      selectedExpertise: [],
+      externalFactorFilter: "any",
+      selectedExternalFactors: [],
+      selectedContributions: ["Research", "Publications"],
+      messageTemplates: { ...defaultCommunityMessageTemplates },
+    },
   },
 };
 
