@@ -2738,7 +2738,7 @@ const Community = () => {
                             </div>
                             <h3 className="text-sm font-semibold text-card-foreground mb-1">{e.title}</h3>
                             <p className="text-xs text-muted-foreground mb-1">
-                              <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}
+                              <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}{e.endTime && ` – ${e.endTime}`}
                               {e.speaker && <> · Presenter: <button onClick={() => { const member = mockMembers.find(m => m.name === e.speaker); if (member) setSelectedMember(member); }} className="font-medium text-muted-foreground hover:text-primary transition-colors">{e.speaker}</button></>}
                             </p>
                             {(e.city || e.country) && (
