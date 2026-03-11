@@ -155,6 +155,7 @@ interface Event {
   title: string;
   date: string;
   time: string;
+  endTime?: string;
   type: "webinar" | "meetup" | "conference" | "workshop";
   attendees: number;
   description: string;
@@ -236,12 +237,12 @@ const mockResources: Resource[] = [
 ];
 
 const mockEvents: Event[] = [
-  { id: "1", title: "Mixed-Methods Research Design Workshop", date: "28 Mar 2026", time: "14:00 GMT", type: "workshop", attendees: 32, description: "Half-day workshop on applying mixed-methods approaches to professional services research.", speaker: "Prof. Sarah Mitchell", city: "London", country: "United Kingdom", eligible: true },
-  { id: "2", title: "AI in Professional Services — Monthly Webinar", date: "10 Apr 2026", time: "12:00 BST", type: "webinar", attendees: 78, description: "Monthly discussion on the latest developments in AI across consulting, audit, and legal services.", speaker: "Dr. Aisha Patel", recurring: "monthly", nextOccurrences: ["8 May 2026", "12 Jun 2026", "10 Jul 2026"], eligible: true },
-  { id: "3", title: "CPSR Spring Research Symposium", date: "15 May 2026", time: "09:00 BST", type: "conference", attendees: 120, description: "Full-day symposium featuring 20 paper presentations and 3 panel discussions on current research.", city: "Edinburgh", country: "United Kingdom", eligible: false },
-  { id: "4", title: "London Meetup: Emerging Researchers Network", date: "22 Apr 2026", time: "18:30 BST", type: "meetup", attendees: 25, description: "Informal networking event for early-career researchers studying professional services.", city: "London", country: "United Kingdom", eligible: true },
-  { id: "5", title: "Weekly Research Round-Up — Live Session", date: "Every Friday", time: "16:00 BST", type: "webinar", attendees: 45, description: "A weekly 30-minute live session where members share research updates, ask questions, and discuss trending topics in professional services.", speaker: "Prof. Sarah Mitchell", recurring: "weekly", nextOccurrences: ["14 Mar 2026", "21 Mar 2026", "28 Mar 2026", "4 Apr 2026"], eligible: true },
-  { id: "6", title: "Peer Review Circle — Fortnightly Feedback Session", date: "Every other Tuesday", time: "11:00 BST", type: "workshop", attendees: 18, description: "Bring your draft papers and working documents for constructive peer review in a supportive, structured session.", recurring: "biweekly", nextOccurrences: ["18 Mar 2026", "1 Apr 2026", "15 Apr 2026"], city: "Manchester", country: "United Kingdom", eligible: true },
+  { id: "1", title: "Mixed-Methods Research Design Workshop", date: "28 Mar 2026", time: "14:00 GMT", endTime: "17:30 GMT", type: "workshop", attendees: 32, description: "Half-day workshop on applying mixed-methods approaches to professional services research.", speaker: "Prof. Sarah Mitchell", city: "London", country: "United Kingdom", eligible: true },
+  { id: "2", title: "AI in Professional Services — Monthly Webinar", date: "10 Apr 2026", time: "12:00 BST", endTime: "13:00 BST", type: "webinar", attendees: 78, description: "Monthly discussion on the latest developments in AI across consulting, audit, and legal services.", speaker: "Dr. Aisha Patel", recurring: "monthly", nextOccurrences: ["8 May 2026", "12 Jun 2026", "10 Jul 2026"], eligible: true },
+  { id: "3", title: "CPSR Spring Research Symposium", date: "15 May 2026", time: "09:00 BST", endTime: "17:00 BST", type: "conference", attendees: 120, description: "Full-day symposium featuring 20 paper presentations and 3 panel discussions on current research.", city: "Edinburgh", country: "United Kingdom", eligible: false },
+  { id: "4", title: "London Meetup: Emerging Researchers Network", date: "22 Apr 2026", time: "18:30 BST", endTime: "20:30 BST", type: "meetup", attendees: 25, description: "Informal networking event for early-career researchers studying professional services.", city: "London", country: "United Kingdom", eligible: true },
+  { id: "5", title: "Weekly Research Round-Up — Live Session", date: "Every Friday", time: "16:00 BST", endTime: "16:30 BST", type: "webinar", attendees: 45, description: "A weekly 30-minute live session where members share research updates, ask questions, and discuss trending topics in professional services.", speaker: "Prof. Sarah Mitchell", recurring: "weekly", nextOccurrences: ["14 Mar 2026", "21 Mar 2026", "28 Mar 2026", "4 Apr 2026"], eligible: true },
+  { id: "6", title: "Peer Review Circle — Fortnightly Feedback Session", date: "Every other Tuesday", time: "11:00 BST", endTime: "12:30 BST", type: "workshop", attendees: 18, description: "Bring your draft papers and working documents for constructive peer review in a supportive, structured session.", recurring: "biweekly", nextOccurrences: ["18 Mar 2026", "1 Apr 2026", "15 Apr 2026"], city: "Manchester", country: "United Kingdom", eligible: true },
 ];
 
 const mockPolls: Poll[] = [
@@ -868,10 +869,13 @@ const Community = () => {
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
+  const [newEventEndTime, setNewEventEndTime] = useState("");
   const [newEventType, setNewEventType] = useState<Event["type"]>("webinar");
   const [newEventDescription, setNewEventDescription] = useState("");
   const [newEventSpeaker, setNewEventSpeaker] = useState("");
   const [newEventRecurring, setNewEventRecurring] = useState<"" | "weekly" | "biweekly" | "monthly">("");
+  const [newEventCity, setNewEventCity] = useState("");
+  const [newEventCountry, setNewEventCountry] = useState("");
   const [communityEvents, setCommunityEvents] = useState<Event[]>(mockEvents);
   const [eventRegistrations, setEventRegistrations] = useState<Set<string>>(new Set());
   const [eventSearch, setEventSearch] = useState("");
@@ -1287,6 +1291,25 @@ const Community = () => {
     ? searchResults.discussions.length + searchResults.members.length + searchResults.resources.length + searchResults.events.length
     : 0;
 
+  // Scroll to top when community page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  // Group add discussion/resource state
+  const [showAddGroupDiscussion, setShowAddGroupDiscussion] = useState(false);
+  const [newGroupDiscussionTitle, setNewGroupDiscussionTitle] = useState("");
+  const [newGroupDiscussionContent, setNewGroupDiscussionContent] = useState("");
+  const [newGroupDiscussionVisibility, setNewGroupDiscussionVisibility] = useState<GroupVisibility>("group-only");
+  const [showAddGroupResource, setShowAddGroupResource] = useState(false);
+  const [newGroupResourceTitle, setNewGroupResourceTitle] = useState("");
+  const [newGroupResourceType, setNewGroupResourceType] = useState<Resource["type"]>("link");
+  const [newGroupResourceAuthor, setNewGroupResourceAuthor] = useState("");
+  const [newGroupResourceDesc, setNewGroupResourceDesc] = useState("");
+  const [newGroupResourceVisibility, setNewGroupResourceVisibility] = useState<GroupVisibility>("group-only");
+  // Working groups state (mutable copy)
+  const [workingGroups, setWorkingGroups] = useState<WorkingGroup[]>(mockWorkingGroups);
+
   return (
     <div className="flex flex-col min-h-screen bg-cream">
       {/* Top Navigation Bar */}
@@ -1511,7 +1534,7 @@ const Community = () => {
                       className="w-full text-left bg-white border border-border rounded-lg p-4 hover:border-primary/30 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-center gap-2 mb-1"><EventTypeBadge type={e.type} /><h4 className="text-sm font-semibold text-card-foreground">{e.title}</h4></div>
-                      <span className="text-[11px] text-muted-foreground">{e.date} · {e.time}{e.speaker && ` · ${e.speaker}`}</span>
+                      <span className="text-[11px] text-muted-foreground">{e.date} · {e.time}{e.endTime && ` – ${e.endTime}`}{e.speaker && ` · ${e.speaker}`}</span>
                     </button>
                   ))}
                 </div>
@@ -2734,7 +2757,7 @@ const Community = () => {
                             </div>
                             <h3 className="text-sm font-semibold text-card-foreground mb-1">{e.title}</h3>
                             <p className="text-xs text-muted-foreground mb-1">
-                              <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}
+                              <FontAwesomeIcon icon={faCalendarDays} className="mr-1" /> {e.date} · {e.time}{e.endTime && ` – ${e.endTime}`}
                               {e.speaker && <> · Presenter: <button onClick={() => { const member = mockMembers.find(m => m.name === e.speaker); if (member) setSelectedMember(member); }} className="font-medium text-muted-foreground hover:text-primary transition-colors">{e.speaker}</button></>}
                             </p>
                             {(e.city || e.country) && (
@@ -2783,7 +2806,7 @@ const Community = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm text-muted-foreground">
-                      {mockWorkingGroups.length} working groups within this community
+                      {workingGroups.length} working groups within this community
                     </p>
                     {isAdmin && (
                       <button
@@ -2927,9 +2950,52 @@ const Community = () => {
                                 </button>
                               ))}
                             </div>
-                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                            {isAdmin && <button onClick={() => { setShowAddGroupDiscussion(!showAddGroupDiscussion); setShowAddGroupResource(false); }} className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
                           </div>
                         </div>
+                        {/* Add Discussion Form */}
+                        {showAddGroupDiscussion && viewingGroup && (
+                          <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2 mb-2">
+                            <h5 className="text-xs font-semibold text-card-foreground">Add discussion to {viewingGroup.name}</h5>
+                            <input type="text" value={newGroupDiscussionTitle} onChange={e => setNewGroupDiscussionTitle(e.target.value)} placeholder="Discussion title *" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <textarea value={newGroupDiscussionContent} onChange={e => setNewGroupDiscussionContent(e.target.value)} placeholder="Discussion content *" rows={3} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">Visibility:</span>
+                              {(["group-only", "community-wide", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} onClick={() => setNewGroupDiscussionVisibility(v)} className={`text-[10px] px-2.5 py-1 rounded-md border transition-colors ${newGroupDiscussionVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "group-only": "Group only", "community-wide": "Community-wide", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => { setShowAddGroupDiscussion(false); setNewGroupDiscussionTitle(""); setNewGroupDiscussionContent(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                              <button
+                                disabled={!newGroupDiscussionTitle.trim() || !newGroupDiscussionContent.trim()}
+                                onClick={() => {
+                                  if (!viewingGroup) return;
+                                  const newDisc: GroupDiscussion = {
+                                    id: `gd-${Date.now()}`,
+                                    title: newGroupDiscussionTitle.trim(),
+                                    author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
+                                    content: newGroupDiscussionContent.trim(),
+                                    date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+                                    replies: 0, likes: 0,
+                                    tags: [],
+                                    visibility: newGroupDiscussionVisibility,
+                                  };
+                                  setWorkingGroups(prev => prev.map(g => g.id === viewingGroup.id ? { ...g, groupDiscussions: [newDisc, ...g.groupDiscussions] } : g));
+                                  setViewingGroup(prev => prev ? { ...prev, groupDiscussions: [newDisc, ...prev.groupDiscussions] } : prev);
+                                  setShowAddGroupDiscussion(false);
+                                  setNewGroupDiscussionTitle("");
+                                  setNewGroupDiscussionContent("");
+                                }}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newGroupDiscussionTitle.trim() && newGroupDiscussionContent.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              >
+                                Add Discussion
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           {viewingGroup.groupDiscussions
                             .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
@@ -2994,9 +3060,63 @@ const Community = () => {
                                 </button>
                               ))}
                             </div>
-                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                            {isAdmin && <button onClick={() => { setShowAddGroupResource(!showAddGroupResource); setShowAddGroupDiscussion(false); }} className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
                           </div>
                         </div>
+                        {/* Add Resource Form */}
+                        {showAddGroupResource && viewingGroup && (
+                          <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2 mb-2">
+                            <h5 className="text-xs font-semibold text-card-foreground">Add resource to {viewingGroup.name}</h5>
+                            <input type="text" value={newGroupResourceTitle} onChange={e => setNewGroupResourceTitle(e.target.value)} placeholder="Resource title *" className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            <div className="grid grid-cols-2 gap-2">
+                              <select value={newGroupResourceType} onChange={e => setNewGroupResourceType(e.target.value as Resource["type"])} className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <option value="link">Link</option>
+                                <option value="paper">Paper</option>
+                                <option value="report">Report</option>
+                                <option value="presentation">Presentation</option>
+                                <option value="video">Video</option>
+                              </select>
+                              <input type="text" value={newGroupResourceAuthor} onChange={e => setNewGroupResourceAuthor(e.target.value)} placeholder="Author *" className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                            </div>
+                            <textarea value={newGroupResourceDesc} onChange={e => setNewGroupResourceDesc(e.target.value)} placeholder="Description *" rows={2} className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">Visibility:</span>
+                              {(["group-only", "community-wide", "managers-only"] as GroupVisibility[]).map(v => (
+                                <button key={v} onClick={() => setNewGroupResourceVisibility(v)} className={`text-[10px] px-2.5 py-1 rounded-md border transition-colors ${newGroupResourceVisibility === v ? "bg-primary/10 border-primary/30 text-primary font-medium" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                                  {{ "group-only": "Group only", "community-wide": "Community-wide", "managers-only": "Managers only" }[v]}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => { setShowAddGroupResource(false); setNewGroupResourceTitle(""); setNewGroupResourceAuthor(""); setNewGroupResourceDesc(""); }} className="text-xs text-muted-foreground px-3 py-1.5">Cancel</button>
+                              <button
+                                disabled={!newGroupResourceTitle.trim() || !newGroupResourceAuthor.trim() || !newGroupResourceDesc.trim()}
+                                onClick={() => {
+                                  if (!viewingGroup) return;
+                                  const newRes: GroupResource = {
+                                    id: `gr-${Date.now()}`,
+                                    title: newGroupResourceTitle.trim(),
+                                    type: newGroupResourceType,
+                                    author: newGroupResourceAuthor.trim(),
+                                    date: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+                                    downloads: 0, likes: 0,
+                                    description: newGroupResourceDesc.trim(),
+                                    visibility: newGroupResourceVisibility,
+                                  };
+                                  setWorkingGroups(prev => prev.map(g => g.id === viewingGroup.id ? { ...g, groupResources: [newRes, ...g.groupResources] } : g));
+                                  setViewingGroup(prev => prev ? { ...prev, groupResources: [newRes, ...prev.groupResources] } : prev);
+                                  setShowAddGroupResource(false);
+                                  setNewGroupResourceTitle("");
+                                  setNewGroupResourceAuthor("");
+                                  setNewGroupResourceDesc("");
+                                }}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${newGroupResourceTitle.trim() && newGroupResourceAuthor.trim() && newGroupResourceDesc.trim() ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              >
+                                Add Resource
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           {viewingGroup.groupResources
                             .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
@@ -3051,7 +3171,7 @@ const Community = () => {
                   {/* Group List */}
                   {(() => {
                     const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-                    let groups = [...mockWorkingGroups];
+                    let groups = [...workingGroups];
                     if (groupSearch.trim()) {
                       const q = groupSearch.toLowerCase();
                       groups = groups.filter(g => g.name.toLowerCase().includes(q) || g.lead.name.toLowerCase().includes(q) || g.tags.some(t => t.toLowerCase().includes(q)));
@@ -3553,11 +3673,17 @@ const Community = () => {
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
                             <button
-                              onClick={() => setShowManageDetails(false)}
+                            onClick={() => {
+                              setEditFormSaving(true);
+                              setTimeout(() => {
+                                setEditFormSaving(false);
+                                setShowManageDetails(false);
+                              }, 600);
+                            }}
                               disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
                               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
-                              Save changes
+                              {editFormSaving ? "Saving…" : "Save changes"}
                             </button>
                           </div>
                         </div>
@@ -3754,12 +3880,21 @@ const Community = () => {
                               onChange={e => setNewEventDate(e.target.value)}
                               className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
-                            <input
-                              type="time"
-                              value={newEventTime}
-                              onChange={e => setNewEventTime(e.target.value)}
-                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="time"
+                                value={newEventTime}
+                                onChange={e => setNewEventTime(e.target.value)}
+                                className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              />
+                              <span className="text-xs text-muted-foreground">to</span>
+                              <input
+                                type="time"
+                                value={newEventEndTime}
+                                onChange={e => setNewEventEndTime(e.target.value)}
+                                className="flex-1 text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              />
+                            </div>
                             <input
                               type="text"
                               value={newEventSpeaker}
@@ -3777,6 +3912,20 @@ const Community = () => {
                               <option value="biweekly">Fortnightly</option>
                               <option value="monthly">Monthly</option>
                             </select>
+                            <input
+                              type="text"
+                              value={newEventCity}
+                              onChange={e => setNewEventCity(e.target.value)}
+                              placeholder="City (optional)"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <input
+                              type="text"
+                              value={newEventCountry}
+                              onChange={e => setNewEventCountry(e.target.value)}
+                              placeholder="Country (optional)"
+                              className="text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
                           </div>
                           <textarea
                             value={newEventDescription}
@@ -3792,10 +3941,13 @@ const Community = () => {
                                 setNewEventTitle("");
                                 setNewEventDate("");
                                 setNewEventTime("");
+                                setNewEventEndTime("");
                                 setNewEventType("webinar");
                                 setNewEventDescription("");
                                 setNewEventSpeaker("");
                                 setNewEventRecurring("");
+                                setNewEventCity("");
+                                setNewEventCountry("");
                               }}
                               className="text-xs text-muted-foreground px-3 py-1.5"
                             >
@@ -3809,21 +3961,27 @@ const Community = () => {
                                   title: newEventTitle.trim(),
                                   date: new Date(newEventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
                                   time: newEventTime,
+                                  endTime: newEventEndTime || undefined,
                                   type: newEventType,
                                   attendees: 0,
                                   description: newEventDescription.trim(),
                                   speaker: newEventSpeaker.trim() || undefined,
                                   recurring: newEventRecurring || undefined,
+                                  city: newEventCity.trim() || undefined,
+                                  country: newEventCountry.trim() || undefined,
                                 };
                                 setCommunityEvents(prev => [newEvent, ...prev]);
                                 setShowAddEvent(false);
                                 setNewEventTitle("");
                                 setNewEventDate("");
                                 setNewEventTime("");
+                                setNewEventEndTime("");
                                 setNewEventType("webinar");
                                 setNewEventDescription("");
                                 setNewEventSpeaker("");
                                 setNewEventRecurring("");
+                                setNewEventCity("");
+                                setNewEventCountry("");
                               }}
                               className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 newEventTitle.trim() && newEventDate && newEventTime && newEventDescription.trim()
