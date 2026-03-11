@@ -2950,7 +2950,7 @@ const Community = () => {
                                 </button>
                               ))}
                             </div>
-                            {isAdmin && <button className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
+                            {isAdmin && <button onClick={() => { setShowAddGroupDiscussion(!showAddGroupDiscussion); setShowAddGroupResource(false); }} className="text-[10px] text-primary font-medium hover:underline"><FontAwesomeIcon icon={faPlus} className="mr-1 text-[8px]" />Add</button>}
                           </div>
                         </div>
                         <div className="space-y-2">
