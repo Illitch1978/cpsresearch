@@ -3074,7 +3074,7 @@ const Community = () => {
                   {/* Group List */}
                   {(() => {
                     const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-                    let groups = [...mockWorkingGroups];
+                    let groups = [...workingGroups];
                     if (groupSearch.trim()) {
                       const q = groupSearch.toLowerCase();
                       groups = groups.filter(g => g.name.toLowerCase().includes(q) || g.lead.name.toLowerCase().includes(q) || g.tags.some(t => t.toLowerCase().includes(q)));
