@@ -2533,8 +2533,12 @@ const Community = () => {
                   )}
 
                   {/* Resource List */}
-                  {sortedResources.map(r => (
-                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                  {sortedResources.map(r => {
+                    const rIsArchived = archivedResources.has(r.id);
+                    // For mock resources, use author string to check if "self" authored it
+                    const rAuthorId = r.author === "Richard Chaplin" ? "self" : undefined;
+                    return (
+                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${rIsArchived ? "opacity-60" : ""} ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                       <div className="flex items-center gap-3 shrink-0">
                         <label className="flex items-center cursor-pointer" title="Make available for playlists">
                           <input
