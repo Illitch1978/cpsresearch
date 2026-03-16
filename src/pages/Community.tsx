@@ -1025,7 +1025,14 @@ const Community = () => {
     e.target.value = "";
   };
 
+  const editFormCriteriaValid = (() => {
+    if (editFormPostReview === "criteria" && editFormPostReviewCriteria.length === 0) return false;
+    if (editFormContentReview === "criteria" && editFormContentReviewCriteria.length === 0) return false;
+    return true;
+  })();
+
   const handleSaveManageDetails = () => {
+    if (!editFormCriteriaValid) return;
     const parsedRules = parseCommunityRules(editFormCommunityRules);
     const parsedRetentionDays = Number.parseInt(editFormReviewRetentionDays, 10);
 
