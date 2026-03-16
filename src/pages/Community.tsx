@@ -2619,6 +2619,7 @@ const Community = () => {
                     </div>
                     );
                   })}
+                </div>
               </TabsContent>
 
               {/* ─── PLAYLISTS TAB ─── */}
