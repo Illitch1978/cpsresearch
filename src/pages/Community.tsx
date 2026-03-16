@@ -2852,12 +2852,16 @@ const Community = () => {
                         const plIsArchived = archivedPlaylists.has(pl.id);
                         return (
                         <div key={pl.id} className={`bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow ${plIsArchived ? "opacity-60" : ""}`}>
+                          <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                                 <FontAwesomeIcon icon={faListAlt} className="text-sm" />
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold text-card-foreground">{pl.name}</h4>
+                                <div className="flex items-center gap-1.5">
+                                  {plIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
+                                  <h4 className="text-sm font-semibold text-card-foreground">{pl.name}</h4>
+                                </div>
                                 <p className="text-[11px] text-muted-foreground">
                                   by {pl.author.id === "self" ? <span className="text-primary font-medium">You</span> : pl.author.name} · {pl.createdDate}
                                 </p>
