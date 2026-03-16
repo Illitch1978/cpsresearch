@@ -2606,10 +2606,19 @@ const Community = () => {
                             <FontAwesomeIcon icon={faThumbtack} />
                           </button>
                         )}
+                        {canArchiveContent(rAuthorId) && (
+                          <button
+                            onClick={() => toggleArchive(archivedResources, setArchivedResources, r.id)}
+                            className={`text-xs transition-colors ${rIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
+                            title={rIsArchived ? "De-archive resource" : "Archive resource"}
+                          >
+                            <FontAwesomeIcon icon={faBoxArchive} />
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                    );
+                  })}
               </TabsContent>
 
               {/* ─── PLAYLISTS TAB ─── */}
