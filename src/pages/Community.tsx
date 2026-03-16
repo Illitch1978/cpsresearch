@@ -2475,7 +2475,7 @@ const Community = () => {
                         <input type="checkbox" checked={showArchivedResources} onChange={() => setShowArchivedResources(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
                         <span className="text-muted-foreground">Show archived ({archivedResources.size})</span>
                       </label>
-                    )
+                    )}
                   </div>
 
                   {/* Add Resource Form */}
