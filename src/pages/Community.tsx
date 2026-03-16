@@ -2130,8 +2130,16 @@ const Community = () => {
                                 <FontAwesomeIcon icon={faThumbtack} />
                               </button>
                             )}
+                            {canArchiveContent(d.author.id) && (
+                              <button
+                                onClick={() => toggleArchive(archivedDiscussions, setArchivedDiscussions, d.id)}
+                                className={`text-xs transition-colors ${dIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
+                                title={dIsArchived ? "De-archive discussion" : "Archive discussion"}
+                              >
+                                <FontAwesomeIcon icon={faBoxArchive} />
+                              </button>
+                            )}
                           </div>
-                        </div>
                         <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-50 text-xs text-muted-foreground">
                           <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
                             <FontAwesomeIcon icon={faThumbsUp} /> {d.likes}
