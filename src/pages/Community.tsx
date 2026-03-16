@@ -3607,6 +3607,15 @@ const Community = () => {
                                 ))}
                               </div>
                               <button onClick={() => setViewingGroup(group)} className="ml-3 text-xs font-medium text-primary hover:underline">View group →</button>
+                              {canArchiveContent(group.lead.id) && (
+                                <button
+                                  onClick={(ev) => { ev.stopPropagation(); toggleArchive(archivedGroups, setArchivedGroups, group.id); }}
+                                  className={`ml-2 text-[10px] flex items-center gap-1 transition-colors ${gIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                  title={gIsArchived ? "De-archive group" : "Archive group"}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {gIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
