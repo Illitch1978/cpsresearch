@@ -2908,8 +2908,23 @@ const Community = () => {
                           )}
 
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                            <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                              {canArchiveContent(pl.author.id) && (
+                                <button
+                                  onClick={() => toggleArchive(archivedPlaylists, setArchivedPlaylists, pl.id)}
+                                  className={`text-[10px] flex items-center gap-1 transition-colors ${plIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {plIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              )}
+                            </div>
                             <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
+                          </div>
+                        </div>
+                        );
+                        });
+                      })()}
                           </div>
                         </div>
                       ));
