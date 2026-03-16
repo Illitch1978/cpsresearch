@@ -369,6 +369,31 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                     </RadioGroup>
                   </div>
 
+                  {/* 3b. Org Size Filter */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on org size</p>
+                    <RadioGroup value={orgSizeFilter} onValueChange={setOrgSizeFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="orgsize-any" />
+                        <Label htmlFor="orgsize-any" className="text-xs text-slate-700 cursor-pointer">Any size (default)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific" id="orgsize-specific" />
+                        <Label htmlFor="orgsize-specific" className="text-xs text-slate-700 cursor-pointer">Specific size</Label>
+                      </div>
+                      {orgSizeFilter === "specific" && (
+                        <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-slate-100 pl-3">
+                          {orgSizes.map((item) => (
+                            <div key={item.label} className="flex items-center space-x-2">
+                              <Checkbox id={`orgsize-${item.label}`} checked={selectedOrgSizes.includes(item.label)} onCheckedChange={() => setSelectedOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])} />
+                              <Label htmlFor={`orgsize-${item.label}`} className="text-[11px] text-slate-600 cursor-pointer">{item.label} <span className="text-slate-400">({item.description})</span></Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
                   {/* 4. Expertise Filter */}
                   <div>
                     <p className="text-xs font-medium text-slate-700 mb-2">Communities based on specific expertise</p>
