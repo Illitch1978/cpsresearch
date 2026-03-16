@@ -2554,6 +2554,7 @@ const Community = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
+                          {rIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
                           {pinnedResources.has(r.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                           <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
                         </div>
