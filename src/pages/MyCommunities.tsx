@@ -539,10 +539,11 @@ const MyCommunities = () => {
     setFormLocationFilter("any"); setFormSelectedContinents([]); setFormSelectedCountries([]);
     setFormSourceFilter("all"); setFormSelectedSectors([]); setFormExpandedSectors([]);
     setFormOrgTypeFilter("any"); setFormSelectedOrgTypes([]);
+    setFormOrgSizeFilter("any"); setFormSelectedOrgSizes([]);
     setFormExpertiseFilter("any"); setFormSelectedExpertise([]);
     setFormExternalFactorFilter("any"); setFormSelectedExternalFactors([]);
     setFormSelectedContributions([]);
-    setFormMembershipRule("anyone"); setFormPostReview("none"); setFormContentReview("none");
+    setFormMembershipRule("anyone"); setFormMembershipCriteria([]); setFormPostReview("none"); setFormPostReviewCriteria([]); setFormContentReview("none"); setFormContentReviewCriteria([]);
     setFormInviteExpiry("90");
     setFormCommunityRules("Open community with no pre-approval of posts and content items.");
     setRulesExpanded(false); setMessagesExpanded(false); setActiveMessageTemplate("welcome");
