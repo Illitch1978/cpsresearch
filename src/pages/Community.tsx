@@ -3041,8 +3041,9 @@ const Community = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {filtered.map(e => {
                         const status = getEventStatus(e);
+                        const eIsArchived = archivedEvents.has(e.id);
                         return (
-                          <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-border"}`}>
+                          <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${eIsArchived ? "opacity-60" : ""} ${e.recurring ? "border-primary/20" : "border-border"}`}>
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center gap-2">
                                 <EventTypeBadge type={e.type} />
