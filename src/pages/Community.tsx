@@ -636,6 +636,7 @@ const cloneCommunityRecord = (record: CommunityRecord): CommunityRecord => ({
     selectedCountries: [...record.settings.selectedCountries],
     selectedSectors: [...record.settings.selectedSectors],
     selectedOrgTypes: [...record.settings.selectedOrgTypes],
+    selectedOrgSizes: [...record.settings.selectedOrgSizes],
     selectedExpertise: [...record.settings.selectedExpertise],
     selectedExternalFactors: [...record.settings.selectedExternalFactors],
     selectedContributions: [...record.settings.selectedContributions],
