@@ -686,6 +686,8 @@ const communityData: Record<string, CommunityRecord> = {
       selectedSectors: [],
       orgTypeFilter: "any",
       selectedOrgTypes: [],
+      orgSizeFilter: "any",
+      selectedOrgSizes: [],
       expertiseFilter: "any",
       selectedExpertise: [],
       externalFactorFilter: "any",
