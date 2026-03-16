@@ -1478,8 +1478,9 @@ const Community = () => {
     };
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
-    return [...pinned, ...unpinned];
-  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions]);
+    const combined = [...pinned, ...unpinned];
+    return showArchivedDiscussions ? combined : combined.filter(d => !archivedDiscussions.has(d.id));
+  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions, showArchivedDiscussions, archivedDiscussions]);
 
   // Sorted/filtered resources
   const sortedResources = useMemo(() => {
@@ -1491,7 +1492,8 @@ const Community = () => {
     if (resourceSort === "pinned") {
       const pinned = list.filter(r => pinnedResources.has(r.id));
       const unpinned = list.filter(r => !pinnedResources.has(r.id));
-      return resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+      const combined = resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+      return showArchivedResources ? combined : combined.filter(r => !archivedResources.has(r.id));
     }
     const pinned = list.filter(r => pinnedResources.has(r.id));
     const unpinned = list.filter(r => !pinnedResources.has(r.id));
@@ -1506,8 +1508,9 @@ const Community = () => {
     };
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
-    return [...pinned, ...unpinned];
-  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
+    const combined = [...pinned, ...unpinned];
+    return showArchivedResources ? combined : combined.filter(r => !archivedResources.has(r.id));
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes, showArchivedResources, archivedResources]);
 
   
 
