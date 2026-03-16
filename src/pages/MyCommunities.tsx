@@ -354,8 +354,11 @@ const MyCommunities = () => {
 
   // Rules state
   const [formMembershipRule, setFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("anyone");
+  const [formMembershipCriteria, setFormMembershipCriteria] = useState<string[]>([]);
   const [formPostReview, setFormPostReview] = useState<"none" | "criteria" | "all">("none");
+  const [formPostReviewCriteria, setFormPostReviewCriteria] = useState<string[]>([]);
   const [formContentReview, setFormContentReview] = useState<"none" | "criteria" | "all">("none");
+  const [formContentReviewCriteria, setFormContentReviewCriteria] = useState<string[]>([]);
   const [formInviteExpiry, setFormInviteExpiry] = useState("90");
   const [formCommunityRules, setFormCommunityRules] = useState("Open community with no pre-approval of posts and content items.");
   const [rulesExpanded, setRulesExpanded] = useState(false);
