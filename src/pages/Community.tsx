@@ -553,6 +553,8 @@ interface CommunitySettings {
   selectedSectors: string[];
   orgTypeFilter: string;
   selectedOrgTypes: string[];
+  orgSizeFilter: string;
+  selectedOrgSizes: string[];
   expertiseFilter: string;
   selectedExpertise: string[];
   externalFactorFilter: string;
