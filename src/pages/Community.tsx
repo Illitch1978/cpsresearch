@@ -2140,6 +2140,7 @@ const Community = () => {
                               </button>
                             )}
                           </div>
+                        </div>
                         <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-50 text-xs text-muted-foreground">
                           <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
                             <FontAwesomeIcon icon={faThumbsUp} /> {d.likes}
