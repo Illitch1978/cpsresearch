@@ -3685,6 +3685,25 @@ const Community = () => {
                                       ))}
                                     </div>
                                   )}
+                              </RadioGroup>
+                              </div>
+
+                              {/* Org Size */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Org Size</p>
+                                <RadioGroup value={editFormOrgSizeFilter} onValueChange={setEditFormOrgSizeFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-orgsize-any" /><Label htmlFor="edit-orgsize-any" className="text-xs text-card-foreground cursor-pointer">Any size (default)</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="edit-orgsize-spec" /><Label htmlFor="edit-orgsize-spec" className="text-xs text-card-foreground cursor-pointer">Specific size</Label></div>
+                                  {editFormOrgSizeFilter === "specific" && (
+                                    <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-border pl-3">
+                                      {orgSizes.map(item => (
+                                        <div key={item.label} className="flex items-center space-x-1.5">
+                                          <Checkbox id={`edit-orgsize-${item.label}`} checked={editFormSelectedOrgSizes.includes(item.label)} onCheckedChange={() => setEditFormSelectedOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])} />
+                                          <Label htmlFor={`edit-orgsize-${item.label}`} className="text-[11px] text-muted-foreground cursor-pointer">{item.label} <span className="text-muted-foreground/60">({item.description})</span></Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </RadioGroup>
                               </div>
 
