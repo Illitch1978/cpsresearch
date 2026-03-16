@@ -3109,6 +3109,17 @@ const Community = () => {
                             ) : (
                               <span className="mt-4 text-xs text-muted-foreground italic">Not eligible for this event</span>
                             )}
+                            {/* Archive button — admin + HQ only for events */}
+                            {canArchiveEvent() && (
+                              <div className="mt-3 pt-2 border-t border-border/50 flex justify-end">
+                                <button
+                                  onClick={() => toggleArchive(archivedEvents, setArchivedEvents, e.id)}
+                                  className={`text-[10px] flex items-center gap-1 transition-colors ${eIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {eIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
