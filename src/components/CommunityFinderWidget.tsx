@@ -11,6 +11,7 @@ import {
   sectorsByCategory,
   sectors,
   orgTypes,
+  orgSizes,
   managementExpertiseList,
   leadershipExpertiseList,
   contributionsList,
