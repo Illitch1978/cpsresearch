@@ -949,6 +949,8 @@ const Community = () => {
   const [editFormExpandedSectors, setEditFormExpandedSectors] = useState<string[]>([]);
   const [editFormOrgTypeFilter, setEditFormOrgTypeFilter] = useState("any");
   const [editFormSelectedOrgTypes, setEditFormSelectedOrgTypes] = useState<string[]>([]);
+  const [editFormOrgSizeFilter, setEditFormOrgSizeFilter] = useState("any");
+  const [editFormSelectedOrgSizes, setEditFormSelectedOrgSizes] = useState<string[]>([]);
   const [editFormExpertiseFilter, setEditFormExpertiseFilter] = useState("any");
   const [editFormSelectedExpertise, setEditFormSelectedExpertise] = useState<string[]>([]);
   const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
