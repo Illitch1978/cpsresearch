@@ -1500,12 +1500,15 @@ const MyCommunities = () => {
             </div>
 
             {/* Actions */}
+            {(formPostReview === "criteria" && formPostReviewCriteria.length === 0) || (formContentReview === "criteria" && formContentReviewCriteria.length === 0) ? (
+              <p className="text-[11px] text-destructive">Please select at least one criterion checkbox for each review rule set to "criteria".</p>
+            ) : null}
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
               <button onClick={() => setCreateOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
               <button
                 onClick={handleCreate}
-                disabled={!formName.trim() || !formSummary.trim() || formSelectedContributions.length === 0 || formSaving}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${formName.trim() && formSummary.trim() && formSelectedContributions.length > 0 && !formSaving ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                disabled={!formName.trim() || !formSummary.trim() || formSelectedContributions.length === 0 || formSaving || (formPostReview === "criteria" && formPostReviewCriteria.length === 0) || (formContentReview === "criteria" && formContentReviewCriteria.length === 0)}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${formName.trim() && formSummary.trim() && formSelectedContributions.length > 0 && !formSaving && !(formPostReview === "criteria" && formPostReviewCriteria.length === 0) && !(formContentReview === "criteria" && formContentReviewCriteria.length === 0) ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
               >
                 {formSaving ? "Saving…" : "Save"}
               </button>
