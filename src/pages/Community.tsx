@@ -989,6 +989,8 @@ const Community = () => {
     setEditFormExpandedSectors([]);
     setEditFormOrgTypeFilter(community.settings.orgTypeFilter);
     setEditFormSelectedOrgTypes([...community.settings.selectedOrgTypes]);
+    setEditFormOrgSizeFilter(community.settings.orgSizeFilter);
+    setEditFormSelectedOrgSizes([...community.settings.selectedOrgSizes]);
     setEditFormExpertiseFilter(community.settings.expertiseFilter);
     setEditFormSelectedExpertise([...community.settings.selectedExpertise]);
     setEditFormExternalFactorFilter(community.settings.externalFactorFilter);
