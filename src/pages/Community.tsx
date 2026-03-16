@@ -3010,6 +3010,11 @@ const Community = () => {
                     return matchesSearch && matchesType && matchesStatus;
                   });
 
+                  // Filter out archived events unless showing them
+                  if (!showArchivedEvents) {
+                    filtered = filtered.filter(e => !archivedEvents.has(e.id));
+                  }
+
                   filtered.sort((a, b) => {
                     let cmp = 0;
                     switch (eventSort) {
