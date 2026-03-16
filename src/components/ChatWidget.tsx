@@ -659,6 +659,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
+  const [previewCommunity, setPreviewCommunity] = useState<Community | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
