@@ -1482,10 +1482,10 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
                       </div>
                       <button 
-                        onClick={() => window.open('/community/prof-services-research', '_blank')}
+                        onClick={() => setPreviewCommunity(community)}
                         className="flex items-center gap-1.5 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
                       >
-                        Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                        Preview <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
                       </button>
                     </div>
                   </div>
