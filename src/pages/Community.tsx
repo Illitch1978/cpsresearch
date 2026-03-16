@@ -3542,11 +3542,16 @@ const Community = () => {
                       }
                       return groupSortDir === "desc" ? -cmp : cmp;
                     });
+                    if (!showArchivedGroups) {
+                      groups = groups.filter(g => !archivedGroups.has(g.id));
+                    }
                     if (groups.length === 0) {
                       return <div className="text-center py-8 text-sm text-muted-foreground">No groups match your search.</div>;
                     }
-                    return groups.map(group => (
-                    <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all">
+                    return groups.map(group => {
+                    const gIsArchived = archivedGroups.has(group.id);
+                    return (
+                    <div key={group.id} className={`bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all ${gIsArchived ? "opacity-60" : ""}`}>
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary font-serif font-semibold text-sm flex items-center justify-center shrink-0">
                           {group.avatar}
