@@ -3567,7 +3567,10 @@ const Community = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
+                              <div className="flex items-center gap-2">
+                                {gIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
+                                <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
+                              </div>
                               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{group.description}</p>
                             </div>
                             {!joinedGroups.has(group.id) ? (
