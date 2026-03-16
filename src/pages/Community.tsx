@@ -2152,7 +2152,8 @@ const Community = () => {
                           </button>
                         </div>
                       </article>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Sidebar — Active Members */}
