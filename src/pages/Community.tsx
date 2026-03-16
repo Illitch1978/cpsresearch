@@ -2087,6 +2087,7 @@ const Community = () => {
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
+                                {dIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
                                 {pinnedDiscussions.has(d.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                                 {d.repliesDisabled && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30 flex items-center gap-1"><FontAwesomeIcon icon={faLock} className="text-[8px]" />Replies closed</Badge>}
                                 <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
