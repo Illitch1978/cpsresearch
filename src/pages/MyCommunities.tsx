@@ -59,6 +59,7 @@ import {
   sectorsByCategory,
   sectors,
   orgTypes,
+  orgSizes,
   managementExpertiseList,
   leadershipExpertiseList,
   contributionsList,
@@ -343,6 +344,8 @@ const MyCommunities = () => {
   const [formExpandedSectors, setFormExpandedSectors] = useState<string[]>([]);
   const [formOrgTypeFilter, setFormOrgTypeFilter] = useState("any");
   const [formSelectedOrgTypes, setFormSelectedOrgTypes] = useState<string[]>([]);
+  const [formOrgSizeFilter, setFormOrgSizeFilter] = useState("any");
+  const [formSelectedOrgSizes, setFormSelectedOrgSizes] = useState<string[]>([]);
   const [formExpertiseFilter, setFormExpertiseFilter] = useState("any");
   const [formSelectedExpertise, setFormSelectedExpertise] = useState<string[]>([]);
   const [formExternalFactorFilter, setFormExternalFactorFilter] = useState("any");
@@ -351,8 +354,11 @@ const MyCommunities = () => {
 
   // Rules state
   const [formMembershipRule, setFormMembershipRule] = useState<"anyone" | "criteria" | "approval">("anyone");
+  const [formMembershipCriteria, setFormMembershipCriteria] = useState<string[]>([]);
   const [formPostReview, setFormPostReview] = useState<"none" | "criteria" | "all">("none");
+  const [formPostReviewCriteria, setFormPostReviewCriteria] = useState<string[]>([]);
   const [formContentReview, setFormContentReview] = useState<"none" | "criteria" | "all">("none");
+  const [formContentReviewCriteria, setFormContentReviewCriteria] = useState<string[]>([]);
   const [formInviteExpiry, setFormInviteExpiry] = useState("90");
   const [formCommunityRules, setFormCommunityRules] = useState("Open community with no pre-approval of posts and content items.");
   const [rulesExpanded, setRulesExpanded] = useState(false);
@@ -533,10 +539,11 @@ const MyCommunities = () => {
     setFormLocationFilter("any"); setFormSelectedContinents([]); setFormSelectedCountries([]);
     setFormSourceFilter("all"); setFormSelectedSectors([]); setFormExpandedSectors([]);
     setFormOrgTypeFilter("any"); setFormSelectedOrgTypes([]);
+    setFormOrgSizeFilter("any"); setFormSelectedOrgSizes([]);
     setFormExpertiseFilter("any"); setFormSelectedExpertise([]);
     setFormExternalFactorFilter("any"); setFormSelectedExternalFactors([]);
     setFormSelectedContributions([]);
-    setFormMembershipRule("anyone"); setFormPostReview("none"); setFormContentReview("none");
+    setFormMembershipRule("anyone"); setFormMembershipCriteria([]); setFormPostReview("none"); setFormPostReviewCriteria([]); setFormContentReview("none"); setFormContentReviewCriteria([]);
     setFormInviteExpiry("90");
     setFormCommunityRules("Open community with no pre-approval of posts and content items.");
     setRulesExpanded(false); setMessagesExpanded(false); setActiveMessageTemplate("welcome");
@@ -1245,6 +1252,25 @@ const MyCommunities = () => {
                         ))}
                       </div>
                     )}
+                </RadioGroup>
+                </div>
+
+                {/* Org Size */}
+                <div>
+                  <p className="text-xs font-medium text-card-foreground mb-2">Org Size</p>
+                  <RadioGroup value={formOrgSizeFilter} onValueChange={setFormOrgSizeFilter} className="space-y-2">
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="form-orgsize-any" /><Label htmlFor="form-orgsize-any" className="text-xs text-card-foreground cursor-pointer">Any size (default)</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="form-orgsize-spec" /><Label htmlFor="form-orgsize-spec" className="text-xs text-card-foreground cursor-pointer">Specific size</Label></div>
+                    {formOrgSizeFilter === "specific" && (
+                      <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-border pl-3">
+                        {orgSizes.map(item => (
+                          <div key={item.label} className="flex items-center space-x-1.5">
+                            <Checkbox id={`form-orgsize-${item.label}`} checked={formSelectedOrgSizes.includes(item.label)} onCheckedChange={() => setFormSelectedOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])} />
+                            <Label htmlFor={`form-orgsize-${item.label}`} className="text-[11px] text-muted-foreground cursor-pointer">{item.label} <span className="text-muted-foreground/60">({item.description})</span></Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </RadioGroup>
                 </div>
 
@@ -1348,6 +1374,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formMembershipRule === "criteria" && (
+                      <div className="ml-6 mt-3 grid gap-2 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-membership-photo" checked={formMembershipCriteria.includes("Profile photo added")} onCheckedChange={() => setFormMembershipCriteria(prev => prev.includes("Profile photo added") ? prev.filter(x => x !== "Profile photo added") : [...prev, "Profile photo added"])} />
+                          <Label htmlFor="form-membership-photo" className="text-[11px] text-card-foreground cursor-pointer">Profile photo added</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
@@ -1361,6 +1395,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formPostReview === "criteria" && (
+                      <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-post-review-criterion" checked={formPostReviewCriteria.includes("First logged in to the platform in past 30 days")} onCheckedChange={() => setFormPostReviewCriteria(prev => prev.includes("First logged in to the platform in past 30 days") ? [] : ["First logged in to the platform in past 30 days"])} />
+                          <Label htmlFor="form-post-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">First logged in to the platform in past 30 days</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
@@ -1374,6 +1416,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formContentReview === "criteria" && (
+                      <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-content-review-criterion" checked={formContentReviewCriteria.includes("First logged in to the platform in past 30 days")} onCheckedChange={() => setFormContentReviewCriteria(prev => prev.includes("First logged in to the platform in past 30 days") ? [] : ["First logged in to the platform in past 30 days"])} />
+                          <Label htmlFor="form-content-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">First logged in to the platform in past 30 days</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
@@ -1450,12 +1500,15 @@ const MyCommunities = () => {
             </div>
 
             {/* Actions */}
+            {(formPostReview === "criteria" && formPostReviewCriteria.length === 0) || (formContentReview === "criteria" && formContentReviewCriteria.length === 0) ? (
+              <p className="text-[11px] text-destructive">Please select at least one criterion checkbox for each review rule set to "criteria".</p>
+            ) : null}
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
               <button onClick={() => setCreateOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
               <button
                 onClick={handleCreate}
-                disabled={!formName.trim() || !formSummary.trim() || formSelectedContributions.length === 0 || formSaving}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${formName.trim() && formSummary.trim() && formSelectedContributions.length > 0 && !formSaving ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                disabled={!formName.trim() || !formSummary.trim() || formSelectedContributions.length === 0 || formSaving || (formPostReview === "criteria" && formPostReviewCriteria.length === 0) || (formContentReview === "criteria" && formContentReviewCriteria.length === 0)}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${formName.trim() && formSummary.trim() && formSelectedContributions.length > 0 && !formSaving && !(formPostReview === "criteria" && formPostReviewCriteria.length === 0) && !(formContentReview === "criteria" && formContentReviewCriteria.length === 0) ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
               >
                 {formSaving ? "Saving…" : "Save"}
               </button>

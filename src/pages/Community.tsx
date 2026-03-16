@@ -89,6 +89,7 @@ import {
   sectorsByCategory,
   sectors,
   orgTypes,
+  orgSizes,
   managementExpertiseList,
   leadershipExpertiseList,
   contributionsList,
@@ -552,6 +553,8 @@ interface CommunitySettings {
   selectedSectors: string[];
   orgTypeFilter: string;
   selectedOrgTypes: string[];
+  orgSizeFilter: string;
+  selectedOrgSizes: string[];
   expertiseFilter: string;
   selectedExpertise: string[];
   externalFactorFilter: string;
@@ -580,9 +583,6 @@ interface CommunityRecord {
 
 const membershipCriteriaOptions = [
   "Profile photo added",
-  "Earned 100 learning points",
-  "Evaluated five content items",
-  "Curated five playlists",
 ] as const;
 
 const reviewCriteriaOption = "First logged in to the platform in past 30 days";
@@ -636,6 +636,7 @@ const cloneCommunityRecord = (record: CommunityRecord): CommunityRecord => ({
     selectedCountries: [...record.settings.selectedCountries],
     selectedSectors: [...record.settings.selectedSectors],
     selectedOrgTypes: [...record.settings.selectedOrgTypes],
+    selectedOrgSizes: [...record.settings.selectedOrgSizes],
     selectedExpertise: [...record.settings.selectedExpertise],
     selectedExternalFactors: [...record.settings.selectedExternalFactors],
     selectedContributions: [...record.settings.selectedContributions],
@@ -685,6 +686,8 @@ const communityData: Record<string, CommunityRecord> = {
       selectedSectors: [],
       orgTypeFilter: "any",
       selectedOrgTypes: [],
+      orgSizeFilter: "any",
+      selectedOrgSizes: [],
       expertiseFilter: "any",
       selectedExpertise: [],
       externalFactorFilter: "any",
@@ -946,6 +949,8 @@ const Community = () => {
   const [editFormExpandedSectors, setEditFormExpandedSectors] = useState<string[]>([]);
   const [editFormOrgTypeFilter, setEditFormOrgTypeFilter] = useState("any");
   const [editFormSelectedOrgTypes, setEditFormSelectedOrgTypes] = useState<string[]>([]);
+  const [editFormOrgSizeFilter, setEditFormOrgSizeFilter] = useState("any");
+  const [editFormSelectedOrgSizes, setEditFormSelectedOrgSizes] = useState<string[]>([]);
   const [editFormExpertiseFilter, setEditFormExpertiseFilter] = useState("any");
   const [editFormSelectedExpertise, setEditFormSelectedExpertise] = useState<string[]>([]);
   const [editFormExternalFactorFilter, setEditFormExternalFactorFilter] = useState("any");
@@ -984,6 +989,8 @@ const Community = () => {
     setEditFormExpandedSectors([]);
     setEditFormOrgTypeFilter(community.settings.orgTypeFilter);
     setEditFormSelectedOrgTypes([...community.settings.selectedOrgTypes]);
+    setEditFormOrgSizeFilter(community.settings.orgSizeFilter);
+    setEditFormSelectedOrgSizes([...community.settings.selectedOrgSizes]);
     setEditFormExpertiseFilter(community.settings.expertiseFilter);
     setEditFormSelectedExpertise([...community.settings.selectedExpertise]);
     setEditFormExternalFactorFilter(community.settings.externalFactorFilter);
@@ -1018,7 +1025,14 @@ const Community = () => {
     e.target.value = "";
   };
 
+  const editFormCriteriaValid = (() => {
+    if (editFormPostReview === "criteria" && editFormPostReviewCriteria.length === 0) return false;
+    if (editFormContentReview === "criteria" && editFormContentReviewCriteria.length === 0) return false;
+    return true;
+  })();
+
   const handleSaveManageDetails = () => {
+    if (!editFormCriteriaValid) return;
     const parsedRules = parseCommunityRules(editFormCommunityRules);
     const parsedRetentionDays = Number.parseInt(editFormReviewRetentionDays, 10);
 
@@ -1058,6 +1072,8 @@ const Community = () => {
           selectedSectors: [...editFormSelectedSectors],
           orgTypeFilter: editFormOrgTypeFilter,
           selectedOrgTypes: [...editFormSelectedOrgTypes],
+          orgSizeFilter: editFormOrgSizeFilter,
+          selectedOrgSizes: [...editFormSelectedOrgSizes],
           expertiseFilter: editFormExpertiseFilter,
           selectedExpertise: [...editFormSelectedExpertise],
           externalFactorFilter: editFormExternalFactorFilter,
@@ -3669,6 +3685,25 @@ const Community = () => {
                                       ))}
                                     </div>
                                   )}
+                              </RadioGroup>
+                              </div>
+
+                              {/* Org Size */}
+                              <div>
+                                <p className="text-xs font-medium text-card-foreground mb-2">Org Size</p>
+                                <RadioGroup value={editFormOrgSizeFilter} onValueChange={setEditFormOrgSizeFilter} className="space-y-2">
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="any" id="edit-orgsize-any" /><Label htmlFor="edit-orgsize-any" className="text-xs text-card-foreground cursor-pointer">Any size (default)</Label></div>
+                                  <div className="flex items-center space-x-2"><RadioGroupItem value="specific" id="edit-orgsize-spec" /><Label htmlFor="edit-orgsize-spec" className="text-xs text-card-foreground cursor-pointer">Specific size</Label></div>
+                                  {editFormOrgSizeFilter === "specific" && (
+                                    <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-border pl-3">
+                                      {orgSizes.map(item => (
+                                        <div key={item.label} className="flex items-center space-x-1.5">
+                                          <Checkbox id={`edit-orgsize-${item.label}`} checked={editFormSelectedOrgSizes.includes(item.label)} onCheckedChange={() => setEditFormSelectedOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])} />
+                                          <Label htmlFor={`edit-orgsize-${item.label}`} className="text-[11px] text-muted-foreground cursor-pointer">{item.label} <span className="text-muted-foreground/60">({item.description})</span></Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </RadioGroup>
                               </div>
 
@@ -3958,13 +3993,18 @@ const Community = () => {
                             )}
                           </div>
 
+                          {/* Validation message */}
+                          {!editFormCriteriaValid && (
+                            <p className="text-[11px] text-destructive">Please select at least one criterion checkbox for each review rule set to "criteria".</p>
+                          )}
+
                           {/* Actions */}
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
                             <button
                               onClick={handleSaveManageDetails}
-                              disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
-                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0 || !editFormCriteriaValid}
+                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 && editFormCriteriaValid ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
                               {editFormSaving ? "Saving…" : "Save changes"}
                             </button>

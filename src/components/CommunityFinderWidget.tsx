@@ -11,6 +11,7 @@ import {
   sectorsByCategory,
   sectors,
   orgTypes,
+  orgSizes,
   managementExpertiseList,
   leadershipExpertiseList,
   contributionsList,
@@ -65,6 +66,8 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
   const [orgTypeFilter, setOrgTypeFilter] = useState("any");
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
+  const [orgSizeFilter, setOrgSizeFilter] = useState("any");
+  const [selectedOrgSizes, setSelectedOrgSizes] = useState<string[]>([]);
   const [externalFactorFilter, setExternalFactorFilter] = useState("any");
   const [selectedExternalFactors, setSelectedExternalFactors] = useState<string[]>([]);
   const [selectedContributions, setSelectedContributions] = useState<string[]>([]);
@@ -129,6 +132,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSourceFilter("all"); setSelectedSectors([]); setLocationFilter("any");
     setSelectedContinents([]); setSelectedCountries([]); setExpertiseFilter("any");
     setSelectedExpertise([]); setOrgTypeFilter("any"); setSelectedOrgTypes([]);
+    setOrgSizeFilter("any"); setSelectedOrgSizes([]);
     setExternalFactorFilter("any"); setSelectedExternalFactors([]); setSelectedContributions([]);
   };
 
@@ -358,6 +362,31 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                             <div key={item} className="flex items-center space-x-2 w-[45%]">
                               <Checkbox id={`orgtype-${item}`} checked={selectedOrgTypes.includes(item)} onCheckedChange={() => handleOrgTypeToggle(item)} />
                               <Label htmlFor={`orgtype-${item}`} className="text-[11px] text-slate-600 cursor-pointer">{item}</Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </RadioGroup>
+                  </div>
+
+                  {/* 3b. Org Size Filter */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-700 mb-2">Communities based on org size</p>
+                    <RadioGroup value={orgSizeFilter} onValueChange={setOrgSizeFilter} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="any" id="orgsize-any" />
+                        <Label htmlFor="orgsize-any" className="text-xs text-slate-700 cursor-pointer">Any size (default)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="specific" id="orgsize-specific" />
+                        <Label htmlFor="orgsize-specific" className="text-xs text-slate-700 cursor-pointer">Specific size</Label>
+                      </div>
+                      {orgSizeFilter === "specific" && (
+                        <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-slate-100 pl-3">
+                          {orgSizes.map((item) => (
+                            <div key={item.label} className="flex items-center space-x-2">
+                              <Checkbox id={`orgsize-${item.label}`} checked={selectedOrgSizes.includes(item.label)} onCheckedChange={() => setSelectedOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])} />
+                              <Label htmlFor={`orgsize-${item.label}`} className="text-[11px] text-slate-600 cursor-pointer">{item.label} <span className="text-slate-400">({item.description})</span></Label>
                             </div>
                           ))}
                         </div>

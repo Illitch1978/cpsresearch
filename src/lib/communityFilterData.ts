@@ -48,6 +48,13 @@ export const orgTypes = [
   "Virtual firm",
 ].sort();
 
+export const orgSizes = [
+  { label: "SME", description: "less than 250 global FTE headcount" },
+  { label: "Mid-market", description: "250 to 2,000 global FTE headcount" },
+  { label: "Large", description: "2,000 to 10,000 global FTE headcount" },
+  { label: "Very large", description: "over 10,000 global FTE headcount" },
+];
+
 export const managementExpertiseList = [
   "Business development",
   "Communication",

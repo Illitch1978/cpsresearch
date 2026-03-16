@@ -659,6 +659,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
+  const [previewCommunity, setPreviewCommunity] = useState<Community | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1481,10 +1482,10 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                         <Label htmlFor={`bookmark-community-${community.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
                       </div>
                       <button 
-                        onClick={() => window.open('/community/prof-services-research', '_blank')}
+                        onClick={() => setPreviewCommunity(community)}
                         className="flex items-center gap-1.5 bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-brand-red transition-colors"
                       >
-                        Join <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
+                        Preview <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[8px]" />
                       </button>
                     </div>
                   </div>
@@ -1587,6 +1588,61 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Community Preview Popup */}
+      {previewCommunity && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setPreviewCommunity(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100vw-3rem)] sm:w-[420px] max-w-[420px] bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-sm">{previewCommunity.name}</h3>
+                <span className="text-[9px] text-slate-400 flex items-center gap-1">
+                  <FontAwesomeIcon icon={faUsers} className="text-[8px]" /> {previewCommunity.members.toLocaleString()} members
+                </span>
+              </div>
+              <button onClick={() => setPreviewCommunity(null)} className="text-slate-400 hover:text-white transition-colors">
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="p-4 max-h-[40vh] overflow-y-auto">
+              <p className="text-xs text-slate-700 leading-relaxed mb-3">{previewCommunity.description}</p>
+              {previewCommunity.theme && (
+                <div className="mb-3">
+                  <span className="text-[10px] font-medium text-slate-500">Theme:</span>
+                  <span className="ml-1.5 px-2 py-0.5 bg-brand-red/10 text-brand-red text-[10px] font-medium rounded">{previewCommunity.theme}</span>
+                </div>
+              )}
+              {previewCommunity.tags && previewCommunity.tags.length > 0 && (
+                <div className="mb-3">
+                  <span className="text-[10px] font-medium text-slate-500">Tags:</span>
+                  <div className="flex gap-1 mt-1">
+                    {previewCommunity.tags.map((tag, j) => (
+                      <span key={j} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between">
+              <div className="flex items-center space-x-1.5">
+                <Checkbox
+                  id={`preview-bookmark-${previewCommunity.name}`}
+                  checked={bookmarkedCommunities.includes(previewCommunity.name)}
+                  onCheckedChange={() => handleCommunityBookmark(previewCommunity.name)}
+                />
+                <Label htmlFor={`preview-bookmark-${previewCommunity.name}`} className="text-[10px] text-slate-500 cursor-pointer">Bookmark</Label>
+              </div>
+              <button
+                onClick={() => { setPreviewCommunity(null); window.open('/community/prof-services-research', '_blank'); }}
+                className="bg-slate-900 text-white text-[10px] font-bold px-4 py-1.5 rounded hover:bg-brand-red transition-colors"
+              >
+                Join community
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };
