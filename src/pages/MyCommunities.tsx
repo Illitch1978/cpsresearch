@@ -1374,6 +1374,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formMembershipRule === "criteria" && (
+                      <div className="ml-6 mt-3 grid gap-2 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-membership-photo" checked={formMembershipCriteria.includes("Profile photo added")} onCheckedChange={() => setFormMembershipCriteria(prev => prev.includes("Profile photo added") ? prev.filter(x => x !== "Profile photo added") : [...prev, "Profile photo added"])} />
+                          <Label htmlFor="form-membership-photo" className="text-[11px] text-card-foreground cursor-pointer">Profile photo added</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of posts <span className="text-destructive">*</span></label>
@@ -1387,6 +1395,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formPostReview === "criteria" && (
+                      <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-post-review-criterion" checked={formPostReviewCriteria.includes("First logged in to the platform in past 30 days")} onCheckedChange={() => setFormPostReviewCriteria(prev => prev.includes("First logged in to the platform in past 30 days") ? [] : ["First logged in to the platform in past 30 days"])} />
+                          <Label htmlFor="form-post-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">First logged in to the platform in past 30 days</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-2 block">Rules for review of content items <span className="text-destructive">*</span></label>
@@ -1400,6 +1416,14 @@ const MyCommunities = () => {
                         </label>
                       ))}
                     </div>
+                    {formContentReview === "criteria" && (
+                      <div className="ml-6 mt-3 border-l-2 border-border pl-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="form-content-review-criterion" checked={formContentReviewCriteria.includes("First logged in to the platform in past 30 days")} onCheckedChange={() => setFormContentReviewCriteria(prev => prev.includes("First logged in to the platform in past 30 days") ? [] : ["First logged in to the platform in past 30 days"])} />
+                          <Label htmlFor="form-content-review-criterion" className="text-[11px] text-card-foreground cursor-pointer">First logged in to the platform in past 30 days</Label>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-medium text-card-foreground mb-1.5 block">Invite expiry date <span className="text-destructive">*</span></label>
