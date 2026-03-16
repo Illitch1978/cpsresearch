@@ -40,6 +40,7 @@ import {
   faArrowRight,
   faUserShield,
   faTrashAlt,
+  faBoxArchive,
   faBan,
   faCopy,
   faCheck,
