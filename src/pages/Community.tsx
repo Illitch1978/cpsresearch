@@ -2969,6 +2969,14 @@ const Community = () => {
                   </div>
                 </div>
 
+                {/* Show archived events toggle */}
+                {archivedEvents.size > 0 && (
+                  <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input type="checkbox" checked={showArchivedEvents} onChange={() => setShowArchivedEvents(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                    <span className="text-muted-foreground">Show archived ({archivedEvents.size})</span>
+                  </label>
+                )}
+
                 {(() => {
                   const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
                   const parseEventDate = (d: string) => {
