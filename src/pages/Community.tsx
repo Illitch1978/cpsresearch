@@ -2842,6 +2842,9 @@ const Community = () => {
                           }
                           return playlistSortDir === "desc" ? -cmp : cmp;
                         });
+                        if (!showArchivedPlaylists) {
+                          allPl = allPl.filter(pl => !archivedPlaylists.has(pl.id));
+                        }
                         if (allPl.length === 0) {
                           return <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">No playlists match your search.</div>;
                         }
