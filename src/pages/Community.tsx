@@ -1072,6 +1072,8 @@ const Community = () => {
           selectedSectors: [...editFormSelectedSectors],
           orgTypeFilter: editFormOrgTypeFilter,
           selectedOrgTypes: [...editFormSelectedOrgTypes],
+          orgSizeFilter: editFormOrgSizeFilter,
+          selectedOrgSizes: [...editFormSelectedOrgSizes],
           expertiseFilter: editFormExpertiseFilter,
           selectedExpertise: [...editFormSelectedExpertise],
           externalFactorFilter: editFormExternalFactorFilter,
