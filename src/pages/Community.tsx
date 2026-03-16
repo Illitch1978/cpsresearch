@@ -583,9 +583,6 @@ interface CommunityRecord {
 
 const membershipCriteriaOptions = [
   "Profile photo added",
-  "Earned 100 learning points",
-  "Evaluated five content items",
-  "Curated five playlists",
 ] as const;
 
 const reviewCriteriaOption = "First logged in to the platform in past 30 days";
