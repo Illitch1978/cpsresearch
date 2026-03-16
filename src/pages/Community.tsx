@@ -1128,6 +1128,35 @@ const Community = () => {
   const [playlistSort, setPlaylistSort] = useState<"name" | "curator" | "date" | "likes">("date");
   const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
+  // Archive state
+  const [archivedDiscussions, setArchivedDiscussions] = useState<Set<string>>(new Set());
+  const [archivedReplies, setArchivedReplies] = useState<Set<string>>(new Set());
+  const [archivedResources, setArchivedResources] = useState<Set<string>>(new Set());
+  const [archivedEvents, setArchivedEvents] = useState<Set<string>>(new Set());
+  const [archivedPlaylists, setArchivedPlaylists] = useState<Set<string>>(new Set());
+  const [archivedGroups, setArchivedGroups] = useState<Set<string>>(new Set());
+  const [archivedGroupDiscussions, setArchivedGroupDiscussions] = useState<Set<string>>(new Set());
+  const [archivedGroupResources, setArchivedGroupResources] = useState<Set<string>>(new Set());
+  const [showArchivedDiscussions, setShowArchivedDiscussions] = useState(false);
+  const [showArchivedResources, setShowArchivedResources] = useState(false);
+  const [showArchivedEvents, setShowArchivedEvents] = useState(false);
+  const [showArchivedPlaylists, setShowArchivedPlaylists] = useState(false);
+  const [showArchivedGroups, setShowArchivedGroups] = useState(false);
+
+  const toggleArchive = (set: Set<string>, setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) => {
+    setter(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  // Check if current user can archive an item
+  // Posts, replies, resources, playlists, groups: admin + author + HQ
+  // Events: admin + HQ only (not the person who added)
+  const canArchiveContent = (authorId?: string) => isAdmin || isHQ || authorId === "self";
+  const canArchiveEvent = () => isAdmin || isHQ;
+
   // Members tab sort/search state
   // Groups tab state
   const [groupSearch, setGroupSearch] = useState("");
