@@ -2812,7 +2812,15 @@ const Community = () => {
                             {playlistSort === s && <span className="ml-0.5">{playlistSortDir === "asc" ? "↑" : "↓"}</span>}
                           </button>
                         ))}
-                      </div>
+                    </div>
+
+                    {/* Show archived playlists toggle */}
+                    {archivedPlaylists.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none mb-2">
+                        <input type="checkbox" checked={showArchivedPlaylists} onChange={() => setShowArchivedPlaylists(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedPlaylists.size})</span>
+                      </label>
+                    )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
