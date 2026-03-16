@@ -3601,7 +3601,8 @@ const Community = () => {
                         </div>
                       </div>
                     </div>
-                    ));
+                    );
+                    });
                   })()}
                 </div>
               </TabsContent>
