@@ -3047,6 +3047,11 @@ const Community = () => {
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center gap-2">
                                 <EventTypeBadge type={e.type} />
+                                {eIsArchived && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1">
+                                    <FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" /> Archived
+                                  </span>
+                                )}
                                 {e.recurring && (
                                   <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
                                     <FontAwesomeIcon icon={faRepeat} className="text-[8px]" />
