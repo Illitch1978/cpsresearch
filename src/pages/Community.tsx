@@ -2041,6 +2041,14 @@ const Community = () => {
                       </div>
                     </div>
 
+                    {/* Show archived toggle */}
+                    {archivedDiscussions.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                        <input type="checkbox" checked={showArchivedDiscussions} onChange={() => setShowArchivedDiscussions(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedDiscussions.size})</span>
+                      </label>
+                    )}
+
                     {/* Tag Filter Bar */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-muted-foreground flex items-center gap-1.5">
