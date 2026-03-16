@@ -344,6 +344,8 @@ const MyCommunities = () => {
   const [formExpandedSectors, setFormExpandedSectors] = useState<string[]>([]);
   const [formOrgTypeFilter, setFormOrgTypeFilter] = useState("any");
   const [formSelectedOrgTypes, setFormSelectedOrgTypes] = useState<string[]>([]);
+  const [formOrgSizeFilter, setFormOrgSizeFilter] = useState("any");
+  const [formSelectedOrgSizes, setFormSelectedOrgSizes] = useState<string[]>([]);
   const [formExpertiseFilter, setFormExpertiseFilter] = useState("any");
   const [formSelectedExpertise, setFormSelectedExpertise] = useState<string[]>([]);
   const [formExternalFactorFilter, setFormExternalFactorFilter] = useState("any");
