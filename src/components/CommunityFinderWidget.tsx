@@ -132,6 +132,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
     setSourceFilter("all"); setSelectedSectors([]); setLocationFilter("any");
     setSelectedContinents([]); setSelectedCountries([]); setExpertiseFilter("any");
     setSelectedExpertise([]); setOrgTypeFilter("any"); setSelectedOrgTypes([]);
+    setOrgSizeFilter("any"); setSelectedOrgSizes([]);
     setExternalFactorFilter("any"); setSelectedExternalFactors([]); setSelectedContributions([]);
   };
 
