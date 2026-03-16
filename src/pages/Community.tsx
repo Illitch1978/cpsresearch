@@ -40,6 +40,7 @@ import {
   faArrowRight,
   faUserShield,
   faTrashAlt,
+  faBoxArchive,
   faBan,
   faCopy,
   faCheck,
@@ -1127,6 +1128,35 @@ const Community = () => {
   const [playlistSort, setPlaylistSort] = useState<"name" | "curator" | "date" | "likes">("date");
   const [playlistSortDir, setPlaylistSortDir] = useState<"asc" | "desc">("desc");
 
+  // Archive state
+  const [archivedDiscussions, setArchivedDiscussions] = useState<Set<string>>(new Set());
+  const [archivedReplies, setArchivedReplies] = useState<Set<string>>(new Set());
+  const [archivedResources, setArchivedResources] = useState<Set<string>>(new Set());
+  const [archivedEvents, setArchivedEvents] = useState<Set<string>>(new Set());
+  const [archivedPlaylists, setArchivedPlaylists] = useState<Set<string>>(new Set());
+  const [archivedGroups, setArchivedGroups] = useState<Set<string>>(new Set());
+  const [archivedGroupDiscussions, setArchivedGroupDiscussions] = useState<Set<string>>(new Set());
+  const [archivedGroupResources, setArchivedGroupResources] = useState<Set<string>>(new Set());
+  const [showArchivedDiscussions, setShowArchivedDiscussions] = useState(false);
+  const [showArchivedResources, setShowArchivedResources] = useState(false);
+  const [showArchivedEvents, setShowArchivedEvents] = useState(false);
+  const [showArchivedPlaylists, setShowArchivedPlaylists] = useState(false);
+  const [showArchivedGroups, setShowArchivedGroups] = useState(false);
+
+  const toggleArchive = (set: Set<string>, setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) => {
+    setter(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  // Check if current user can archive an item
+  // Posts, replies, resources, playlists, groups: admin + author + HQ
+  // Events: admin + HQ only (not the person who added)
+  const canArchiveContent = (authorId?: string) => isAdmin || isHQ || authorId === "self";
+  const canArchiveEvent = () => isAdmin || isHQ;
+
   // Members tab sort/search state
   // Groups tab state
   const [groupSearch, setGroupSearch] = useState("");
@@ -1448,8 +1478,9 @@ const Community = () => {
     };
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
-    return [...pinned, ...unpinned];
-  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions]);
+    const combined = [...pinned, ...unpinned];
+    return showArchivedDiscussions ? combined : combined.filter(d => !archivedDiscussions.has(d.id));
+  }, [selectedTag, discussionSearch, discussionSort, discussionSortDir, pinnedDiscussions, showArchivedDiscussions, archivedDiscussions]);
 
   // Sorted/filtered resources
   const sortedResources = useMemo(() => {
@@ -1461,7 +1492,8 @@ const Community = () => {
     if (resourceSort === "pinned") {
       const pinned = list.filter(r => pinnedResources.has(r.id));
       const unpinned = list.filter(r => !pinnedResources.has(r.id));
-      return resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+      const combined = resourceSortDir === "asc" ? [...pinned, ...unpinned] : [...unpinned, ...pinned];
+      return showArchivedResources ? combined : combined.filter(r => !archivedResources.has(r.id));
     }
     const pinned = list.filter(r => pinnedResources.has(r.id));
     const unpinned = list.filter(r => !pinnedResources.has(r.id));
@@ -1476,8 +1508,9 @@ const Community = () => {
     };
     pinned.sort(sortFn);
     unpinned.sort(sortFn);
-    return [...pinned, ...unpinned];
-  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes]);
+    const combined = [...pinned, ...unpinned];
+    return showArchivedResources ? combined : combined.filter(r => !archivedResources.has(r.id));
+  }, [communityResources, resourceSearch, resourceSort, resourceSortDir, pinnedResources, resourceLikes, showArchivedResources, archivedResources]);
 
   
 
@@ -2008,6 +2041,14 @@ const Community = () => {
                       </div>
                     </div>
 
+                    {/* Show archived toggle */}
+                    {archivedDiscussions.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                        <input type="checkbox" checked={showArchivedDiscussions} onChange={() => setShowArchivedDiscussions(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedDiscussions.size})</span>
+                      </label>
+                    )}
+
                     {/* Tag Filter Bar */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-muted-foreground flex items-center gap-1.5">
@@ -2031,8 +2072,10 @@ const Community = () => {
                     </div>
 
                     {/* Discussion List */}
-                    {filteredDiscussions.map(d => (
-                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                    {filteredDiscussions.map(d => {
+                      const dIsArchived = archivedDiscussions.has(d.id);
+                      return (
+                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${dIsArchived ? "opacity-60" : ""} ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             <button onClick={() => setSelectedMember(d.author)} className="shrink-0">
@@ -2044,6 +2087,7 @@ const Community = () => {
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
+                                {dIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
                                 {pinnedDiscussions.has(d.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                                 {d.repliesDisabled && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30 flex items-center gap-1"><FontAwesomeIcon icon={faLock} className="text-[8px]" />Replies closed</Badge>}
                                 <button onClick={() => setSelectedDiscussion(d)} className="text-sm font-semibold text-card-foreground leading-snug hover:text-primary transition-colors text-left">{d.title}</button>
@@ -2086,6 +2130,15 @@ const Community = () => {
                                 <FontAwesomeIcon icon={faThumbtack} />
                               </button>
                             )}
+                            {canArchiveContent(d.author.id) && (
+                              <button
+                                onClick={() => toggleArchive(archivedDiscussions, setArchivedDiscussions, d.id)}
+                                className={`text-xs transition-colors ${dIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
+                                title={dIsArchived ? "De-archive discussion" : "Archive discussion"}
+                              >
+                                <FontAwesomeIcon icon={faBoxArchive} />
+                              </button>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-5 mt-4 pt-3 border-t border-gray-50 text-xs text-muted-foreground">
@@ -2100,7 +2153,8 @@ const Community = () => {
                           </button>
                         </div>
                       </article>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Sidebar — Active Members */}
@@ -2414,6 +2468,14 @@ const Community = () => {
                         </button>
                       ))}
                     </div>
+
+                    {/* Show archived toggle */}
+                    {archivedResources.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                        <input type="checkbox" checked={showArchivedResources} onChange={() => setShowArchivedResources(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedResources.size})</span>
+                      </label>
+                    )}
                   </div>
 
                   {/* Add Resource Form */}
@@ -2471,8 +2533,12 @@ const Community = () => {
                   )}
 
                   {/* Resource List */}
-                  {sortedResources.map(r => (
-                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                  {sortedResources.map(r => {
+                    const rIsArchived = archivedResources.has(r.id);
+                    // For mock resources, use author string to check if "self" authored it
+                    const rAuthorId = r.author === "Richard Chaplin" ? "self" : undefined;
+                    return (
+                    <div key={r.id} className={`bg-white border rounded-lg p-5 flex items-start gap-4 hover:shadow-sm transition-shadow ${rIsArchived ? "opacity-60" : ""} ${pinnedResources.has(r.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                       <div className="flex items-center gap-3 shrink-0">
                         <label className="flex items-center cursor-pointer" title="Make available for playlists">
                           <input
@@ -2488,6 +2554,7 @@ const Community = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
+                          {rIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
                           {pinnedResources.has(r.id) && <Badge className="bg-primary/10 text-primary border-0 text-[10px] px-1.5 py-0"><FontAwesomeIcon icon={faThumbtack} className="text-[8px] mr-1" />Pinned</Badge>}
                           <h3 className="text-sm font-semibold text-card-foreground">{r.title}</h3>
                         </div>
@@ -2539,9 +2606,19 @@ const Community = () => {
                             <FontAwesomeIcon icon={faThumbtack} />
                           </button>
                         )}
+                        {canArchiveContent(rAuthorId) && (
+                          <button
+                            onClick={() => toggleArchive(archivedResources, setArchivedResources, r.id)}
+                            className={`text-xs transition-colors ${rIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
+                            title={rIsArchived ? "De-archive resource" : "Archive resource"}
+                          >
+                            <FontAwesomeIcon icon={faBoxArchive} />
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </TabsContent>
 
@@ -2735,7 +2812,15 @@ const Community = () => {
                             {playlistSort === s && <span className="ml-0.5">{playlistSortDir === "asc" ? "↑" : "↓"}</span>}
                           </button>
                         ))}
-                      </div>
+                    </div>
+
+                    {/* Show archived playlists toggle */}
+                    {archivedPlaylists.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none mb-2">
+                        <input type="checkbox" checked={showArchivedPlaylists} onChange={() => setShowArchivedPlaylists(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedPlaylists.size})</span>
+                      </label>
+                    )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2757,18 +2842,26 @@ const Community = () => {
                           }
                           return playlistSortDir === "desc" ? -cmp : cmp;
                         });
+                        if (!showArchivedPlaylists) {
+                          allPl = allPl.filter(pl => !archivedPlaylists.has(pl.id));
+                        }
                         if (allPl.length === 0) {
                           return <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">No playlists match your search.</div>;
                         }
-                        return allPl.map(pl => (
-                        <div key={pl.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
+                        return allPl.map(pl => {
+                        const plIsArchived = archivedPlaylists.has(pl.id);
+                        return (
+                        <div key={pl.id} className={`bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow ${plIsArchived ? "opacity-60" : ""}`}>
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                                 <FontAwesomeIcon icon={faListAlt} className="text-sm" />
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold text-card-foreground">{pl.name}</h4>
+                                <div className="flex items-center gap-1.5">
+                                  {plIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
+                                  <h4 className="text-sm font-semibold text-card-foreground">{pl.name}</h4>
+                                </div>
                                 <p className="text-[11px] text-muted-foreground">
                                   by {pl.author.id === "self" ? <span className="text-primary font-medium">You</span> : pl.author.name} · {pl.createdDate}
                                 </p>
@@ -2815,11 +2908,22 @@ const Community = () => {
                           )}
 
                           <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                            <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] text-muted-foreground">{pl.items.length} {pl.items.length === 1 ? "resource" : "resources"}</span>
+                              {canArchiveContent(pl.author.id) && (
+                                <button
+                                  onClick={() => toggleArchive(archivedPlaylists, setArchivedPlaylists, pl.id)}
+                                  className={`text-[10px] flex items-center gap-1 transition-colors ${plIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {plIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              )}
+                            </div>
                             <button onClick={() => setViewPlaylistId(viewPlaylistId === pl.id ? null : pl.id)} className="text-xs font-medium text-primary hover:underline">{viewPlaylistId === pl.id ? "Close ↑" : "View resources →"}</button>
                           </div>
                         </div>
-                      ));
+                        );
+                        });
                       })()}
                     </div>
                   </div>
@@ -2892,6 +2996,14 @@ const Community = () => {
                   </div>
                 </div>
 
+                {/* Show archived events toggle */}
+                {archivedEvents.size > 0 && (
+                  <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                    <input type="checkbox" checked={showArchivedEvents} onChange={() => setShowArchivedEvents(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                    <span className="text-muted-foreground">Show archived ({archivedEvents.size})</span>
+                  </label>
+                )}
+
                 {(() => {
                   const monthOrder: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
                   const parseEventDate = (d: string) => {
@@ -2925,6 +3037,11 @@ const Community = () => {
                     return matchesSearch && matchesType && matchesStatus;
                   });
 
+                  // Filter out archived events unless showing them
+                  if (!showArchivedEvents) {
+                    filtered = filtered.filter(e => !archivedEvents.has(e.id));
+                  }
+
                   filtered.sort((a, b) => {
                     let cmp = 0;
                     switch (eventSort) {
@@ -2951,11 +3068,17 @@ const Community = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {filtered.map(e => {
                         const status = getEventStatus(e);
+                        const eIsArchived = archivedEvents.has(e.id);
                         return (
-                          <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${e.recurring ? "border-primary/20" : "border-border"}`}>
+                          <div key={e.id} className={`bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow ${eIsArchived ? "opacity-60" : ""} ${e.recurring ? "border-primary/20" : "border-border"}`}>
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center gap-2">
                                 <EventTypeBadge type={e.type} />
+                                {eIsArchived && (
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1">
+                                    <FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" /> Archived
+                                  </span>
+                                )}
                                 {e.recurring && (
                                   <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
                                     <FontAwesomeIcon icon={faRepeat} className="text-[8px]" />
@@ -3013,6 +3136,17 @@ const Community = () => {
                             ) : (
                               <span className="mt-4 text-xs text-muted-foreground italic">Not eligible for this event</span>
                             )}
+                            {/* Archive button — admin + HQ only for events */}
+                            {canArchiveEvent() && (
+                              <div className="mt-3 pt-2 border-t border-border/50 flex justify-end">
+                                <button
+                                  onClick={() => toggleArchive(archivedEvents, setArchivedEvents, e.id)}
+                                  className={`text-[10px] flex items-center gap-1 transition-colors ${eIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {eIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -3067,7 +3201,15 @@ const Community = () => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                    </div>
+
+                    {/* Show archived groups toggle */}
+                    {archivedGroups.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                        <input type="checkbox" checked={showArchivedGroups} onChange={() => setShowArchivedGroups(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedGroups.size})</span>
+                      </label>
+                    )}
 
                   {/* Viewing a specific group */}
                   {viewingGroup && (
@@ -3408,11 +3550,16 @@ const Community = () => {
                       }
                       return groupSortDir === "desc" ? -cmp : cmp;
                     });
+                    if (!showArchivedGroups) {
+                      groups = groups.filter(g => !archivedGroups.has(g.id));
+                    }
                     if (groups.length === 0) {
                       return <div className="text-center py-8 text-sm text-muted-foreground">No groups match your search.</div>;
                     }
-                    return groups.map(group => (
-                    <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all">
+                    return groups.map(group => {
+                    const gIsArchived = archivedGroups.has(group.id);
+                    return (
+                    <div key={group.id} className={`bg-white border border-gray-200 rounded-lg p-5 sm:p-6 hover:shadow-md hover:border-primary/20 transition-all ${gIsArchived ? "opacity-60" : ""}`}>
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 text-primary font-serif font-semibold text-sm flex items-center justify-center shrink-0">
                           {group.avatar}
@@ -3420,7 +3567,10 @@ const Community = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
+                              <div className="flex items-center gap-2">
+                                {gIsArchived && <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-600 border-amber-300 flex items-center gap-1"><FontAwesomeIcon icon={faBoxArchive} className="text-[8px]" />Archived</Badge>}
+                                <h3 className="text-base font-serif font-semibold text-card-foreground">{group.name}</h3>
+                              </div>
                               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{group.description}</p>
                             </div>
                             {!joinedGroups.has(group.id) ? (
@@ -3457,12 +3607,22 @@ const Community = () => {
                                 ))}
                               </div>
                               <button onClick={() => setViewingGroup(group)} className="ml-3 text-xs font-medium text-primary hover:underline">View group →</button>
+                              {canArchiveContent(group.lead.id) && (
+                                <button
+                                  onClick={(ev) => { ev.stopPropagation(); toggleArchive(archivedGroups, setArchivedGroups, group.id); }}
+                                  className={`ml-2 text-[10px] flex items-center gap-1 transition-colors ${gIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                  title={gIsArchived ? "De-archive group" : "Archive group"}
+                                >
+                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {gIsArchived ? "De-archive" : "Archive"}
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    ));
+                    );
+                    });
                   })()}
                 </div>
               </TabsContent>
