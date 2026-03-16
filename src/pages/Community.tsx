@@ -3974,13 +3974,18 @@ const Community = () => {
                             )}
                           </div>
 
+                          {/* Validation message */}
+                          {!editFormCriteriaValid && (
+                            <p className="text-[11px] text-destructive">Please select at least one criterion checkbox for each review rule set to "criteria".</p>
+                          )}
+
                           {/* Actions */}
                           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                             <button onClick={() => setShowManageDetails(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors">Cancel</button>
                             <button
                               onClick={handleSaveManageDetails}
-                              disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0}
-                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                              disabled={!editFormName.trim() || !editFormSummary.trim() || editFormSelectedContributions.length === 0 || !editFormCriteriaValid}
+                              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${editFormName.trim() && editFormSummary.trim() && editFormSelectedContributions.length > 0 && editFormCriteriaValid ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                             >
                               {editFormSaving ? "Saving…" : "Save changes"}
                             </button>
