@@ -3201,7 +3201,15 @@ const Community = () => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                    </div>
+
+                    {/* Show archived groups toggle */}
+                    {archivedGroups.size > 0 && (
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer select-none">
+                        <input type="checkbox" checked={showArchivedGroups} onChange={() => setShowArchivedGroups(v => !v)} className="accent-[hsl(var(--primary))] w-3.5 h-3.5 rounded cursor-pointer" />
+                        <span className="text-muted-foreground">Show archived ({archivedGroups.size})</span>
+                      </label>
+                    )}
 
                   {/* Viewing a specific group */}
                   {viewingGroup && (
