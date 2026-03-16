@@ -2075,7 +2075,7 @@ const Community = () => {
                     {filteredDiscussions.map(d => {
                       const dIsArchived = archivedDiscussions.has(d.id);
                       return (
-                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
+                      <article key={d.id} className={`bg-white border rounded-lg p-5 transition-all hover:shadow-sm ${dIsArchived ? "opacity-60" : ""} ${pinnedDiscussions.has(d.id) ? "border-primary/20 bg-primary/[0.02]" : "border-gray-200"}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             <button onClick={() => setSelectedMember(d.author)} className="shrink-0">
