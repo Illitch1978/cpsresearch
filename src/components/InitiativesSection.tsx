@@ -7,7 +7,7 @@ const initiatives = [
   {
     title: "Credible voices marketplace",
     description:
-      "The Centre maintains a curated pool of researchers and practitioners willing to contribute to consultations, panels and media commentary. Selection is based on evidence of sustained, high quality contribution rather than seniority or profile.",
+      "The Centre maintains a curated pool of researchers and practitioners willing to contribute to consultations, panels and media commentary. Selection is based on evidence of sustained, high quality contribution rather than seniority or profile. The marketplace connects organisations seeking credible, independent expertise with voices who bring both rigour and practical insight, ensuring public and policy debate is informed by those closest to the work.",
   },
   {
     title: "Peer led research projects",
@@ -17,7 +17,7 @@ const initiatives = [
   {
     title: "Learning and development in professional services",
     description:
-      "The Centre investigates how professional services firms develop talent, build capabilities and foster continuous learning. Research covers emerging models for skills development, knowledge sharing and career progression that respond to changing client expectations and workforce dynamics.",
+      "The Centre investigates how professional services firms develop talent, build capabilities and foster continuous learning. Research covers emerging models for skills development, knowledge sharing and career progression that respond to changing client expectations and workforce dynamics. Work in this area draws on evidence from across the sector to identify what distinguishes firms that consistently build deep, adaptable expertise from those that rely on traditional approaches alone.",
   },
   {
     title: "Innovation across professional services",
