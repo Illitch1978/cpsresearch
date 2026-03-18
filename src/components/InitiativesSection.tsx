@@ -2,7 +2,7 @@ const initiatives = [
   {
     title: "Quarterly professional services trend analysis",
     description:
-      "The Centre publishes a quarterly trend analysis examining key themes and topics shaping the professional services sector, including shifts in client demand, competitive dynamics, talent markets and regulatory developments. It is used by leadership teams, investors and policymakers as a timely, evidence based reference point.",
+      "The Centre publishes a quarterly trend analysis examining key themes and topics shaping the professional services sector, including shifts in client demand, competitive dynamics, talent markets and regulatory developments. It is used by leadership teams, investors and policymakers as a timely, evidence based reference point. Each edition draws on a blend of proprietary research, practitioner insight and public data to surface the trends that matter most to firms navigating an evolving landscape.",
   },
   {
     title: "Credible voices marketplace",
