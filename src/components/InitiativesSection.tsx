@@ -1,13 +1,8 @@
 const initiatives = [
   {
-    title: "Annual state of professional services report",
+    title: "Quarterly professional services trend analysis",
     description:
-      "The Centre publishes a flagship annual report providing an objective overview of performance, trends and structural shifts across the sector, including productivity, talent, innovation and regulation as recurring chapters. It is used by government departments, investors and leadership teams as a shared reference point.",
-  },
-  {
-    title: "Quarterly insight briefings for policy and leadership",
-    description:
-      "Short, focused briefings translate current research and member contributions into implications for policy, regulation and firm strategy, covering immediate challenges like AI adoption or regulatory divergence. These are designed to be read and used in boardrooms and policy discussions.",
+      "The Centre publishes a quarterly trend analysis examining key themes and topics shaping the professional services sector, including shifts in client demand, competitive dynamics, talent markets and regulatory developments. It is used by leadership teams, investors and policymakers as a timely, evidence based reference point.",
   },
   {
     title: "Credible voices marketplace",
@@ -20,17 +15,21 @@ const initiatives = [
       "Each year the Centre sponsors a small number of collaborative research projects led by mixed teams of academics and practitioners. Outputs are formally published under the Centre banner and presented at open events.",
   },
   {
-    title: "Centre seminars and public lectures",
+    title: "Learning and development in professional services",
     description:
-      "The Centre runs a programme of in person and hybrid events where new research findings are presented and debated. These events are open to members and invited external audiences, supporting visibility and informed dialogue.",
+      "The Centre investigates how professional services firms develop talent, build capabilities and foster continuous learning. Research covers emerging models for skills development, knowledge sharing and career progression that respond to changing client expectations and workforce dynamics.",
   },
   {
-    title: "Collaborative commissions on priority topics",
+    title: "Innovation across professional services",
     description:
-      "Where there is clear sector wide interest, the Centre brings together funders and contributors to commission independent research on a defined issue. The Centre oversees scope, quality and dissemination to ensure neutrality.",
+      "The Centre examines how firms across the sector approach innovation in service delivery, business models and client engagement. Work in this area surfaces practical examples, identifies barriers and shares frameworks that help firms move from experimentation to sustained, scalable change.",
+  },
+  {
+    title: "AI in professional services",
+    description:
+      "The Centre connects leading initiatives, surfaces practical use cases and addresses risk management challenges as AI reshapes professional services. Research covers adoption strategies, governance frameworks and the evolving boundary between human expertise and machine capability.",
   },
 ];
-
 const InitiativesSection = () => {
   return (
     <section id="initiatives" className="py-24 bg-cream-dark">
