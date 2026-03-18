@@ -3143,8 +3143,9 @@ const Community = () => {
                                 <button
                                   onClick={() => toggleArchive(archivedEvents, setArchivedEvents, e.id)}
                                   className={`text-[10px] flex items-center gap-1 transition-colors ${eIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                  title={eIsArchived ? "De-archive event" : "Archive event"}
                                 >
-                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {eIsArchived ? "De-archive" : "Archive"}
+                                  <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
                                 </button>
                               </div>
                             )}
