@@ -42,10 +42,10 @@ const InitiativesSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {initiatives.map((initiative, index) => (
             <div key={index} className="initiative-card group">
-              <h3 className="text-2xl font-serif font-medium text-slate-900 mb-4 group-hover:text-brand-red transition-colors duration-300">
+              <h3 className="text-xl font-serif font-medium text-slate-900 mb-5 group-hover:text-brand-red transition-colors duration-300">
                 {initiative.title}
               </h3>
-              <p className="text-slate-600 font-light text-base mt-auto">
+              <p className="text-slate-600 font-light text-sm leading-relaxed mt-auto">
                 {initiative.description}
               </p>
             </div>
