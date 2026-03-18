@@ -3615,7 +3615,7 @@ const Community = () => {
                                   className={`ml-2 text-[10px] flex items-center gap-1 transition-colors ${gIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
                                   title={gIsArchived ? "De-archive group" : "Archive group"}
                                 >
-                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {gIsArchived ? "De-archive" : "Archive"}
+                                  <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
                                 </button>
                               )}
                             </div>
