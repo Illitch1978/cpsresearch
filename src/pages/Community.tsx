@@ -5163,8 +5163,15 @@ const Community = () => {
                 {allReplies.map(reply => {
                   const isNested = !!reply.parentId;
                   const replyLiked = likedItems.has(`reply-${reply.id}`);
+                  const rIsArchived = archivedReplies.has(reply.id);
+                  if (rIsArchived && !showArchivedDiscussions) return null;
+                  const canEditReply = reply.author.id === "self" && (() => {
+                    const posted = replyTimestamps[reply.id];
+                    if (!posted) return false;
+                    return (Date.now() - posted) < 12 * 60 * 60 * 1000;
+                  })();
                   return (
-                    <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"}`}>
+                    <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"} ${rIsArchived ? "opacity-60" : ""}`}>
                       <div className="flex items-start gap-3">
                         <button onClick={() => setSelectedMember(reply.author)} className="shrink-0">
                           <Avatar className={`${isNested ? "h-7 w-7" : "h-8 w-8"}`}>
@@ -5180,6 +5187,8 @@ const Community = () => {
                             <span>·</span>
                             <span>{reply.date}</span>
                             {reply.author.id === "self" && <Badge className="bg-primary/10 text-primary border-0 text-[9px] px-1.5 py-0 ml-1">You</Badge>}
+                            {rIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300 ml-1">Archived</Badge>}
+                            {reply.edited && <span className="text-[10px] text-muted-foreground/60 italic ml-1">(edited)</span>}
                           </div>
                           {reply.parentId && (() => {
                             const parent = allReplies.find(r => r.id === reply.parentId);
@@ -5189,7 +5198,22 @@ const Community = () => {
                               </p>
                             ) : null;
                           })()}
-                          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
+                          {editingReplyId === reply.id ? (
+                            <div className="mt-1.5 space-y-1.5">
+                              <textarea
+                                value={editingReplyText}
+                                onChange={e => setEditingReplyText(e.target.value)}
+                                className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                                rows={2}
+                              />
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => { if (!editingReplyText.trim()) return; handleSaveEditReply(reply.id, editingReplyText.trim()); }} className="text-[10px] px-3 py-1 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90">Save</button>
+                                <button onClick={() => { setEditingReplyId(null); setEditingReplyText(""); }} className="text-[10px] px-3 py-1 text-muted-foreground hover:text-foreground">Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
+                          )}
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                             <button
                               onClick={() => toggleLike(`reply-${reply.id}`)}
@@ -5203,6 +5227,24 @@ const Community = () => {
                             >
                               Reply
                             </button>
+                            {canEditReply && editingReplyId !== reply.id && (
+                              <button
+                                onClick={() => { setEditingReplyId(reply.id); setEditingReplyText(reply.content); }}
+                                className="transition-colors hover:text-primary"
+                                title="Edit reply (within 12 hours)"
+                              >
+                                <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Edit
+                              </button>
+                            )}
+                            {canArchiveContent(reply.author.id) && (
+                              <button
+                                onClick={() => toggleArchive(archivedReplies, setArchivedReplies, reply.id)}
+                                className={`transition-colors ${rIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                title={rIsArchived ? "De-archive reply" : "Archive reply"}
+                              >
+                                <FontAwesomeIcon icon={faTrashAlt} className="text-[10px]" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
