@@ -2136,7 +2136,7 @@ const Community = () => {
                                 className={`text-xs transition-colors ${dIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
                                 title={dIsArchived ? "De-archive discussion" : "Archive discussion"}
                               >
-                                <FontAwesomeIcon icon={faBoxArchive} />
+                                <FontAwesomeIcon icon={faTrashAlt} />
                               </button>
                             )}
                           </div>
