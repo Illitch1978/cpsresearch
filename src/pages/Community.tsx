@@ -1426,20 +1426,37 @@ const Community = () => {
 
   const handleSubmitReply = () => {
     if (!replyText.trim() || !selectedDiscussion) return;
+    const now = Date.now();
+    const replyId = `user-${now}`;
     const newReply: Reply = {
-      id: `user-${Date.now()}`,
+      id: replyId,
       author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
       content: replyText.trim(),
       date: "Just now",
       likes: 0,
       parentId: replyingTo?.id,
+      timestamp: now,
     };
     setThreadReplies(prev => ({
       ...prev,
       [selectedDiscussion.id]: [...(prev[selectedDiscussion.id] || []), newReply],
     }));
+    setReplyTimestamps(prev => ({ ...prev, [replyId]: now }));
     setReplyText("");
     setReplyingTo(null);
+  };
+
+  const handleSaveEditReply = (replyId: string, newContent: string) => {
+    if (!selectedDiscussion) return;
+    setThreadReplies(prev => {
+      const discReplies = prev[selectedDiscussion.id] || [];
+      return {
+        ...prev,
+        [selectedDiscussion.id]: discReplies.map(r => r.id === replyId ? { ...r, content: newContent, edited: true } : r),
+      };
+    });
+    setEditingReplyId(null);
+    setEditingReplyText("");
   };
 
   // Close notifications on outside click
