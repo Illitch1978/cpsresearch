@@ -17,7 +17,7 @@ const initiatives = [
   {
     title: "Learning and development in professional services",
     description:
-      "The Centre investigates how professional services firms develop talent, build capabilities and foster continuous learning. Research covers emerging models for skills development, knowledge sharing and career progression that respond to changing client expectations and workforce dynamics.",
+      "The Centre investigates how professional services firms develop talent, build capabilities and foster continuous learning. Research covers emerging models for skills development, knowledge sharing and career progression that respond to changing client expectations and workforce dynamics. Work in this area draws on evidence from across the sector to identify what distinguishes firms that consistently build deep, adaptable expertise from those that rely on traditional approaches alone.",
   },
   {
     title: "Innovation across professional services",
