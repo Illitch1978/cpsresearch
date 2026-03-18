@@ -3385,13 +3385,16 @@ const Community = () => {
                         <div className="space-y-2">
                           {viewingGroup.groupDiscussions
                             .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
+                            .filter(d => !archivedGroupDiscussions.has(d.id) || showArchivedGroups)
                             .map(d => {
                               const effectiveVis = groupVisibilityOverrides[d.id] || d.visibility;
+                              const gdIsArchived = archivedGroupDiscussions.has(d.id);
                               return (
-                                <div key={d.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                <div key={d.id} className={`bg-muted/20 border border-border rounded-lg p-3 ${gdIsArchived ? "opacity-60" : ""}`}>
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap">
+                                        {gdIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300">Archived</Badge>}
                                         {d.pinned && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200 font-medium"><FontAwesomeIcon icon={faThumbtack} className="mr-0.5 text-[8px]" />Pinned</span>}
                                         <h5 className="text-xs font-semibold text-card-foreground">{d.title}</h5>
                                       </div>
@@ -3401,6 +3404,15 @@ const Community = () => {
                                         <span>{d.date}</span>
                                         <span><FontAwesomeIcon icon={faReply} className="mr-0.5" />{d.replies}</span>
                                         <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{d.likes}</span>
+                                        {canArchiveContent(d.author.id) && (
+                                          <button
+                                            onClick={() => toggleArchive(archivedGroupDiscussions, setArchivedGroupDiscussions, d.id)}
+                                            className={`transition-colors ${gdIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                            title={gdIsArchived ? "De-archive" : "Archive"}
+                                          >
+                                            <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
