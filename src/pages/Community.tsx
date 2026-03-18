@@ -5188,7 +5188,7 @@ const Community = () => {
                   const rIsArchived = archivedReplies.has(reply.id);
                   if (rIsArchived && !showArchivedDiscussions) return null;
                   const canEditReply = reply.author.id === "self" && (() => {
-                    const posted = replyTimestamps[reply.id];
+                    const posted = reply.timestamp || replyTimestamps[reply.id];
                     if (!posted) return false;
                     return (Date.now() - posted) < 12 * 60 * 60 * 1000;
                   })();
