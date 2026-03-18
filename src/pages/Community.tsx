@@ -496,6 +496,8 @@ interface Reply {
   date: string;
   likes: number;
   parentId?: string;
+  edited?: boolean;
+  timestamp?: number;
 }
 
 const mockReplies: Record<string, Reply[]> = {
@@ -855,6 +857,9 @@ const Community = () => {
   const [threadReplies, setThreadReplies] = useState<Record<string, Reply[]>>({});
   const [replyText, setReplyText] = useState("");
   const [replyingTo, setReplyingTo] = useState<Reply | null>(null);
+  const [replyTimestamps, setReplyTimestamps] = useState<Record<string, number>>({});
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [editingReplyText, setEditingReplyText] = useState("");
   const notifRef = useRef<HTMLDivElement>(null);
 
   // Leave community state
@@ -1421,20 +1426,37 @@ const Community = () => {
 
   const handleSubmitReply = () => {
     if (!replyText.trim() || !selectedDiscussion) return;
+    const now = Date.now();
+    const replyId = `user-${now}`;
     const newReply: Reply = {
-      id: `user-${Date.now()}`,
+      id: replyId,
       author: { id: "self", name: "Richard Chaplin", role: "Managing Director", firm: "PM Intelligence", joinedDate: "Jan 2025", expertise: ["Strategy", "Governance"] },
       content: replyText.trim(),
       date: "Just now",
       likes: 0,
       parentId: replyingTo?.id,
+      timestamp: now,
     };
     setThreadReplies(prev => ({
       ...prev,
       [selectedDiscussion.id]: [...(prev[selectedDiscussion.id] || []), newReply],
     }));
+    setReplyTimestamps(prev => ({ ...prev, [replyId]: now }));
     setReplyText("");
     setReplyingTo(null);
+  };
+
+  const handleSaveEditReply = (replyId: string, newContent: string) => {
+    if (!selectedDiscussion) return;
+    setThreadReplies(prev => {
+      const discReplies = prev[selectedDiscussion.id] || [];
+      return {
+        ...prev,
+        [selectedDiscussion.id]: discReplies.map(r => r.id === replyId ? { ...r, content: newContent, edited: true } : r),
+      };
+    });
+    setEditingReplyId(null);
+    setEditingReplyText("");
   };
 
   // Close notifications on outside click
@@ -2136,7 +2158,7 @@ const Community = () => {
                                 className={`text-xs transition-colors ${dIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
                                 title={dIsArchived ? "De-archive discussion" : "Archive discussion"}
                               >
-                                <FontAwesomeIcon icon={faBoxArchive} />
+                                <FontAwesomeIcon icon={faTrashAlt} />
                               </button>
                             )}
                           </div>
@@ -2612,7 +2634,7 @@ const Community = () => {
                             className={`text-xs transition-colors ${rIsArchived ? "text-amber-500" : "text-slate-300 hover:text-amber-500"}`}
                             title={rIsArchived ? "De-archive resource" : "Archive resource"}
                           >
-                            <FontAwesomeIcon icon={faBoxArchive} />
+                            <FontAwesomeIcon icon={faTrashAlt} />
                           </button>
                         )}
                       </div>
@@ -2914,8 +2936,9 @@ const Community = () => {
                                 <button
                                   onClick={() => toggleArchive(archivedPlaylists, setArchivedPlaylists, pl.id)}
                                   className={`text-[10px] flex items-center gap-1 transition-colors ${plIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                  title={plIsArchived ? "De-archive playlist" : "Archive playlist"}
                                 >
-                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {plIsArchived ? "De-archive" : "Archive"}
+                                  <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
                                 </button>
                               )}
                             </div>
@@ -3142,8 +3165,9 @@ const Community = () => {
                                 <button
                                   onClick={() => toggleArchive(archivedEvents, setArchivedEvents, e.id)}
                                   className={`text-[10px] flex items-center gap-1 transition-colors ${eIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
+                                  title={eIsArchived ? "De-archive event" : "Archive event"}
                                 >
-                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {eIsArchived ? "De-archive" : "Archive"}
+                                  <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
                                 </button>
                               </div>
                             )}
@@ -3361,13 +3385,16 @@ const Community = () => {
                         <div className="space-y-2">
                           {viewingGroup.groupDiscussions
                             .filter(d => groupDiscussionFilter === "all" || d.visibility === groupDiscussionFilter)
+                            .filter(d => !archivedGroupDiscussions.has(d.id) || showArchivedGroups)
                             .map(d => {
                               const effectiveVis = groupVisibilityOverrides[d.id] || d.visibility;
+                              const gdIsArchived = archivedGroupDiscussions.has(d.id);
                               return (
-                                <div key={d.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                <div key={d.id} className={`bg-muted/20 border border-border rounded-lg p-3 ${gdIsArchived ? "opacity-60" : ""}`}>
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap">
+                                        {gdIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300">Archived</Badge>}
                                         {d.pinned && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200 font-medium"><FontAwesomeIcon icon={faThumbtack} className="mr-0.5 text-[8px]" />Pinned</span>}
                                         <h5 className="text-xs font-semibold text-card-foreground">{d.title}</h5>
                                       </div>
@@ -3377,6 +3404,15 @@ const Community = () => {
                                         <span>{d.date}</span>
                                         <span><FontAwesomeIcon icon={faReply} className="mr-0.5" />{d.replies}</span>
                                         <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{d.likes}</span>
+                                        {canArchiveContent(d.author.id) && (
+                                          <button
+                                            onClick={() => toggleArchive(archivedGroupDiscussions, setArchivedGroupDiscussions, d.id)}
+                                            className={`transition-colors ${gdIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                            title={gdIsArchived ? "De-archive" : "Archive"}
+                                          >
+                                            <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
@@ -3482,19 +3518,33 @@ const Community = () => {
                         <div className="space-y-2">
                           {viewingGroup.groupResources
                             .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
+                            .filter(r => !archivedGroupResources.has(r.id) || showArchivedGroups)
                             .map(r => {
                               const effectiveVis = groupVisibilityOverrides[r.id] || r.visibility;
+                              const grIsArchived = archivedGroupResources.has(r.id);
                               return (
-                                <div key={r.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                <div key={r.id} className={`bg-muted/20 border border-border rounded-lg p-3 ${grIsArchived ? "opacity-60" : ""}`}>
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
-                                      <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {grIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300">Archived</Badge>}
+                                        <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      </div>
                                       <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
                                       <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
                                         <span>{r.author}</span>
                                         <span>{r.date}</span>
                                         <span><FontAwesomeIcon icon={faDownload} className="mr-0.5" />{r.downloads}</span>
                                         <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{r.likes}</span>
+                                        {canArchiveContent(undefined) && (
+                                          <button
+                                            onClick={() => toggleArchive(archivedGroupResources, setArchivedGroupResources, r.id)}
+                                            className={`transition-colors ${grIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                            title={grIsArchived ? "De-archive" : "Archive"}
+                                          >
+                                            <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
@@ -3613,7 +3663,7 @@ const Community = () => {
                                   className={`ml-2 text-[10px] flex items-center gap-1 transition-colors ${gIsArchived ? "text-amber-500 font-medium" : "text-muted-foreground hover:text-amber-500"}`}
                                   title={gIsArchived ? "De-archive group" : "Archive group"}
                                 >
-                                  <FontAwesomeIcon icon={faBoxArchive} className="text-[9px]" /> {gIsArchived ? "De-archive" : "Archive"}
+                                  <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
                                 </button>
                               )}
                             </div>
@@ -5161,8 +5211,15 @@ const Community = () => {
                 {allReplies.map(reply => {
                   const isNested = !!reply.parentId;
                   const replyLiked = likedItems.has(`reply-${reply.id}`);
+                  const rIsArchived = archivedReplies.has(reply.id);
+                  if (rIsArchived && !showArchivedDiscussions) return null;
+                  const canEditReply = reply.author.id === "self" && (() => {
+                    const posted = reply.timestamp || replyTimestamps[reply.id];
+                    if (!posted) return false;
+                    return (Date.now() - posted) < 12 * 60 * 60 * 1000;
+                  })();
                   return (
-                    <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"}`}>
+                    <div key={reply.id} className={`${isNested ? "ml-10 border-l-2 border-primary/10 pl-4" : ""} pb-4 mb-4 ${isNested ? "" : "border-b border-gray-50"} ${rIsArchived ? "opacity-60" : ""}`}>
                       <div className="flex items-start gap-3">
                         <button onClick={() => setSelectedMember(reply.author)} className="shrink-0">
                           <Avatar className={`${isNested ? "h-7 w-7" : "h-8 w-8"}`}>
@@ -5178,6 +5235,8 @@ const Community = () => {
                             <span>·</span>
                             <span>{reply.date}</span>
                             {reply.author.id === "self" && <Badge className="bg-primary/10 text-primary border-0 text-[9px] px-1.5 py-0 ml-1">You</Badge>}
+                            {rIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300 ml-1">Archived</Badge>}
+                            {reply.edited && <span className="text-[10px] text-muted-foreground/60 italic ml-1">(edited)</span>}
                           </div>
                           {reply.parentId && (() => {
                             const parent = allReplies.find(r => r.id === reply.parentId);
@@ -5187,7 +5246,22 @@ const Community = () => {
                               </p>
                             ) : null;
                           })()}
-                          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
+                          {editingReplyId === reply.id ? (
+                            <div className="mt-1.5 space-y-1.5">
+                              <textarea
+                                value={editingReplyText}
+                                onChange={e => setEditingReplyText(e.target.value)}
+                                className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                                rows={2}
+                              />
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => { if (!editingReplyText.trim()) return; handleSaveEditReply(reply.id, editingReplyText.trim()); }} className="text-[10px] px-3 py-1 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90">Save</button>
+                                <button onClick={() => { setEditingReplyId(null); setEditingReplyText(""); }} className="text-[10px] px-3 py-1 text-muted-foreground hover:text-foreground">Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{reply.content}</p>
+                          )}
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                             <button
                               onClick={() => toggleLike(`reply-${reply.id}`)}
@@ -5201,6 +5275,24 @@ const Community = () => {
                             >
                               Reply
                             </button>
+                            {canEditReply && editingReplyId !== reply.id && (
+                              <button
+                                onClick={() => { setEditingReplyId(reply.id); setEditingReplyText(reply.content); }}
+                                className="transition-colors hover:text-primary"
+                                title="Edit reply (within 12 hours)"
+                              >
+                                <FontAwesomeIcon icon={faPen} className="text-[10px]" /> Edit
+                              </button>
+                            )}
+                            {canArchiveContent(reply.author.id) && (
+                              <button
+                                onClick={() => toggleArchive(archivedReplies, setArchivedReplies, reply.id)}
+                                className={`transition-colors ${rIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                title={rIsArchived ? "De-archive reply" : "Archive reply"}
+                              >
+                                <FontAwesomeIcon icon={faTrashAlt} className="text-[10px]" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
