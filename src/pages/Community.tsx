@@ -496,6 +496,8 @@ interface Reply {
   date: string;
   likes: number;
   parentId?: string;
+  edited?: boolean;
+  timestamp?: number;
 }
 
 const mockReplies: Record<string, Reply[]> = {
