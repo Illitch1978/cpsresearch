@@ -45,7 +45,7 @@ const InitiativesSection = () => {
               <h3 className="text-xl font-serif font-medium text-slate-900 mb-3 group-hover:text-brand-red transition-colors duration-300">
                 {initiative.title}
               </h3>
-              <p className="text-slate-600 font-light text-sm leading-relaxed mt-auto">
+              <p className="text-slate-600 font-light text-sm leading-relaxed">
                 {initiative.description}
               </p>
             </div>
