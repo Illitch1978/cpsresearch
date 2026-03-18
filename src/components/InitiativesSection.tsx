@@ -12,7 +12,7 @@ const initiatives = [
   {
     title: "Peer led research projects",
     description:
-      "Each year the Centre sponsors a small number of collaborative research projects led by mixed teams of academics and practitioners. Outputs are formally published under the Centre banner and presented at open events.",
+      "Each year the Centre sponsors a small number of collaborative research projects led by mixed teams of academics and practitioners. These projects address practical questions facing the sector and produce findings grounded in both rigorous method and real world experience. Outputs are formally published under the Centre banner and presented at open events.",
   },
   {
     title: "Learning and development in professional services",
