@@ -7,7 +7,7 @@ const initiatives = [
   {
     title: "Credible voices marketplace",
     description:
-      "The Centre maintains a curated pool of researchers and practitioners willing to contribute to consultations, panels and media commentary. Selection is based on evidence of sustained, high quality contribution rather than seniority or profile.",
+      "The Centre maintains a curated pool of researchers and practitioners willing to contribute to consultations, panels and media commentary. Selection is based on evidence of sustained, high quality contribution rather than seniority or profile. The marketplace connects organisations seeking credible, independent expertise with voices who bring both rigour and practical insight, ensuring public and policy debate is informed by those closest to the work.",
   },
   {
     title: "Peer led research projects",
