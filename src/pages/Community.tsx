@@ -857,6 +857,9 @@ const Community = () => {
   const [threadReplies, setThreadReplies] = useState<Record<string, Reply[]>>({});
   const [replyText, setReplyText] = useState("");
   const [replyingTo, setReplyingTo] = useState<Reply | null>(null);
+  const [replyTimestamps, setReplyTimestamps] = useState<Record<string, number>>({});
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [editingReplyText, setEditingReplyText] = useState("");
   const notifRef = useRef<HTMLDivElement>(null);
 
   // Leave community state
