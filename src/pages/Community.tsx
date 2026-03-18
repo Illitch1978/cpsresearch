@@ -3518,19 +3518,33 @@ const Community = () => {
                         <div className="space-y-2">
                           {viewingGroup.groupResources
                             .filter(r => groupResourceFilter === "all" || r.visibility === groupResourceFilter)
+                            .filter(r => !archivedGroupResources.has(r.id) || showArchivedGroups)
                             .map(r => {
                               const effectiveVis = groupVisibilityOverrides[r.id] || r.visibility;
+                              const grIsArchived = archivedGroupResources.has(r.id);
                               return (
-                                <div key={r.id} className="bg-muted/20 border border-border rounded-lg p-3">
+                                <div key={r.id} className={`bg-muted/20 border border-border rounded-lg p-3 ${grIsArchived ? "opacity-60" : ""}`}>
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
-                                      <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        {grIsArchived && <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-amber-600 border-amber-300">Archived</Badge>}
+                                        <h5 className="text-xs font-semibold text-card-foreground">{r.title}</h5>
+                                      </div>
                                       <p className="text-[11px] text-muted-foreground mt-0.5">{r.description}</p>
                                       <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground">
                                         <span>{r.author}</span>
                                         <span>{r.date}</span>
                                         <span><FontAwesomeIcon icon={faDownload} className="mr-0.5" />{r.downloads}</span>
                                         <span><FontAwesomeIcon icon={faThumbsUp} className="mr-0.5" />{r.likes}</span>
+                                        {canArchiveContent(undefined) && (
+                                          <button
+                                            onClick={() => toggleArchive(archivedGroupResources, setArchivedGroupResources, r.id)}
+                                            className={`transition-colors ${grIsArchived ? "text-amber-500" : "hover:text-amber-500"}`}
+                                            title={grIsArchived ? "De-archive" : "Archive"}
+                                          >
+                                            <FontAwesomeIcon icon={faTrashAlt} className="text-[9px]" />
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
