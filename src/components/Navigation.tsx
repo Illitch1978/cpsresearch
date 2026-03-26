@@ -174,13 +174,14 @@ const Navigation = ({ onShowHome, onShowContribute, onShowContact, onNavigateToS
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isTransparent
-                    ? "bg-white/10 text-white hover:bg-white/20 border border-white/20"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }`}
+                className="w-9 h-9 rounded-full overflow-hidden border-2 border-slate-200 hover:border-brand-red transition-all focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2"
+                aria-label="Sign in"
               >
-                <FontAwesomeIcon icon={faSignInAlt} className="text-xs" /> Sign in
+                <Avatar className="w-full h-full">
+                  <AvatarFallback className="bg-slate-100 text-slate-400 text-sm font-medium">
+                    <FontAwesomeIcon icon={faSignInAlt} />
+                  </AvatarFallback>
+                </Avatar>
               </button>
             )}
           </div>

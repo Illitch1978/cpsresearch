@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faMessage, faCamera, faAddressBook, faBookmark, faRightFromBracket, faKey } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import richardAvatar from "@/assets/richard-avatar.png";
 
@@ -24,6 +24,7 @@ const UserAvatar = () => {
     { label: "Welcome message", icon: faMessage, action: () => {} },
     { label: "Profile photo", icon: faCamera, action: () => {} },
     { label: "Contact details", icon: faAddressBook, action: () => {} },
+    { label: "Personal access", icon: faKey, action: () => navigate("/personal-access") },
     { label: "Bookmarks & past searches", icon: faBookmark, action: () => navigate("/bookmarks") },
     { label: "Log out", icon: faRightFromBracket, action: () => {}, divider: true },
   ];

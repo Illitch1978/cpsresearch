@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Bookmarks from "./pages/Bookmarks";
 import Community from "./pages/Community";
 import MyCommunities from "./pages/MyCommunities";
+import PersonalAccess from "./pages/PersonalAccess";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/my-communities" element={<MyCommunities />} />
+          <Route path="/personal-access" element={<PersonalAccess />} />
           <Route path="/community/:id" element={<Community />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
