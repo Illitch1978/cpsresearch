@@ -156,7 +156,7 @@ const PersonalAccess = () => {
       <Footer
         onShowHome={() => navigate("/")}
         onShowContribute={() => navigate("/")}
-        onShowContact={() => navigate("/")}
+        onNavigateToSection={() => {}}
       />
     </div>
   );

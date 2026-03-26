@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Bookmarks from "./pages/Bookmarks";
 import Community from "./pages/Community";
 import MyCommunities from "./pages/MyCommunities";
+import PersonalAccess from "./pages/PersonalAccess";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
