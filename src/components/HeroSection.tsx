@@ -62,12 +62,12 @@ const HeroSection = ({ onOpenExpertFinder, onOpenCommunityFinder }: HeroSectionP
         />
         
         <h1 className="text-3xl sm:text-5xl md:text-7xl font-medium tracking-tight mb-6 sm:mb-8 leading-tight font-serif text-white">
-          Empowering <span className="italic text-slate-300">insight</span> <br className="hidden sm:block" />
-          <span className="sm:hidden"> </span>and collaboration
+          Independent <span className="italic text-slate-300">research</span> <br className="hidden sm:block" />
+          <span className="sm:hidden"> </span>for professional services
         </h1>
         <p className="text-base sm:text-xl md:text-2xl text-white/90 sm:text-white max-w-3xl mx-auto font-light leading-relaxed antialiased px-2 sm:px-0 mb-10 sm:mb-14">
-          We make high quality research easier to find, easier to trust and easier to use, strengthening
-          understanding of professional services in a changing economy.
+          We bring together evidence, expert voices and practical insight to help firms, policymakers,
+          investors and researchers understand how professional services are changing.
         </p>
         
         {/* Finder Buttons */}
