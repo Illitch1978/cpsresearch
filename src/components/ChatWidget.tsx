@@ -309,13 +309,7 @@ const ExpertProfileModal = ({
 
         {/* Bio */}
         <div className="p-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase font-bold text-slate-400">Bio</p>
-            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-brand-red transition-colors">
-              <FontAwesomeIcon icon={faPencil} className="text-[8px]" />
-              Edit
-            </button>
-          </div>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Bio</p>
           <p className={`text-xs text-slate-600 leading-relaxed ${!showFullBio ? 'line-clamp-3' : ''}`}>
             {expert.bio}
           </p>
