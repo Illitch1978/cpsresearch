@@ -78,6 +78,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [joinContributions, setJoinContributions] = useState<string[]>([]);
   // Preview popup state
   const [previewCommunity, setPreviewCommunity] = useState<Community | null>(null);
+  const [rankingsOpen, setRankingsOpen] = useState(false);
   // Track joined/pending communities (mock: user has joined 17 communities)
   const [joinedCount] = useState(17);
   const [pendingCommunities, setPendingCommunities] = useState<string[]>([]);
