@@ -1021,7 +1021,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
                 {/* Expert Role Filter */}
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience in</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience/role in</p>
                   <RadioGroup value={expertRole} onValueChange={(value) => {
                     setExpertRole(value);
                     if (value === "any") {
