@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch, faLockOpen, faCircleInfo, faClock, faUserShield } from "@fortawesome/free-solid-svg-icons";
+import { faUsers, faTimes, faPaperPlane, faSpinner, faArrowUpRightFromSquare, faSearch, faLockOpen, faCircleInfo, faClock, faUserShield, faTrophy, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -78,6 +78,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
   const [joinContributions, setJoinContributions] = useState<string[]>([]);
   // Preview popup state
   const [previewCommunity, setPreviewCommunity] = useState<Community | null>(null);
+  const [rankingsOpen, setRankingsOpen] = useState(false);
   // Track joined/pending communities (mock: user has joined 17 communities)
   const [joinedCount] = useState(17);
   const [pendingCommunities, setPendingCommunities] = useState<string[]>([]);
@@ -218,6 +219,30 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
+          </div>
+
+          {/* Rankings Bar */}
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex-shrink-0">
+            <button
+              onClick={() => setRankingsOpen(o => !o)}
+              className="flex items-center justify-between w-full text-xs font-medium text-amber-900 hover:text-amber-700"
+            >
+              <span className="flex items-center gap-2">
+                <FontAwesomeIcon icon={faTrophy} className="text-amber-600" />
+                View rankings
+              </span>
+              <FontAwesomeIcon icon={rankingsOpen ? faChevronUp : faChevronDown} className="text-[10px]" />
+            </button>
+            {rankingsOpen && (
+              <div className="mt-2 space-y-1.5">
+                <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                  Top 100 UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+                </a>
+                <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                  Top 50 US in UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Content */}

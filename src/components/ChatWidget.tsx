@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faTimes, faUserTie, faPaperPlane, faSpinner, faEnvelope, faPhone, faPencil, faChevronDown, faChevronUp, faBookmark, faUsers, faArrowUpRightFromSquare, faLink, faWandMagicSparkles, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { faFileLines, faAddressCard, faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { orgTypes, orgSizes, seniorityList } from "@/lib/communityFilterData";
 
 interface Expert {
   name: string;
@@ -302,20 +303,14 @@ const ExpertProfileModal = ({
             <p className="text-xs text-slate-700">{expert.division}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Primary group</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Department</p>
             <p className="text-xs text-slate-700">{expert.primaryGroup || "Not set"}</p>
           </div>
         </div>
 
         {/* Bio */}
         <div className="p-5">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] uppercase font-bold text-slate-400">Bio</p>
-            <button className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-brand-red transition-colors">
-              <FontAwesomeIcon icon={faPencil} className="text-[8px]" />
-              Edit
-            </button>
-          </div>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Bio</p>
           <p className={`text-xs text-slate-600 leading-relaxed ${!showFullBio ? 'line-clamp-3' : ''}`}>
             {expert.bio}
           </p>
@@ -656,6 +651,13 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [dateRangeTo, setDateRangeTo] = useState("");
   const [expertRole, setExpertRole] = useState("any");
   const [selectedExpertRoles, setSelectedExpertRoles] = useState<string[]>([]);
+  const [expertOrgTypeFilter, setExpertOrgTypeFilter] = useState("any");
+  const [selectedExpertOrgTypes, setSelectedExpertOrgTypes] = useState<string[]>([]);
+  const [expertOrgSizeFilter, setExpertOrgSizeFilter] = useState("any");
+  const [selectedExpertOrgSizes, setSelectedExpertOrgSizes] = useState<string[]>([]);
+  const [expertSeniorityFilter, setExpertSeniorityFilter] = useState("any");
+  const [selectedExpertSeniorities, setSelectedExpertSeniorities] = useState<string[]>([]);
+  const [rankingsOpen, setRankingsOpen] = useState(false);
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -871,6 +873,30 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           </button>
         </div>
 
+        {/* Rankings Bar */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex-shrink-0">
+          <button
+            onClick={() => setRankingsOpen(o => !o)}
+            className="flex items-center justify-between w-full text-xs font-medium text-amber-900 hover:text-amber-700"
+          >
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faTrophy} className="text-amber-600" />
+              View rankings
+            </span>
+            <FontAwesomeIcon icon={rankingsOpen ? faChevronUp : faChevronDown} className="text-[10px]" />
+          </button>
+          {rankingsOpen && (
+            <div className="mt-2 space-y-1.5">
+              <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                Top 100 UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+              </a>
+              <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                Top 50 US in UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+              </a>
+            </div>
+          )}
+        </div>
+
         {/* Chat Body */}
         <div className="h-[400px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
           {/* Bot Greeting */}
@@ -1020,7 +1046,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
 
                 {/* Expert Role Filter */}
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience in</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience/role in</p>
                   <RadioGroup value={expertRole} onValueChange={(value) => {
                     setExpertRole(value);
                     if (value === "any") {
@@ -1060,6 +1086,93 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                               onCheckedChange={() => handleExpertRoleToggle(role)}
                             />
                             <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </RadioGroup>
+                </div>
+
+                {/* Org Type Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Org type</p>
+                  <RadioGroup value={expertOrgTypeFilter} onValueChange={(v) => { setExpertOrgTypeFilter(v); if (v === "any") setSelectedExpertOrgTypes([]); }} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="expert-orgtype-any" />
+                      <Label htmlFor="expert-orgtype-any" className="text-xs text-slate-700 cursor-pointer">Any org type</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="expert-orgtype-specific" />
+                      <Label htmlFor="expert-orgtype-specific" className="text-xs text-slate-700 cursor-pointer">Specific org types</Label>
+                    </div>
+                    {expertOrgTypeFilter === "specific" && (
+                      <div className="ml-5 grid grid-cols-2 gap-1.5 border-l-2 border-slate-100 pl-3">
+                        {orgTypes.map((item) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`expert-orgtype-${item}`}
+                              checked={selectedExpertOrgTypes.includes(item)}
+                              onCheckedChange={() => setSelectedExpertOrgTypes(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item])}
+                            />
+                            <Label htmlFor={`expert-orgtype-${item}`} className="text-[11px] text-slate-600 cursor-pointer">{item}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </RadioGroup>
+                </div>
+
+                {/* Org Size Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Org size</p>
+                  <RadioGroup value={expertOrgSizeFilter} onValueChange={(v) => { setExpertOrgSizeFilter(v); if (v === "any") setSelectedExpertOrgSizes([]); }} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="expert-orgsize-any" />
+                      <Label htmlFor="expert-orgsize-any" className="text-xs text-slate-700 cursor-pointer">Any size</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="expert-orgsize-specific" />
+                      <Label htmlFor="expert-orgsize-specific" className="text-xs text-slate-700 cursor-pointer">Specific size</Label>
+                    </div>
+                    {expertOrgSizeFilter === "specific" && (
+                      <div className="ml-5 flex flex-col gap-1.5 border-l-2 border-slate-100 pl-3">
+                        {orgSizes.map((item) => (
+                          <div key={item.label} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`expert-orgsize-${item.label}`}
+                              checked={selectedExpertOrgSizes.includes(item.label)}
+                              onCheckedChange={() => setSelectedExpertOrgSizes(prev => prev.includes(item.label) ? prev.filter(x => x !== item.label) : [...prev, item.label])}
+                            />
+                            <Label htmlFor={`expert-orgsize-${item.label}`} className="text-[11px] text-slate-600 cursor-pointer">{item.label} <span className="text-slate-400">({item.description})</span></Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </RadioGroup>
+                </div>
+
+                {/* Seniority Filter */}
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Seniority</p>
+                  <RadioGroup value={expertSeniorityFilter} onValueChange={(v) => { setExpertSeniorityFilter(v); if (v === "any") setSelectedExpertSeniorities([]); }} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="any" id="expert-seniority-any" />
+                      <Label htmlFor="expert-seniority-any" className="text-xs text-slate-700 cursor-pointer">Any seniority</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="specific" id="expert-seniority-specific" />
+                      <Label htmlFor="expert-seniority-specific" className="text-xs text-slate-700 cursor-pointer">Specific seniority</Label>
+                    </div>
+                    {expertSeniorityFilter === "specific" && (
+                      <div className="ml-5 max-h-48 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
+                        {seniorityList.map((item, idx) => (
+                          <div key={item} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`expert-seniority-${idx}`}
+                              checked={selectedExpertSeniorities.includes(item)}
+                              onCheckedChange={() => setSelectedExpertSeniorities(prev => prev.includes(item) ? prev.filter(x => x !== item) : [...prev, item])}
+                            />
+                            <Label htmlFor={`expert-seniority-${idx}`} className="text-[11px] text-slate-600 cursor-pointer">{idx + 1}. {item}</Label>
                           </div>
                         ))}
                       </div>
