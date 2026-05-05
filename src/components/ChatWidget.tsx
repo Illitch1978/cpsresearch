@@ -657,6 +657,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
   const [selectedExpertOrgSizes, setSelectedExpertOrgSizes] = useState<string[]>([]);
   const [expertSeniorityFilter, setExpertSeniorityFilter] = useState("any");
   const [selectedExpertSeniorities, setSelectedExpertSeniorities] = useState<string[]>([]);
+  const [rankingsOpen, setRankingsOpen] = useState(false);
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false);
   const [pendingNewSearch, setPendingNewSearch] = useState(false);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
