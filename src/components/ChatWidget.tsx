@@ -302,7 +302,7 @@ const ExpertProfileModal = ({
             <p className="text-xs text-slate-700">{expert.division}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Primary group</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Department</p>
             <p className="text-xs text-slate-700">{expert.primaryGroup || "Not set"}</p>
           </div>
         </div>
