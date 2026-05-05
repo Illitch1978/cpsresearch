@@ -873,6 +873,30 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
           </button>
         </div>
 
+        {/* Rankings Bar */}
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex-shrink-0">
+          <button
+            onClick={() => setRankingsOpen(o => !o)}
+            className="flex items-center justify-between w-full text-xs font-medium text-amber-900 hover:text-amber-700"
+          >
+            <span className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faTrophy} className="text-amber-600" />
+              View rankings
+            </span>
+            <FontAwesomeIcon icon={rankingsOpen ? faChevronUp : faChevronDown} className="text-[10px]" />
+          </button>
+          {rankingsOpen && (
+            <div className="mt-2 space-y-1.5">
+              <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                Top 100 UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+              </a>
+              <a href="#" className="block text-[11px] text-slate-700 hover:text-brand-red bg-white border border-amber-200 rounded px-2 py-1.5">
+                Top 50 US in UK law firms <span className="text-slate-400">— sponsored by Williams Lea</span>
+              </a>
+            </div>
+          )}
+        </div>
+
         {/* Chat Body */}
         <div className="h-[400px] bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4">
           {/* Bot Greeting */}
