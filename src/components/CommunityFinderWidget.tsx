@@ -229,7 +229,7 @@ const CommunityFinderWidget = ({ isOpen, onToggle }: CommunityFinderWidgetProps)
             >
               <span className="flex items-center gap-2">
                 <FontAwesomeIcon icon={faTrophy} className="text-amber-600" />
-                View rankings
+                View UK and US law firm rankings by quality score
               </span>
               <FontAwesomeIcon icon={rankingsOpen ? faChevronUp : faChevronDown} className="text-[10px]" />
             </button>
