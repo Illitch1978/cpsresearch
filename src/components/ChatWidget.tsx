@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { orgTypes, orgSizes, seniorityList } from "@/lib/communityFilterData";
+import { orgTypes, orgSizes, seniorityList, serviceLines, specialismsByServiceLine } from "@/lib/communityFilterData";
 
 interface Expert {
   name: string;
@@ -299,11 +299,11 @@ const ExpertProfileModal = ({
             </div>
           </div>
           <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Division</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Service line</p>
             <p className="text-xs text-slate-700">{expert.division}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Department</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Specialism</p>
             <p className="text-xs text-slate-700">{expert.primaryGroup || "Not set"}</p>
           </div>
         </div>
@@ -806,7 +806,7 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
     
     const expertRoleText = expertRole === "specific" && selectedExpertRoles.length > 0
       ? selectedExpertRoles.slice(0, 2).join(", ") + (selectedExpertRoles.length > 2 ? ` +${selectedExpertRoles.length - 2} more` : "")
-      : "any experience";
+      : "any specialism";
 
     let sourceText = "";
     if (sourceFilter === "all") sourceText = "any organisation";
@@ -1044,9 +1044,9 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                   </RadioGroup>
                 </div>
 
-                {/* Expert Role Filter */}
+                {/* Specialisms Filter */}
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">With experience/role in</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 mb-2">Specialisms</p>
                   <RadioGroup value={expertRole} onValueChange={(value) => {
                     setExpertRole(value);
                     if (value === "any") {
@@ -1059,33 +1059,28 @@ const ChatWidget = ({ isOpen, onToggle }: ChatWidgetProps) => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="specific" id="expert-role-specific" />
-                      <Label htmlFor="expert-role-specific" className="text-xs text-slate-700 cursor-pointer">Specific experience</Label>
+                      <Label htmlFor="expert-role-specific" className="text-xs text-slate-700 cursor-pointer">Specific specialisms</Label>
                     </div>
                     {expertRole === "specific" && (
-                      <div className="ml-5 max-h-48 overflow-y-auto space-y-1.5 border-l-2 border-slate-100 pl-3">
-                        {[
-                          "Academia",
-                          "Charities",
-                          "Diplomacy",
-                          "Entrepreneurship",
-                          "Financial services",
-                          "Health",
-                          "Leadership & Governance",
-                          "Management",
-                          "Mentorship",
-                          "Philanthropy",
-                          "Professional services",
-                          "Public policy",
-                          "Team membership",
-                          "Technology"
-                        ].map((role) => (
-                          <div key={role} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`}
-                              checked={selectedExpertRoles.includes(role)}
-                              onCheckedChange={() => handleExpertRoleToggle(role)}
-                            />
-                            <Label htmlFor={`expert-role-${role.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs text-slate-700 cursor-pointer">{role}</Label>
+                      <div className="ml-5 max-h-64 overflow-y-auto space-y-2 border-l-2 border-slate-100 pl-3">
+                        {serviceLines.map((sl) => (
+                          <div key={sl}>
+                            <p className="text-[10px] uppercase font-semibold text-slate-500 mb-1">{sl}</p>
+                            <div className="space-y-1 pl-1">
+                              {specialismsByServiceLine[sl].map((spec) => {
+                                const id = `expert-spec-${sl}-${spec}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                                return (
+                                  <div key={spec} className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id={id}
+                                      checked={selectedExpertRoles.includes(spec)}
+                                      onCheckedChange={() => handleExpertRoleToggle(spec)}
+                                    />
+                                    <Label htmlFor={id} className="text-[11px] text-slate-600 cursor-pointer">{spec}</Label>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         ))}
                       </div>
