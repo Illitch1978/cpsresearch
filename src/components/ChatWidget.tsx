@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { orgTypes, orgSizes, seniorityList } from "@/lib/communityFilterData";
+import { orgTypes, orgSizes, seniorityList, serviceLines, specialismsByServiceLine } from "@/lib/communityFilterData";
 
 interface Expert {
   name: string;
